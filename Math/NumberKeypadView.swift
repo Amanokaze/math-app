@@ -16,9 +16,9 @@ struct NumberKeypadView: View {
     
     var body: some View {
         VStack(spacing: 8) {
-            // 7, 8, 9
+            // 1, 2, 3 (아이폰 숫자패드와 동일한 배치)
             HStack(spacing: 8) {
-                ForEach(["7", "8", "9"], id: \.self) { digit in
+                ForEach(["1", "2", "3"], id: \.self) { digit in
                     KeypadButton(title: digit) {
                         onDigit(digit)
                     }
@@ -34,21 +34,17 @@ struct NumberKeypadView: View {
                 }
             }
             
-            // 1, 2, 3
+            // 7, 8, 9
             HStack(spacing: 8) {
-                ForEach(["1", "2", "3"], id: \.self) { digit in
+                ForEach(["7", "8", "9"], id: \.self) { digit in
                     KeypadButton(title: digit) {
                         onDigit(digit)
                     }
                 }
             }
             
-            // 0, -, 백스페이스, 엔터
+            // -, 0, 백스페이스
             HStack(spacing: 8) {
-                KeypadButton(title: "0") {
-                    onDigit("0")
-                }
-                
                 KeypadButton(title: "-", isSpecial: true) {
                     if let onMinus = onMinus {
                         onMinus()
@@ -57,13 +53,18 @@ struct NumberKeypadView: View {
                     }
                 }
                 
+                KeypadButton(title: "0") {
+                    onDigit("0")
+                }
+                
                 KeypadButton(title: "⌫", isSpecial: true) {
                     onBackspace()
                 }
-                
-                KeypadButton(title: confirmTitle, isSpecial: true, isAccent: true) {
-                    onSubmit()
-                }
+            }
+            
+            // 확인 (한 줄 전체)
+            KeypadButton(title: confirmTitle, isSpecial: true, isAccent: true) {
+                onSubmit()
             }
         }
         .padding(12)
