@@ -31,6 +31,7 @@ struct MathProblem {
 
 struct GameView: View {
     @Binding var isPresented: Bool
+    let bestTime: Double
     let onComplete: (Double) -> Void
     
     @State private var problems: [MathProblem] = []
@@ -41,6 +42,7 @@ struct GameView: View {
     @State private var elapsedTime: Double = 0
     @State private var showQuitAlert = false
     @State private var isTimerPaused = false
+    @FocusState private var isGameFocused: Bool
     
     private let totalProblems = 10
     
@@ -52,36 +54,40 @@ struct GameView: View {
     var body: some View {
         GeometryReader { geometry in
         ZStack {
+            Color(.systemBackground)
+                .ignoresSafeArea()
             VStack(spacing: 0) {
-                // 상단 바: 뒤로가기, 타이머, 문제 번호
-                HStack {
-                    Button(action: {
-                        isTimerPaused = true
-                        timer?.invalidate()
-                        showQuitAlert = true
-                    }) {
-                        Image(systemName: "chevron.left")
-                            .font(.title2)
-                            .foregroundColor(.blue)
-                            .frame(width: 44, height: 44)
+                // 상단 바: 게임 중에만 표시 (완료 화면에서는 숨김)
+                if currentProblem != nil {
+                    HStack {
+                        Button(action: {
+                            isTimerPaused = true
+                            timer?.invalidate()
+                            showQuitAlert = true
+                        }) {
+                            Image(systemName: "chevron.left")
+                                .font(.title2)
+                                .foregroundColor(.blue)
+                                .frame(width: 44, height: 44)
+                        }
+                        
+                        Spacer()
+                        
+                        Text(String(format: "%.2f초", elapsedTime))
+                            .font(.system(size: 20, weight: .medium, design: .monospaced))
+                            .foregroundColor(.primary)
+                        
+                        Spacer()
+                        
+                        Text("\(currentIndex + 1)/\(totalProblems)")
+                            .font(.headline)
+                            .foregroundColor(.secondary)
+                            .frame(width: 44, alignment: .trailing)
                     }
-                    
-                    Spacer()
-                    
-                    Text(String(format: "%.2f초", elapsedTime))
-                        .font(.system(size: 20, weight: .medium, design: .monospaced))
-                        .foregroundColor(.primary)
-                    
-                    Spacer()
-                    
-                    Text("\(currentIndex + 1)/\(totalProblems)")
-                        .font(.headline)
-                        .foregroundColor(.secondary)
-                        .frame(width: 44, alignment: .trailing)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .background(Color(.systemBackground))
                 }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
-                .background(Color(.systemBackground))
                 
                 if let problem = currentProblem {
                     // 문제 영역
@@ -128,28 +134,61 @@ struct GameView: View {
                     )
                     .frame(height: geometry.size.height / 3)
                 } else {
-                    // 게임 완료
-                    VStack(spacing: 24) {
-                        Spacer()
-                        Text("완료!")
-                            .font(.system(size: 36, weight: .bold))
-                        Text(String(format: "%.2f초", elapsedTime))
-                            .font(.system(size: 28, design: .monospaced))
-                            .foregroundColor(.green)
-                        Button("메인으로") {
-                            isPresented = false
+                    // 게임 완료 (bestTime==0 또는 기록 경신/동률 시 축하)
+                    let isNewRecord = bestTime == 0 || elapsedTime <= bestTime
+                    ZStack {
+                        VStack(spacing: 28) {
+                            Spacer()
+                            Text("완료!")
+                                .font(.system(size: 38, weight: .bold))
+                            if isNewRecord {
+                                Text("최고 기록을 경신했어요! 🎉")
+                                    .font(.title2)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.green)
+                                    .multilineTextAlignment(.center)
+                                Text("10문제를 모두 풀고\n새로운 기록을 세웠어요. 축하해요!")
+                                    .font(.body)
+                                    .foregroundColor(.secondary)
+                                    .multilineTextAlignment(.center)
+                                    .lineSpacing(4)
+                                    .padding(.horizontal, 24)
+                            } else {
+                                Text("수고하셨습니다")
+                                    .font(.title3)
+                                    .foregroundColor(.secondary)
+                            }
+                            Text(String(format: "%.2f초", elapsedTime))
+                                .font(.system(size: 32, weight: .semibold, design: .monospaced))
+                                .foregroundColor(.green)
+                                .padding(.top, 8)
+                            if !isNewRecord && bestTime > 0 {
+                                Text("최고 기록 \(String(format: "%.2f초", bestTime))")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                                    .padding(.top, 4)
+                            }
+                            Button("메인으로") {
+                                isPresented = false
+                            }
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 40)
+                            .padding(.vertical, 14)
+                            .background(Color.blue)
+                            .cornerRadius(14)
+                            .padding(.top, 32)
+                            Spacer()
                         }
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 32)
-                        .padding(.vertical, 12)
-                        .background(Color.blue)
-                        .cornerRadius(12)
-                        .padding(.top, 20)
-                        Spacer()
+                        if isNewRecord {
+                            ConfettiView()
+                                .ignoresSafeArea()
+                                .allowsHitTesting(false)
+                        }
                     }
                 }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             
             // 정답/오답 오버레이
             if let result = showResult {
@@ -208,13 +247,44 @@ struct GameView: View {
                 .padding(40)
             }
         }
+        .focusable()
+        .focused($isGameFocused)
         .onAppear {
             generateProblems()
             startTimer()
+            isGameFocused = true
         }
         .onDisappear {
             timer?.invalidate()
         }
+        .onKeyPress(characters: .init(charactersIn: "0123456789")) { press in
+            guard currentProblem != nil, !showQuitAlert, showResult == nil else { return .ignored }
+            let digit = String(press.characters)
+            if userAnswer == "-" || (userAnswer.hasPrefix("-") && userAnswer.count < 5) || (!userAnswer.hasPrefix("-") && userAnswer.count < 4) {
+                userAnswer += digit
+            }
+            return .handled
+        }
+        .onKeyPress(.return) {
+            guard currentProblem != nil, !showQuitAlert, showResult == nil else { return .ignored }
+            submitAnswer()
+            return .handled
+        }
+        .onKeyPress(.delete) {
+            guard !showQuitAlert, showResult == nil else { return .ignored }
+            if !userAnswer.isEmpty {
+                userAnswer.removeLast()
+            }
+            return .handled
+        }
+        .onKeyPress(characters: .init(charactersIn: "-")) { _ in
+            guard currentProblem != nil, !showQuitAlert, showResult == nil else { return .ignored }
+            if userAnswer.isEmpty {
+                userAnswer = "-"
+            }
+            return .handled
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
     
@@ -263,6 +333,69 @@ struct GameView: View {
     }
 }
 
+/// 꽃가루/축하 파티클 효과
+struct ConfettiView: View {
+    @State private var particles: [ConfettiParticle] = []
+    @State private var startTime: Double = 0
+    
+    private let particleCount = 80
+    private let colors: [Color] = [
+        .pink, .orange, .yellow, .green, .mint, .cyan, .blue, .purple, .red
+    ]
+    
+    var body: some View {
+        GeometryReader { geometry in
+            let size = geometry.size
+            TimelineView(.animation(minimumInterval: 1/60)) { timeline in
+                ZStack {
+                    ForEach(particles) { particle in
+                        let pos = particle.position(at: timeline.date.timeIntervalSinceReferenceDate, in: size)
+                        Circle()
+                            .fill(particle.color.opacity(0.85))
+                            .frame(width: particle.size, height: particle.size)
+                            .position(pos)
+                    }
+                }
+            }
+            .onAppear {
+                if particles.isEmpty && size.width > 0 && size.height > 0 {
+                    startTime = Date().timeIntervalSinceReferenceDate
+                    particles = (0..<particleCount).map { i in
+                        ConfettiParticle(
+                            startX: CGFloat.random(in: 0...max(1, size.width)),
+                            startY: size.height + CGFloat.random(in: 0...100),
+                            size: CGFloat.random(in: 8...18),
+                            color: colors.randomElement() ?? .yellow,
+                            startTime: startTime + Double(i) * 0.05,
+                            speed: Double.random(in: 100...220),
+                            drift: CGFloat.random(in: -120...120)
+                        )
+                    }
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+struct ConfettiParticle: Identifiable {
+    let id = UUID()
+    let startX: CGFloat
+    let startY: CGFloat
+    let size: CGFloat
+    let color: Color
+    let startTime: Double
+    let speed: Double
+    let drift: CGFloat
+    
+    func position(at time: Double, in size: CGSize) -> CGPoint {
+        let elapsed = max(0, time - startTime)
+        let y = startY - CGFloat(speed * elapsed)
+        let x = startX + CGFloat(drift) * elapsed * 0.25 + sin(elapsed * 2.5) * 25
+        return CGPoint(x: x, y: y)
+    }
+}
+
 #Preview {
-    GameView(isPresented: .constant(true), onComplete: { _ in })
+    GameView(isPresented: .constant(true), bestTime: 0, onComplete: { _ in })
 }
