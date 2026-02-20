@@ -32,6 +32,7 @@ struct MathProblem {
 struct GameView: View {
     @Binding var isPresented: Bool
     let bestTime: Double
+    let appLanguage: AppLanguage
     let onComplete: (Double) -> Void
     
     @State private var problems: [MathProblem] = []
@@ -73,7 +74,7 @@ struct GameView: View {
                         
                         Spacer()
                         
-                        Text(String(format: "%.2f초", elapsedTime))
+                        Text(L.string("time_format", language: appLanguage, elapsedTime))
                             .font(.system(size: 20, weight: .medium, design: .monospaced))
                             .foregroundColor(.primary)
                         
@@ -130,7 +131,8 @@ struct GameView: View {
                             if userAnswer.isEmpty {
                                 userAnswer = "-"
                             }
-                        }
+                        },
+                        confirmTitle: L.string("confirm", language: appLanguage)
                     )
                     .frame(height: geometry.size.height / 3)
                 } else {
@@ -139,36 +141,36 @@ struct GameView: View {
                     ZStack {
                         VStack(spacing: 28) {
                             Spacer()
-                            Text("완료!")
+                            Text(L.string("complete", language: appLanguage))
                                 .font(.system(size: 38, weight: .bold))
                             if isNewRecord {
-                                Text("최고 기록을 경신했어요! 🎉")
+                                Text(L.string("new_record_title", language: appLanguage))
                                     .font(.title2)
                                     .fontWeight(.semibold)
                                     .foregroundColor(.green)
                                     .multilineTextAlignment(.center)
-                                Text("10문제를 모두 풀고\n새로운 기록을 세웠어요. 축하해요!")
+                                Text(L.string("new_record_message", language: appLanguage))
                                     .font(.body)
                                     .foregroundColor(.secondary)
                                     .multilineTextAlignment(.center)
                                     .lineSpacing(4)
                                     .padding(.horizontal, 24)
                             } else {
-                                Text("수고하셨습니다")
+                                Text(L.string("well_done", language: appLanguage))
                                     .font(.title3)
                                     .foregroundColor(.secondary)
                             }
-                            Text(String(format: "%.2f초", elapsedTime))
+                            Text(L.string("time_format", language: appLanguage, elapsedTime))
                                 .font(.system(size: 32, weight: .semibold, design: .monospaced))
                                 .foregroundColor(.green)
                                 .padding(.top, 8)
                             if !isNewRecord && bestTime > 0 {
-                                Text("최고 기록 \(String(format: "%.2f초", bestTime))")
+                                Text(L.string("best_record_format", language: appLanguage, L.string("time_format", language: appLanguage, bestTime)))
                                     .font(.subheadline)
                                     .foregroundColor(.secondary)
                                     .padding(.top, 4)
                             }
-                            Button("메인으로") {
+                            Button(L.string("to_main", language: appLanguage)) {
                                 isPresented = false
                             }
                             .font(.headline)
@@ -210,13 +212,13 @@ struct GameView: View {
                     .onTapGesture { }
                 
                 VStack(spacing: 24) {
-                    Text("그만하시겠습니까?")
+                    Text(L.string("quit_confirm", language: appLanguage))
                         .font(.title2)
                         .fontWeight(.semibold)
                         .multilineTextAlignment(.center)
                     
                     HStack(spacing: 16) {
-                        Button("아니오") {
+                        Button(L.string("no", language: appLanguage)) {
                             showQuitAlert = false
                             isTimerPaused = false
                             startTimer()
@@ -228,7 +230,7 @@ struct GameView: View {
                         .background(Color(.systemGray6))
                         .cornerRadius(12)
                         
-                        Button("예") {
+                        Button(L.string("yes", language: appLanguage)) {
                             showQuitAlert = false
                             isPresented = false
                         }
@@ -397,5 +399,5 @@ struct ConfettiParticle: Identifiable {
 }
 
 #Preview {
-    GameView(isPresented: .constant(true), bestTime: 0, onComplete: { _ in })
+    GameView(isPresented: .constant(true), bestTime: 0, appLanguage: .korean, onComplete: { _ in })
 }

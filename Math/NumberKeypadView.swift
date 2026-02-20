@@ -12,6 +12,7 @@ struct NumberKeypadView: View {
     let onBackspace: () -> Void
     let onSubmit: () -> Void
     var onMinus: (() -> Void)? = nil  // 마이너스 (음수 입력용)
+    var confirmTitle: String = "확인"
     
     var body: some View {
         VStack(spacing: 8) {
@@ -60,7 +61,7 @@ struct NumberKeypadView: View {
                     onBackspace()
                 }
                 
-                KeypadButton(title: "확인", isSpecial: true, isAccent: true) {
+                KeypadButton(title: confirmTitle, isSpecial: true, isAccent: true) {
                     onSubmit()
                 }
             }

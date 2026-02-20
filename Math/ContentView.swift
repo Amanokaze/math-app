@@ -12,7 +12,21 @@ struct ContentView: View {
     @State private var isGameActive = false
     @State private var showCountdown = false
     @State private var showResetConfirm = false
+    @State private var showLanguageSheet = false
     @AppStorage("bestTime") private var bestTime: Double = 0
+    @AppStorage("appLanguage") private var appLanguageRaw: String = ""
+    
+    private var appLanguage: AppLanguage {
+        get {
+            guard !appLanguageRaw.isEmpty, let lang = AppLanguage(rawValue: appLanguageRaw) else {
+                return AppLanguage.deviceLanguage
+            }
+            return lang
+        }
+        set {
+            appLanguageRaw = newValue.rawValue
+        }
+    }
     
     var body: some View {
         NavigationStack {
@@ -24,10 +38,15 @@ struct ContentView: View {
                     HStack {
                         Spacer()
                         Menu {
+                            Button(action: {
+                                showLanguageSheet = true
+                            }) {
+                                Label(L.string("language", language: appLanguage), systemImage: "globe")
+                            }
                             Button(role: .destructive, action: {
                                 showResetConfirm = true
                             }) {
-                                Label("기록 초기화", systemImage: "trash")
+                                Label(L.string("reset_records", language: appLanguage), systemImage: "trash")
                             }
                         } label: {
                             Image(systemName: "gearshape.fill")
@@ -50,7 +69,7 @@ struct ContentView: View {
                     Button(action: {
                         showCountdown = true
                     }) {
-                        Text("시작")
+                        Text(L.string("start", language: appLanguage))
                             .font(.title)
                             .fontWeight(.semibold)
                             .foregroundColor(.white)
@@ -62,10 +81,10 @@ struct ContentView: View {
                     .padding(.horizontal, 40)
                     
                     VStack(spacing: 8) {
-                        Text("최고 기록")
+                        Text(L.string("best_record", language: appLanguage))
                             .font(.headline)
                             .foregroundColor(.secondary)
-                        Text(bestTime > 0 ? String(format: "%.2f초", bestTime) : "-")
+                        Text(bestTime > 0 ? L.string("time_format", language: appLanguage, bestTime) : "-")
                             .font(.system(size: 28, weight: .bold, design: .monospaced))
                             .foregroundColor(bestTime > 0 ? .green : .secondary)
                     }
@@ -75,8 +94,8 @@ struct ContentView: View {
                     
                     // 라이트/다크 모드 선택 (화면 하단)
                     Picker("", selection: $colorSchemeMode) {
-                        Text("라이트").tag(1)
-                        Text("다크").tag(2)
+                        Text(L.string("light", language: appLanguage)).tag(1)
+                        Text(L.string("dark", language: appLanguage)).tag(2)
                     }
                     .pickerStyle(.segmented)
                     .padding(.horizontal, 40)
@@ -86,29 +105,36 @@ struct ContentView: View {
                     if colorSchemeMode != 1 && colorSchemeMode != 2 {
                         colorSchemeMode = 1
                     }
+                    if appLanguageRaw.isEmpty {
+                        appLanguageRaw = AppLanguage.deviceLanguage.rawValue
+                    }
                 }
                 
                 // 카운트다운 오버레이
                 if showCountdown {
-                    CountdownOverlay(onComplete: {
+                    CountdownOverlay(appLanguage: appLanguage, onComplete: {
                         showCountdown = false
                         isGameActive = true
                     })
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .confirmationDialog("기록을 초기화하시겠습니까?", isPresented: $showResetConfirm) {
-                Button("초기화", role: .destructive) {
+            .confirmationDialog(L.string("reset_confirm_title", language: appLanguage), isPresented: $showResetConfirm) {
+                Button(L.string("reset", language: appLanguage), role: .destructive) {
                     bestTime = 0
                 }
-                Button("취소", role: .cancel) { }
+                Button(L.string("cancel", language: appLanguage), role: .cancel) { }
             } message: {
-                Text("최고 기록이 삭제됩니다.")
+                Text(L.string("reset_confirm_message", language: appLanguage))
+            }
+            .sheet(isPresented: $showLanguageSheet) {
+                LanguagePickerSheet(appLanguageRaw: $appLanguageRaw, isPresented: $showLanguageSheet)
             }
             .navigationDestination(isPresented: $isGameActive) {
                 GameView(
                     isPresented: $isGameActive,
                     bestTime: bestTime,
+                    appLanguage: appLanguage,
                     onComplete: { time in
                         if bestTime == 0 || time < bestTime {
                             bestTime = time
@@ -122,8 +148,56 @@ struct ContentView: View {
     }
 }
 
+/// 언어 선택 시트
+struct LanguagePickerSheet: View {
+    @Binding var appLanguageRaw: String
+    @Binding var isPresented: Bool
+    
+    private var selectedLanguage: AppLanguage {
+        get {
+            guard !appLanguageRaw.isEmpty, let lang = AppLanguage(rawValue: appLanguageRaw) else {
+                return AppLanguage.deviceLanguage
+            }
+            return lang
+        }
+        set {
+            appLanguageRaw = newValue.rawValue
+        }
+    }
+    
+    var body: some View {
+        NavigationStack {
+            List(AppLanguage.allCases, id: \.rawValue) { language in
+                Button(action: {
+                    appLanguageRaw = language.rawValue
+                    isPresented = false
+                }) {
+                    HStack {
+                        Text(language.displayName)
+                        Spacer()
+                        if language == selectedLanguage {
+                            Image(systemName: "checkmark")
+                                .foregroundColor(.blue)
+                        }
+                    }
+                }
+            }
+            .navigationTitle(L.string("language", language: selectedLanguage))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(L.string("cancel", language: selectedLanguage)) {
+                        isPresented = false
+                    }
+                }
+            }
+        }
+    }
+}
+
 /// 3, 2, 1, 시작! 카운트다운 오버레이
 struct CountdownOverlay: View {
+    let appLanguage: AppLanguage
     let onComplete: () -> Void
     
     @State private var count = 3
@@ -150,7 +224,7 @@ struct CountdownOverlay: View {
         if count > 0 {
             return "\(count)"
         } else {
-            return "시작!"
+            return L.string("countdown_go", language: appLanguage)
         }
     }
     
