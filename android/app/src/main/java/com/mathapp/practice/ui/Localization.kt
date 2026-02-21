@@ -46,7 +46,12 @@ object L10n {
             "no" to "아니오",
             "yes" to "예",
             "confirm" to "확인",
-            "language" to "언어"
+            "language" to "언어",
+            "level_easy" to "쉬움",
+            "level_normal" to "보통",
+            "help_title" to "레벨 설명",
+            "help_easy_desc" to "• 왼쪽 숫자: 0~99\n• 오른쪽 숫자: 0~10\n• 뺄셈 시 결과가 음수가 되지 않음",
+            "help_normal_desc" to "• 왼쪽 숫자: 0~99\n• 오른쪽 숫자: 0~99\n• 덧셈과 뺄셈 (음수 가능)"
         ),
         AppLanguage.ENGLISH to mapOf(
             "reset_records" to "Reset Records",
@@ -70,7 +75,12 @@ object L10n {
             "no" to "No",
             "yes" to "Yes",
             "confirm" to "Confirm",
-            "language" to "Language"
+            "language" to "Language",
+            "level_easy" to "Easy",
+            "level_normal" to "Normal",
+            "help_title" to "Level Guide",
+            "help_easy_desc" to "• Left number: 0~99\n• Right number: 0~10\n• Subtraction: result is never negative",
+            "help_normal_desc" to "• Left number: 0~99\n• Right number: 0~99\n• Addition and subtraction (negative allowed)"
         ),
         AppLanguage.CHINESE_TRADITIONAL to mapOf(
             "reset_records" to "重置紀錄",
@@ -94,7 +104,12 @@ object L10n {
             "no" to "否",
             "yes" to "是",
             "confirm" to "確認",
-            "language" to "語言"
+            "language" to "語言",
+            "level_easy" to "簡單",
+            "level_normal" to "普通",
+            "help_title" to "難度說明",
+            "help_easy_desc" to "• 左側數字：0~99\n• 右側數字：0~10\n• 減法時結果不為負數",
+            "help_normal_desc" to "• 左側數字：0~99\n• 右側數字：0~99\n• 加法和減法（可為負數）"
         ),
         AppLanguage.CHINESE_SIMPLIFIED to mapOf(
             "reset_records" to "重置记录",
@@ -118,7 +133,12 @@ object L10n {
             "no" to "否",
             "yes" to "是",
             "confirm" to "确认",
-            "language" to "语言"
+            "language" to "语言",
+            "level_easy" to "简单",
+            "level_normal" to "普通",
+            "help_title" to "难度说明",
+            "help_easy_desc" to "• 左侧数字：0~99\n• 右侧数字：0~10\n• 减法时结果不为负数",
+            "help_normal_desc" to "• 左侧数字：0~99\n• 右侧数字：0~99\n• 加法和减法（可为负数）"
         ),
         AppLanguage.JAPANESE to mapOf(
             "reset_records" to "記録をリセット",
@@ -142,7 +162,12 @@ object L10n {
             "no" to "いいえ",
             "yes" to "はい",
             "confirm" to "確認",
-            "language" to "言語"
+            "language" to "言語",
+            "level_easy" to "かんたん",
+            "level_normal" to "ふつう",
+            "help_title" to "レベル説明",
+            "help_easy_desc" to "• 左の数字：0~99\n• 右の数字：0~10\n• 引き算は結果がマイナスにならない",
+            "help_normal_desc" to "• 左の数字：0~99\n• 右の数字：0~99\n• 足し算と引き算（マイナス可）"
         )
     )
 

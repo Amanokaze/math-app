@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.HelpOutline
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -50,6 +51,8 @@ fun MainScreen(
     appLanguageRaw: String,
     onAppLanguageChange: (String) -> Unit,
     bestTime: Float,
+    selectedLevel: GameLevel,
+    onSelectedLevelChange: (GameLevel) -> Unit,
     onStartClick: () -> Unit,
     showCountdown: Boolean,
     onShowCountdownChange: (Boolean) -> Unit,
@@ -58,6 +61,7 @@ fun MainScreen(
 ) {
     var showResetConfirm by remember { mutableStateOf(false) }
     var showLanguageSheet by remember { mutableStateOf(false) }
+    var showHelp by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         if (appLanguageRaw.isEmpty()) {
@@ -78,6 +82,9 @@ fun MainScreen(
                 horizontalArrangement = Arrangement.End
             ) {
                 var showMenu by remember { mutableStateOf(false) }
+                IconButton(onClick = { showHelp = true }) {
+                    Icon(Icons.Outlined.HelpOutline, contentDescription = null)
+                }
                 Box {
                     IconButton(onClick = { showMenu = true }) {
                         Icon(Icons.Default.Settings, contentDescription = null)
@@ -111,6 +118,23 @@ fun MainScreen(
                 style = MaterialTheme.typography.headlineLarge,
                 fontSize = 48.sp
             )
+
+            SingleChoiceSegmentedButtonRow {
+                SegmentedButton(
+                    selected = selectedLevel == GameLevel.EASY,
+                    onClick = { onSelectedLevelChange(GameLevel.EASY) },
+                    shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2)
+                ) {
+                    Text(L10n.string("level_easy", appLanguage))
+                }
+                SegmentedButton(
+                    selected = selectedLevel == GameLevel.NORMAL,
+                    onClick = { onSelectedLevelChange(GameLevel.NORMAL) },
+                    shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2)
+                ) {
+                    Text(L10n.string("level_normal", appLanguage))
+                }
+            }
 
             Spacer(modifier = Modifier.weight(1f))
 
@@ -201,6 +225,38 @@ fun MainScreen(
                 },
                 dismissButton = {
                     OutlinedButton(onClick = { showResetConfirm = false }) {
+                        Text(L10n.string("cancel", appLanguage))
+                    }
+                }
+            )
+        }
+
+        if (showHelp) {
+            AlertDialog(
+                onDismissRequest = { showHelp = false },
+                title = { Text(L10n.string("help_title", appLanguage)) },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        Text(
+                            L10n.string("level_easy", appLanguage),
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            L10n.string("help_easy_desc", appLanguage),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Text(
+                            L10n.string("level_normal", appLanguage),
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            L10n.string("help_normal_desc", appLanguage),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                },
+                confirmButton = {
+                    OutlinedButton(onClick = { showHelp = false }) {
                         Text(L10n.string("cancel", appLanguage))
                     }
                 }

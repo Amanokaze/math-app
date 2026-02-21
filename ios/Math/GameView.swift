@@ -8,6 +8,11 @@
 import SwiftUI
 import UIKit
 
+enum GameLevel: String, CaseIterable {
+    case easy = "easy"
+    case normal = "normal"
+}
+
 enum MathOperation: String, CaseIterable {
     case add = "+"
     case subtract = "-"
@@ -32,6 +37,7 @@ struct MathProblem {
 
 struct GameView: View {
     @Binding var isPresented: Bool
+    let level: GameLevel
     let bestTime: Double
     let appLanguage: AppLanguage
     let onComplete: (Double) -> Void
@@ -347,10 +353,21 @@ struct GameView: View {
     
     private func generateProblems() {
         problems = (0..<totalProblems).map { _ in
-            let num1 = Int.random(in: 0...99)
-            let num2 = Int.random(in: 0...99)
-            let operation: MathOperation = Bool.random() ? .add : .subtract
-            return MathProblem(num1: num1, num2: num2, operation: operation)
+            switch level {
+            case .easy:
+                let num1 = Int.random(in: 0...99)
+                let num2 = Int.random(in: 0...10)
+                let operation: MathOperation = Bool.random() ? .add : .subtract
+                if operation == .subtract && num2 > num1 {
+                    return MathProblem(num1: num2, num2: num1, operation: operation)
+                }
+                return MathProblem(num1: num1, num2: num2, operation: operation)
+            case .normal:
+                let num1 = Int.random(in: 0...99)
+                let num2 = Int.random(in: 0...99)
+                let operation: MathOperation = Bool.random() ? .add : .subtract
+                return MathProblem(num1: num1, num2: num2, operation: operation)
+            }
         }
     }
     
@@ -454,5 +471,5 @@ struct ConfettiParticle: Identifiable {
 }
 
 #Preview {
-    GameView(isPresented: .constant(true), bestTime: 0, appLanguage: .korean, onComplete: { _ in })
+    GameView(isPresented: .constant(true), level: .normal, bestTime: 0, appLanguage: .korean, onComplete: { _ in })
 }

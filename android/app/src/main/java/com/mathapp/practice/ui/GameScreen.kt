@@ -24,6 +24,8 @@ import androidx.compose.ui.window.DialogProperties
 import kotlinx.coroutines.delay
 import kotlin.random.Random
 
+enum class GameLevel { EASY, NORMAL }
+
 data class MathProblem(val num1: Int, val num2: Int, val op: String) {
     val answer: Int = if (op == "+") num1 + num2 else num1 - num2
     val displayText: String = "$num1 $op $num2"
@@ -31,18 +33,31 @@ data class MathProblem(val num1: Int, val num2: Int, val op: String) {
 
 @Composable
 fun GameScreen(
+    level: GameLevel,
     bestTime: Float,
     appLanguage: AppLanguage,
     onComplete: (Float) -> Unit,
     onBack: () -> Unit
 ) {
-    val problems = remember {
+    val problems = remember(level) {
         List(10) {
-            MathProblem(
-                num1 = Random.nextInt(0, 100),
-                num2 = Random.nextInt(0, 100),
-                op = if (Random.nextBoolean()) "+" else "-"
-            )
+            when (level) {
+                GameLevel.EASY -> {
+                    val num1 = Random.nextInt(0, 100)
+                    val num2 = Random.nextInt(0, 11)
+                    val op = if (Random.nextBoolean()) "+" else "-"
+                    if (op == "-" && num2 > num1) {
+                        MathProblem(num1 = num2, num2 = num1, op = op)
+                    } else {
+                        MathProblem(num1 = num1, num2 = num2, op = op)
+                    }
+                }
+                GameLevel.NORMAL -> MathProblem(
+                    num1 = Random.nextInt(0, 100),
+                    num2 = Random.nextInt(0, 100),
+                    op = if (Random.nextBoolean()) "+" else "-"
+                )
+            }
         }
     }
 

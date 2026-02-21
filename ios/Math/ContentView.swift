@@ -13,8 +13,15 @@ struct ContentView: View {
     @State private var showCountdown = false
     @State private var showResetConfirm = false
     @State private var showLanguageSheet = false
-    @AppStorage("bestTime") private var bestTime: Double = 0
+    @State private var showHelpSheet = false
+    @State private var selectedLevel: GameLevel = .normal
+    @AppStorage("bestTimeEasy") private var bestTimeEasy: Double = 0
+    @AppStorage("bestTimeNormal") private var bestTimeNormal: Double = 0
     @AppStorage("appLanguage") private var appLanguageRaw: String = ""
+    
+    private var bestTime: Double {
+        selectedLevel == .easy ? bestTimeEasy : bestTimeNormal
+    }
     
     private var appLanguage: AppLanguage {
         get {
@@ -37,6 +44,12 @@ struct ContentView: View {
                     // 상단 설정 버튼
                     HStack {
                         Spacer()
+                        Button(action: { showHelpSheet = true }) {
+                            Image(systemName: "questionmark.circle")
+                                .font(.title2)
+                                .foregroundColor(.primary)
+                                .frame(width: 44, height: 44)
+                        }
                         Menu {
                             Button(action: {
                                 showLanguageSheet = true
@@ -63,6 +76,13 @@ struct ContentView: View {
                     Text("Math")
                         .font(.system(size: 48, weight: .bold))
                         .foregroundColor(.primary)
+                    
+                    Picker("", selection: $selectedLevel) {
+                        Text(L.string("level_easy", language: appLanguage)).tag(GameLevel.easy)
+                        Text(L.string("level_normal", language: appLanguage)).tag(GameLevel.normal)
+                    }
+                    .pickerStyle(.segmented)
+                    .padding(.horizontal, 40)
                     
                     Spacer()
                     
@@ -108,6 +128,10 @@ struct ContentView: View {
                     if appLanguageRaw.isEmpty {
                         appLanguageRaw = AppLanguage.deviceLanguage.rawValue
                     }
+                    if bestTimeNormal == 0 {
+                        let legacy = UserDefaults.standard.double(forKey: "bestTime")
+                        if legacy > 0 { bestTimeNormal = legacy }
+                    }
                 }
                 
                 // 카운트다운 오버레이
@@ -121,7 +145,8 @@ struct ContentView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .confirmationDialog(L.string("reset_confirm_title", language: appLanguage), isPresented: $showResetConfirm) {
                 Button(L.string("reset", language: appLanguage), role: .destructive) {
-                    bestTime = 0
+                    bestTimeEasy = 0
+                    bestTimeNormal = 0
                 }
                 Button(L.string("cancel", language: appLanguage), role: .cancel) { }
             } message: {
@@ -130,14 +155,20 @@ struct ContentView: View {
             .sheet(isPresented: $showLanguageSheet) {
                 LanguagePickerSheet(appLanguageRaw: $appLanguageRaw, isPresented: $showLanguageSheet)
             }
+            .sheet(isPresented: $showHelpSheet) {
+                HelpSheet(appLanguage: appLanguage, isPresented: $showHelpSheet)
+            }
             .navigationDestination(isPresented: $isGameActive) {
                 GameView(
                     isPresented: $isGameActive,
+                    level: selectedLevel,
                     bestTime: bestTime,
                     appLanguage: appLanguage,
                     onComplete: { time in
-                        if bestTime == 0 || time < bestTime {
-                            bestTime = time
+                        if selectedLevel == .easy {
+                            if bestTimeEasy == 0 || time < bestTimeEasy { bestTimeEasy = time }
+                        } else {
+                            if bestTimeNormal == 0 || time < bestTimeNormal { bestTimeNormal = time }
                         }
                     }
                 )
@@ -258,6 +289,46 @@ struct CountdownOverlay: View {
         }
         withAnimation(.easeOut(duration: 0.2).delay(0.3)) {
             scale = 1.0
+        }
+    }
+}
+
+/// 도움말 시트 - Easy/Normal 차이 설명
+struct HelpSheet: View {
+    let appLanguage: AppLanguage
+    @Binding var isPresented: Bool
+    
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 24) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(L.string("level_easy", language: appLanguage))
+                            .font(.headline)
+                        Text(L.string("help_easy_desc", language: appLanguage))
+                            .font(.body)
+                            .foregroundColor(.secondary)
+                    }
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(L.string("level_normal", language: appLanguage))
+                            .font(.headline)
+                        Text(L.string("help_normal_desc", language: appLanguage))
+                            .font(.body)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(24)
+            }
+            .navigationTitle(L.string("help_title", language: appLanguage))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button(L.string("cancel", language: appLanguage)) {
+                        isPresented = false
+                    }
+                }
+            }
         }
     }
 }
