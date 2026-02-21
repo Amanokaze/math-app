@@ -1,45 +1,56 @@
 # Math - 산수 연습 앱
 
-아이폰용 산수 연습 앱입니다. 덧셈과 뺄셈 문제를 풀며 시간을 측정합니다.
+덧셈과 뺄셈 문제를 풀며 시간을 측정하는 산수 연습 앱입니다. iOS와 Android를 지원합니다.
 
-## 기능
+## 프로젝트 구조 (Monorepo)
 
-- **메인 화면**: 시작 버튼, 이전 최고 기록 표시
-- **게임 화면**:
-  - 0~99 사이 임의의 수 2개로 덧셈/뺄셈 문제 (예: 88 + 88)
-  - 10문제 풀기
-  - 소수점 2자리 스톱워치 (경쟁용)
-  - 문제 진행 표시 (1/10, 2/10, ...)
-  - 커스텀 숫자 키패드 (화면 하단 1/3)
-  - 숫자, 백스페이스(⌫), 확인 버튼
-  - 음수 입력 지원 (- 버튼)
-- **정답 시**: ✓ 0.5초 표시 후 다음 문제
-- **오답 시**: ✗ 0.5초 표시 후 같은 문제 재도전
-- **그만하기**: 왼쪽 상단 ← 버튼 → "그만하시겠습니까?" 팝업 (예/아니오)
-- **최고 기록**: UserDefaults에 저장, 메인 화면 하단 표시
+```
+math-app/
+├── ios/                # iOS 프로젝트
+│   ├── Math.xcodeproj/
+│   └── Math/
+├── android/            # Android 프로젝트
+│   ├── app/
+│   └── ...
+└── README.md
+```
 
-## 실행 방법
+## iOS
 
-1. **Xcode**에서 `Math.xcodeproj` 열기
+### 기능
+- 메인 화면: 시작 버튼, 최고 기록, 다크/라이트 모드, 언어 설정
+- 3-2-1 카운트다운 후 게임 시작
+- 10문제 (덧셈/뺄셈), 타이머, 커스텀 숫자패드
+- 기록 경신 시 축하 멘트 + 꽃가루 효과
+- 다국어: 한국어, English, 中文(繁體), 中文(简体), 日本語
+
+### 실행
+1. Xcode에서 `ios/Math.xcodeproj` 열기
 2. 시뮬레이터 또는 실제 기기 선택
 3. ⌘R로 빌드 및 실행
 
-## 요구사항
-
+### 요구사항
 - Xcode 15.0 이상
-- iOS 15.0 이상
+- iOS 17.0 이상
 
-## 프로젝트 구조
+## Android
 
+### 기능
+- iOS와 동일한 기능 (메인, 게임, 설정, 다국어, 다크모드)
+
+### 실행
+1. **Android Studio**에서 `android/` 폴더 열기
+2. 에뮬레이터 또는 실제 기기 연결
+3. Run 버튼으로 빌드 및 실행
+
+또는 커맨드라인:
+```bash
+cd android
+./gradlew assembleDebug
+# APK: app/build/outputs/apk/debug/app-debug.apk
 ```
-Math-app/
-├── Math.xcodeproj/
-├── Math/
-│   ├── MathApp.swift        # 앱 진입점
-│   ├── ContentView.swift    # 메인 화면
-│   ├── GameView.swift       # 게임 화면
-│   ├── NumberKeypadView.swift # 커스텀 키패드
-│   ├── Info.plist
-│   └── Assets.xcassets/
-└── README.md
-```
+
+### 요구사항
+- Android Studio 또는 JDK 17+
+- Android SDK 34
+- minSdk 26

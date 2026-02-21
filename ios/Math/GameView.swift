@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 enum MathOperation: String, CaseIterable {
     case add = "+"
@@ -47,6 +48,51 @@ struct GameView: View {
     
     private let totalProblems = 10
     
+    private var topBar: some View {
+        HStack {
+            Button(action: {
+                isTimerPaused = true
+                timer?.invalidate()
+                showQuitAlert = true
+            }) {
+                Image(systemName: "chevron.left")
+                    .font(.title2)
+                    .foregroundColor(.blue)
+                    .frame(width: 44, height: 44)
+            }
+            Spacer()
+            Text(L.string("time_format", language: appLanguage, elapsedTime))
+                .font(.system(size: 20, weight: .medium, design: .monospaced))
+                .foregroundColor(.primary)
+            Spacer()
+            Text("\(currentIndex + 1)/\(totalProblems)")
+                .font(.headline)
+                .foregroundColor(.secondary)
+                .frame(width: 44, alignment: .trailing)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(Color(.systemBackground))
+    }
+    
+    private func keypadOnDigit(_ digit: String) {
+        if userAnswer == "-" || (userAnswer.hasPrefix("-") && userAnswer.count < 5) || (!userAnswer.hasPrefix("-") && userAnswer.count < 4) {
+            userAnswer += digit
+        }
+    }
+    
+    private func keypadOnBackspace() {
+        if !userAnswer.isEmpty {
+            userAnswer.removeLast()
+        }
+    }
+    
+    private func keypadOnMinus() {
+        if userAnswer.isEmpty {
+            userAnswer = "-"
+        }
+    }
+    
     var currentProblem: MathProblem? {
         guard currentIndex < problems.count else { return nil }
         return problems[currentIndex]
@@ -54,87 +100,97 @@ struct GameView: View {
     
     var body: some View {
         GeometryReader { geometry in
+        let isLandscape = geometry.size.width > geometry.size.height
         ZStack {
             Color(.systemBackground)
                 .ignoresSafeArea()
-            VStack(spacing: 0) {
-                // 상단 바: 게임 중에만 표시 (완료 화면에서는 숨김)
-                if currentProblem != nil {
-                    HStack {
-                        Button(action: {
-                            isTimerPaused = true
-                            timer?.invalidate()
-                            showQuitAlert = true
-                        }) {
-                            Image(systemName: "chevron.left")
-                                .font(.title2)
-                                .foregroundColor(.blue)
-                                .frame(width: 44, height: 44)
-                        }
-                        
-                        Spacer()
-                        
-                        Text(L.string("time_format", language: appLanguage, elapsedTime))
-                            .font(.system(size: 20, weight: .medium, design: .monospaced))
-                            .foregroundColor(.primary)
-                        
-                        Spacer()
-                        
-                        Text("\(currentIndex + 1)/\(totalProblems)")
-                            .font(.headline)
-                            .foregroundColor(.secondary)
-                            .frame(width: 44, alignment: .trailing)
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 12)
-                    .background(Color(.systemBackground))
-                }
-                
+            Group {
                 if let problem = currentProblem {
-                    // 문제 영역
-                    VStack(spacing: 24) {
-                        Spacer()
-                        
-                        Text(problem.displayText)
-                            .font(.system(size: 48, weight: .bold, design: .monospaced))
-                            .foregroundColor(.primary)
-                        
-                        // 답 입력 칸
-                        Text(userAnswer.isEmpty ? " " : userAnswer)
-                            .font(.system(size: 36, weight: .medium, design: .monospaced))
-                            .foregroundColor(.primary)
-                            .frame(height: 50)
-                            .frame(maxWidth: .infinity)
-                            .background(Color(.systemGray6))
-                            .cornerRadius(12)
-                            .padding(.horizontal, 40)
-                        
-                        Spacer()
+                    if isLandscape {
+                        // 가로 모드: 상단바 전체화면, 아래 좌(수식) 우(키패드)
+                        VStack(spacing: 0) {
+                            topBar
+                            HStack(spacing: 0) {
+                                // 수식 패널 (카드 형태로 시각적 무게 부여)
+                                VStack(spacing: 0) {
+                                    Spacer(minLength: 20)
+                                    VStack(spacing: 28) {
+                                        Text(problem.displayText)
+                                            .font(.system(size: 56, weight: .bold, design: .monospaced))
+                                            .foregroundColor(.primary)
+                                        Text(userAnswer.isEmpty ? " " : userAnswer)
+                                            .font(.system(size: 40, weight: .medium, design: .monospaced))
+                                            .foregroundColor(.primary)
+                                            .frame(height: 56)
+                                            .frame(maxWidth: .infinity)
+                                            .background(Color(.systemGray6))
+                                            .cornerRadius(14)
+                                            .padding(.horizontal, 48)
+                                    }
+                                    .padding(.vertical, 40)
+                                    .padding(.horizontal, 32)
+                                    .frame(maxWidth: .infinity)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 24)
+                                            .fill(Color(.systemGray6).opacity(0.6))
+                                    )
+                                    .padding(.horizontal, 24)
+                                    Spacer(minLength: 20)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    isGameFocused = true
+                                }
+                                VStack(spacing: 0) {
+                                    Spacer(minLength: 16)
+                                    NumberKeypadView(
+                                        onDigit: keypadOnDigit,
+                                        onBackspace: keypadOnBackspace,
+                                        onSubmit: submitAnswer,
+                                        onMinus: keypadOnMinus,
+                                        confirmTitle: L.string("confirm", language: appLanguage)
+                                    )
+                                    .padding(.horizontal, 16)
+                                    Spacer(minLength: 16)
+                                }
+                                .frame(width: min(500, geometry.size.width * 0.55))
+                                .background(Color(.systemGray6))
+                            }
+                        }
+                    } else {
+                        // 세로 모드: 기존 레이아웃
+                        VStack(spacing: 0) {
+                            topBar
+                            VStack(spacing: 24) {
+                                Spacer()
+                                Text(problem.displayText)
+                                    .font(.system(size: 48, weight: .bold, design: .monospaced))
+                                    .foregroundColor(.primary)
+                                Text(userAnswer.isEmpty ? " " : userAnswer)
+                                    .font(.system(size: 36, weight: .medium, design: .monospaced))
+                                    .foregroundColor(.primary)
+                                    .frame(height: 50)
+                                    .frame(maxWidth: .infinity)
+                                    .background(Color(.systemGray6))
+                                    .cornerRadius(12)
+                                    .padding(.horizontal, 40)
+                                Spacer()
+                            }
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                isGameFocused = true
+                            }
+                            NumberKeypadView(
+                                onDigit: keypadOnDigit,
+                                onBackspace: keypadOnBackspace,
+                                onSubmit: submitAnswer,
+                                onMinus: keypadOnMinus,
+                                confirmTitle: L.string("confirm", language: appLanguage)
+                            )
+                            .frame(height: geometry.size.height / 3)
+                        }
                     }
-                        
-                    // 커스텀 숫자 키패드 (화면 하단 1/3)
-                    NumberKeypadView(
-                        onDigit: { digit in
-                            if userAnswer == "-" || (userAnswer.hasPrefix("-") && userAnswer.count < 5) || (!userAnswer.hasPrefix("-") && userAnswer.count < 4) {
-                                userAnswer += digit
-                            }
-                        },
-                        onBackspace: {
-                            if !userAnswer.isEmpty {
-                                userAnswer.removeLast()
-                            }
-                        },
-                        onSubmit: {
-                            submitAnswer()
-                        },
-                        onMinus: {
-                            if userAnswer.isEmpty {
-                                userAnswer = "-"
-                            }
-                        },
-                        confirmTitle: L.string("confirm", language: appLanguage)
-                    )
-                    .frame(height: geometry.size.height / 3)
                 } else {
                     // 게임 완료 (bestTime==0 또는 기록 경신/동률 시 축하)
                     let isNewRecord = bestTime == 0 || elapsedTime <= bestTime
@@ -205,48 +261,16 @@ struct GameView: View {
                 .allowsHitTesting(false)
             }
             
-            // 그만하기 팝업 (문제 가림)
-            if showQuitAlert {
-                Color.black.opacity(0.7)
-                    .ignoresSafeArea()
-                    .onTapGesture { }
-                
-                VStack(spacing: 24) {
-                    Text(L.string("quit_confirm", language: appLanguage))
-                        .font(.title2)
-                        .fontWeight(.semibold)
-                        .multilineTextAlignment(.center)
-                    
-                    HStack(spacing: 16) {
-                        Button(L.string("no", language: appLanguage)) {
-                            showQuitAlert = false
-                            isTimerPaused = false
-                            startTimer()
-                        }
-                        .font(.headline)
-                        .foregroundColor(.blue)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color(.systemGray6))
-                        .cornerRadius(12)
-                        
-                        Button(L.string("yes", language: appLanguage)) {
-                            showQuitAlert = false
-                            isPresented = false
-                        }
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.red)
-                        .cornerRadius(12)
-                    }
-                }
-                .padding(32)
-                .background(Color(.systemBackground))
-                .cornerRadius(20)
-                .shadow(radius: 20)
-                .padding(40)
+        }
+        .alert(L.string("quit_confirm", language: appLanguage), isPresented: $showQuitAlert) {
+            Button(L.string("no", language: appLanguage), role: .cancel) {
+                showQuitAlert = false
+                isTimerPaused = false
+                startTimer()
+            }
+            Button(L.string("yes", language: appLanguage), role: .destructive) {
+                showQuitAlert = false
+                isPresented = false
             }
         }
         .focusable()
@@ -254,10 +278,41 @@ struct GameView: View {
         .onAppear {
             generateProblems()
             startTimer()
-            isGameFocused = true
+            // iPad만: 하드웨어키보드 시 FocusState 미동작 → GCKeyboard 사용. iPhone은 onKeyPress만 사용.
+            if UIDevice.current.userInterfaceIdiom == .pad {
+                let handler = KeyboardInputHandler.shared
+                handler.isActive = true
+                handler.shouldIgnoreInput = { showQuitAlert || showResult != nil }
+                handler.onDigit = keypadOnDigit
+                handler.onBackspace = keypadOnBackspace
+                handler.onSubmit = submitAnswer
+                handler.onMinus = keypadOnMinus
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                isGameFocused = true
+            }
         }
         .onDisappear {
             timer?.invalidate()
+            if UIDevice.current.userInterfaceIdiom == .pad {
+                let handler = KeyboardInputHandler.shared
+                handler.isActive = false
+                handler.shouldIgnoreInput = nil
+                handler.onDigit = nil
+                handler.onBackspace = nil
+                handler.onSubmit = nil
+                handler.onMinus = nil
+            }
+        }
+        .onChange(of: showQuitAlert) { _, _ in
+            if UIDevice.current.userInterfaceIdiom == .pad {
+                KeyboardInputHandler.shared.shouldIgnoreInput = { showQuitAlert || showResult != nil }
+            }
+        }
+        .onChange(of: showResult) { _, _ in
+            if UIDevice.current.userInterfaceIdiom == .pad {
+                KeyboardInputHandler.shared.shouldIgnoreInput = { showQuitAlert || showResult != nil }
+            }
         }
         .onKeyPress(characters: .init(charactersIn: "0123456789")) { press in
             guard currentProblem != nil, !showQuitAlert, showResult == nil else { return .ignored }

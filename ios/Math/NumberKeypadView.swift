@@ -85,6 +85,7 @@ struct KeypadButton: View {
                 .foregroundColor(isAccent ? .white : .primary)
                 .frame(maxWidth: .infinity)
                 .frame(height: 50)
+                .contentShape(Rectangle())
                 .background(
                     isAccent ? Color.blue :
                     isSpecial ? Color(.systemGray5) : Color(.systemBackground)
