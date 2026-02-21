@@ -27,3 +27,10 @@ fastlane/test_output
 
 # macOS
 .DS_Store
+
+# Android
+android/**/build/
+android/.gradle/
+android/.idea/
+android/local.properties
+android/*.iml
