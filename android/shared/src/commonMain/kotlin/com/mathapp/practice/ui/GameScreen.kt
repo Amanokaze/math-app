@@ -158,54 +158,67 @@ fun GameScreen(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        // iOS hardware keyboard input is much more reliable through the platform
-        // text input system than through raw key events. Keep this hidden field focused.
-        BasicTextField(
-            value = userAnswer,
-            onValueChange = { raw ->
-                val submitRequested = raw.any { it == '\n' || it == '\r' }
-                userAnswer = sanitizeAnswerInput(raw)
-                lastInputMutationAt = currentTimeMillis()
-                if (submitRequested) onSubmit()
-            },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(
-                // Use Ascii so hardware keyboard input is not filtered at the platform layer;
-                // we sanitize manually.
-                keyboardType = KeyboardType.Ascii,
-                imeAction = ImeAction.Done
-            ),
-            keyboardActions = KeyboardActions(
-                onDone = { onSubmit() }
-            ),
-            modifier = Modifier
-                // Needs a real (non-zero) size and non-zero alpha on iOS to reliably become first responder.
-                .align(Alignment.TopStart)
-                .size(12.dp)
-                .alpha(0.01f)
-                .focusRequester(focusRequester)
-                .onFocusChanged { state -> isInputFocused = state.isFocused }
-                .focusable()
-                .onKeyEvent { keyEvent ->
-                    // Fallback path for platforms where Enter doesn't get reflected into text.
-                    if (keyEvent.type == KeyEventType.KeyUp) {
-                        when (keyEvent.key) {
-                            Key.Enter, Key.NumPadEnter -> {
-                                onSubmit()
-                                true
-                            }
-                            else -> {
-                                when (keyEvent.utf16CodePoint) {
-                                    10, 13 -> { onSubmit(); true }
-                                    else -> false
+        if (requiresHiddenTextInputBridge()) {
+            // iOS hardware keyboard input is much more reliable through the platform
+            // text input system than through raw key events. Keep this hidden field focused.
+            BasicTextField(
+                value = userAnswer,
+                onValueChange = { raw ->
+                    val submitRequested = raw.any { it == '\n' || it == '\r' }
+                    userAnswer = sanitizeAnswerInput(raw)
+                    lastInputMutationAt = currentTimeMillis()
+                    if (submitRequested) onSubmit()
+                },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    // Use Ascii so hardware keyboard input is not filtered at the platform layer;
+                    // we sanitize manually.
+                    keyboardType = KeyboardType.Ascii,
+                    imeAction = ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(
+                    onDone = { onSubmit() }
+                ),
+                modifier = Modifier
+                    // Needs a real (non-zero) size and non-zero alpha on iOS to reliably become first responder.
+                    .align(Alignment.TopStart)
+                    .size(12.dp)
+                    .alpha(0.01f)
+                    .focusRequester(focusRequester)
+                    .onFocusChanged { state -> isInputFocused = state.isFocused }
+                    .focusable()
+                    .onKeyEvent { keyEvent ->
+                        // Fallback path for platforms where Enter doesn't get reflected into text.
+                        if (keyEvent.type == KeyEventType.KeyUp) {
+                            when (keyEvent.key) {
+                                Key.Enter, Key.NumPadEnter -> {
+                                    onSubmit()
+                                    true
+                                }
+                                else -> {
+                                    when (keyEvent.utf16CodePoint) {
+                                        10, 13 -> { onSubmit(); true }
+                                        else -> false
+                                    }
                                 }
                             }
+                        } else {
+                            false
                         }
-                    } else {
-                        false
                     }
-                }
-        )
+            )
+        } else {
+            // Android uses Activity-level dispatch for hardware keys; keep only a focus target.
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .size(1.dp)
+                    .alpha(0.01f)
+                    .focusRequester(focusRequester)
+                    .onFocusChanged { state -> isInputFocused = state.isFocused }
+                    .focusable()
+            )
+        }
 
         val isLandscape = maxWidth > maxHeight
         if (currentProblem != null) {

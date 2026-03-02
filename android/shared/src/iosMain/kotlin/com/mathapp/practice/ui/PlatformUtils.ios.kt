@@ -65,3 +65,5 @@ actual fun setHardwareKeyboardHandler(
         }
     }
 }
+
+actual fun requiresHiddenTextInputBridge(): Boolean = true

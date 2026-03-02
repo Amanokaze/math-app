@@ -10,3 +10,5 @@ expect fun setHardwareKeyboardHandler(
     onSubmit: (() -> Unit)? = null,
     onMinus: (() -> Unit)? = null
 )
+
+expect fun requiresHiddenTextInputBridge(): Boolean

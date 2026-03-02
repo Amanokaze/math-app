@@ -2,12 +2,14 @@ package com.mathapp.practice
 
 import android.content.pm.ActivityInfo
 import android.os.Bundle
+import android.view.KeyEvent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import com.mathapp.practice.ui.dispatchHardwareKeyboardEvent
 import com.mathapp.practice.ui.MathApp
 import com.mathapp.practice.ui.initAppSettings
 
@@ -46,5 +48,12 @@ class MainActivity : ComponentActivity() {
         if (hasFocus) {
             hideSystemBars()
         }
+    }
+
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        if (dispatchHardwareKeyboardEvent(event)) {
+            return true
+        }
+        return super.dispatchKeyEvent(event)
     }
 }
