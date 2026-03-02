@@ -9,10 +9,12 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.mathapp.practice.ui.MathApp
+import com.mathapp.practice.ui.initAppSettings
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        initAppSettings(applicationContext)
         
         // 폰(sw<600dp): 세로만, 태블릿: 세로/가로 모두 허용
         val swDp = resources.configuration.smallestScreenWidthDp

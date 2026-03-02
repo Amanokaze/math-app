@@ -9,16 +9,6 @@ enum class AppLanguage(val code: String, val displayName: String) {
 
     companion object {
         fun fromCode(code: String): AppLanguage = entries.find { it.code == code } ?: ENGLISH
-        fun deviceLanguage(locale: java.util.Locale): AppLanguage {
-            val lang = locale.language
-            val country = locale.country
-            return when {
-                lang == "ko" -> KOREAN
-                lang == "ja" -> JAPANESE
-                lang == "zh" -> if (country == "TW" || country == "HK") CHINESE_TRADITIONAL else CHINESE_SIMPLIFIED
-                else -> ENGLISH
-            }
-        }
     }
 }
 
@@ -173,6 +163,53 @@ object L10n {
 
     fun string(key: String, lang: AppLanguage, vararg args: Any): String {
         val template = strings[lang]?.get(key) ?: strings[AppLanguage.ENGLISH]!![key] ?: key
-        return if (args.isEmpty()) template else String.format(template, *args)
+        return if (args.isEmpty()) template else kmpFormat(template, *args)
     }
+}
+
+/** Multiplatform string formatter — supports %.Nf and %s specifiers only. */
+private fun kmpFormat(template: String, vararg args: Any): String {
+    val result = StringBuilder()
+    var argIndex = 0
+    var i = 0
+    while (i < template.length) {
+        if (template[i] == '%' && i + 1 < template.length) {
+            val rest = template.substring(i + 1)
+            val floatMatch = Regex("^\\.(\\d+)f").find(rest)
+            val stringMatch = rest.startsWith("s")
+            when {
+                floatMatch != null -> {
+                    val decimals = floatMatch.groupValues[1].toInt()
+                    val value = (args.getOrNull(argIndex++) as? Number)?.toFloat() ?: 0f
+                    result.append(formatFloat(value, decimals))
+                    i += 1 + floatMatch.value.length
+                }
+                stringMatch -> {
+                    result.append(args.getOrNull(argIndex++)?.toString() ?: "")
+                    i += 2
+                }
+                else -> {
+                    result.append('%')
+                    i++
+                }
+            }
+        } else {
+            result.append(template[i])
+            i++
+        }
+    }
+    return result.toString()
+}
+
+private fun formatFloat(value: Float, decimals: Int): String {
+    val absValue = if (value < 0f) -value else value
+    val sign = if (value < 0f) "-" else ""
+    val multiplier = when (decimals) {
+        0 -> 1; 1 -> 10; 2 -> 100; 3 -> 1000; else -> 100
+    }
+    val scaled = (absValue * multiplier + 0.5f).toInt()
+    val intPart = scaled / multiplier
+    val fracPart = scaled % multiplier
+    return if (decimals == 0) "$sign$intPart"
+    else "$sign$intPart.${fracPart.toString().padStart(decimals, '0')}"
 }

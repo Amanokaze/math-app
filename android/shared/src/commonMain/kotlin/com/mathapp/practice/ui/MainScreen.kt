@@ -65,7 +65,7 @@ fun MainScreen(
 
     LaunchedEffect(Unit) {
         if (appLanguageRaw.isEmpty()) {
-            onAppLanguageChange(AppLanguage.deviceLanguage(java.util.Locale.getDefault()).code)
+            onAppLanguageChange(getDeviceLanguageCode())
         }
     }
 

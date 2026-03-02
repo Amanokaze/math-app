@@ -9,22 +9,16 @@
 /* Begin PBXBuildFile section */
 		A1000001272F09600012CAC3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1000002272F09600012CAC3 /* Assets.xcassets */; };
 		A1000003272F09D00012CAC3 /* MathApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000004272F09D00012CAC3 /* MathApp.swift */; };
-		A1000005272F09D00012CAC3 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000006272F09D00012CAC3 /* ContentView.swift */; };
-		A1000007272F09D00012CAC3 /* GameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000008272F09D00012CAC3 /* GameView.swift */; };
-		A1000009272F09D00012CAC3 /* NumberKeypadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000A272F09D00012CAC3 /* NumberKeypadView.swift */; };
-		A1000020272F0A000012CAC3 /* Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000021272F0A000012CAC3 /* Localization.swift */; };
-		A1000030272F0A100012CAC3 /* KeyboardInputHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000031272F0A100012CAC3 /* KeyboardInputHandler.swift */; };
+		A1000034272F0A200012CAC4 /* KeyboardInputBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000033272F0A200012CAC4 /* KeyboardInputBridge.swift */; };
+		A1000036272F0A300012CAC4 /* KeyInputContainerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000035272F0A300012CAC4 /* KeyInputContainerViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		A1000002272F09600012CAC3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A1000004272F09D00012CAC3 /* MathApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MathApp.swift; sourceTree = "<group>"; };
-		A1000006272F09D00012CAC3 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		A1000008272F09D00012CAC3 /* GameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameView.swift; sourceTree = "<group>"; };
-		A100000A272F09D00012CAC3 /* NumberKeypadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumberKeypadView.swift; sourceTree = "<group>"; };
+		A1000033272F0A200012CAC4 /* KeyboardInputBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardInputBridge.swift; sourceTree = "<group>"; };
+		A1000035272F0A300012CAC4 /* KeyInputContainerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyInputContainerViewController.swift; sourceTree = "<group>"; };
 		A100000B272F095F0012CAC3 /* Math.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Math.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		A1000021272F0A000012CAC3 /* Localization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Localization.swift; sourceTree = "<group>"; };
-		A1000031272F0A100012CAC3 /* KeyboardInputHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardInputHandler.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -50,11 +44,8 @@
 			isa = PBXGroup;
 			children = (
 				A1000004272F09D00012CAC3 /* MathApp.swift */,
-				A1000006272F09D00012CAC3 /* ContentView.swift */,
-				A1000008272F09D00012CAC3 /* GameView.swift */,
-				A100000A272F09D00012CAC3 /* NumberKeypadView.swift */,
-				A1000021272F0A000012CAC3 /* Localization.swift */,
-				A1000031272F0A100012CAC3 /* KeyboardInputHandler.swift */,
+				A1000033272F0A200012CAC4 /* KeyboardInputBridge.swift */,
+				A1000035272F0A300012CAC4 /* KeyInputContainerViewController.swift */,
 				A1000002272F09600012CAC3 /* Assets.xcassets */,
 			);
 			path = Math;
@@ -75,6 +66,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = A1000011272F09610012CAC3 /* Build configuration list for PBXNativeTarget "Math" */;
 			buildPhases = (
+				A1000032272F0A100012CAC4 /* Run Script */,
 				A1000012272F095F0012CAC3 /* Sources */,
 				A100000C272F095F0012CAC3 /* Frameworks */,
 				A1000013272F095F0012CAC3 /* Resources */,
@@ -133,17 +125,32 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		A1000032272F0A100012CAC4 /* Run Script */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Build shared framework";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e\ncd \"$SRCROOT/../android\"\n\nif [ \"$PLATFORM_NAME\" = \"iphonesimulator\" ]; then\n  if [ \"$CONFIGURATION\" = \"Release\" ]; then\n    ./gradlew :shared:linkReleaseFrameworkIosSimulatorArm64\n    FRAMEWORK_DIR=\"shared/build/bin/iosSimulatorArm64/releaseFramework\"\n  else\n    ./gradlew :shared:linkDebugFrameworkIosSimulatorArm64\n    FRAMEWORK_DIR=\"shared/build/bin/iosSimulatorArm64/debugFramework\"\n  fi\nelif [ \"$PLATFORM_NAME\" = \"iphoneos\" ]; then\n  if [ \"$CONFIGURATION\" = \"Release\" ]; then\n    ./gradlew :shared:linkReleaseFrameworkIosArm64\n    FRAMEWORK_DIR=\"shared/build/bin/iosArm64/releaseFramework\"\n  else\n    ./gradlew :shared:linkDebugFrameworkIosArm64\n    FRAMEWORK_DIR=\"shared/build/bin/iosArm64/debugFramework\"\n  fi\nfi\n\ncp -r \"$FRAMEWORK_DIR/shared.framework\" \"$BUILT_PRODUCTS_DIR/\"";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		A1000012272F095F0012CAC3 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				A1000003272F09D00012CAC3 /* MathApp.swift in Sources */,
-				A1000005272F09D00012CAC3 /* ContentView.swift in Sources */,
-				A1000007272F09D00012CAC3 /* GameView.swift in Sources */,
-				A1000009272F09D00012CAC3 /* NumberKeypadView.swift in Sources */,
-				A1000020272F0A000012CAC3 /* Localization.swift in Sources */,
-				A1000030272F0A100012CAC3 /* KeyboardInputHandler.swift in Sources */,
+				A1000034272F0A200012CAC4 /* KeyboardInputBridge.swift in Sources */,
+				A1000036272F0A300012CAC4 /* KeyInputContainerViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -184,7 +191,11 @@
 				DEVELOPMENT_TEAM = Z8QZLJ5AG2;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(BUILT_PRODUCTS_DIR)",
+				);
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -243,7 +254,11 @@
 				DEVELOPMENT_TEAM = Z8QZLJ5AG2;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(BUILT_PRODUCTS_DIR)",
+				);
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;

@@ -18,3 +18,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Math"
 include(":app")
+include(":shared")
