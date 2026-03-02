@@ -1,24 +1,30 @@
-//
-//  MathApp.swift
-//  Math
-//
-//  산수 연습 앱
-//
-
 import SwiftUI
+import shared
 
 @main
 struct MathApp: App {
-    @AppStorage("colorSchemeMode") private var colorSchemeMode: Int = 1  // 1: 라이트, 2: 다크
-    
-    private var preferredScheme: ColorScheme? {
-        colorSchemeMode == 2 ? .dark : .light
+    init() {
+        _ = KeyboardInputBridge.shared
     }
-    
+
     var body: some Scene {
         WindowGroup {
-            ContentView(colorSchemeMode: $colorSchemeMode)
-                .preferredColorScheme(preferredScheme)
+            ContentView()
         }
     }
+}
+
+struct ContentView: View {
+    var body: some View {
+        ComposeView()
+    }
+}
+
+struct ComposeView: UIViewControllerRepresentable {
+    func makeUIViewController(context: Context) -> UIViewController {
+        let composeViewController = IosAppKt.MainViewController()
+        return KeyInputContainerViewController(contentViewController: composeViewController)
+    }
+
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
 }
