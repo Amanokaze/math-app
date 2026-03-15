@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.sp
 fun NumberKeypad(
     modifier: Modifier = Modifier,
     confirmTitle: String,
+    showMinus: Boolean = true,
     onDigit: (String) -> Unit,
     onBackspace: () -> Unit,
     onSubmit: () -> Unit,
@@ -35,7 +36,7 @@ fun NumberKeypad(
             listOf("1", "2", "3"),
             listOf("4", "5", "6"),
             listOf("7", "8", "9"),
-            listOf("-", "0", "⌫")
+            listOf(if (showMinus) "-" else "", "0", "⌫")
         ).forEach { row ->
             Row(
                 modifier = Modifier
@@ -48,11 +49,13 @@ fun NumberKeypad(
                     KeypadButton(
                         text = key,
                         isSpecial = isSpecial,
+                        enabled = key.isNotEmpty(),
                         modifier = Modifier.weight(1f)
                     ) {
                         when (key) {
                             "-" -> onMinus()
                             "⌫" -> onBackspace()
+                            "" -> {}
                             else -> onDigit(key)
                         }
                     }
@@ -77,16 +80,19 @@ fun KeypadButton(
     modifier: Modifier = Modifier,
     isSpecial: Boolean = false,
     isAccent: Boolean = false,
+    enabled: Boolean = true,
     onClick: () -> Unit
 ) {
     Surface(
         modifier = modifier.height(50.dp),
         onClick = onClick,
+        enabled = enabled,
         shape = RoundedCornerShape(10.dp),
         color = when {
-            isAccent -> MaterialTheme.colorScheme.primary
+            !enabled  -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+            isAccent  -> MaterialTheme.colorScheme.primary
             isSpecial -> MaterialTheme.colorScheme.surfaceVariant
-            else -> MaterialTheme.colorScheme.surface
+            else      -> MaterialTheme.colorScheme.surface
         }
     ) {
         androidx.compose.foundation.layout.Box(
