@@ -24,7 +24,8 @@ sealed class Screen {
         val stageNumber: Int,
         val stars: Int,
         val correctCount: Int,
-        val avgSeconds: Float
+        val avgSeconds: Float,
+        val points: Int
     ) : Screen()
 }
 
@@ -37,6 +38,19 @@ fun MathApp() {
     var screen by remember { mutableStateOf<Screen>(Screen.Home) }
     // Bump this whenever stage progress changes so child screens re-read AppSettings
     var progressVersion by remember { mutableIntStateOf(0) }
+    // Bump this whenever hearts are consumed/recharged so UI refreshes
+    var heartsVersion by remember { mutableIntStateOf(0) }
+
+    fun enterGame(op: MathOperation, num: Int) {
+        rechargeHearts()
+        if (!consumeHeart()) {
+            heartsVersion++
+            return
+        }
+        heartsVersion++
+        saveLastPlayedStage(op, num)
+        screen = Screen.Game(op, num)
+    }
 
     val appLanguage = when {
         appLanguageRaw.isEmpty() -> AppLanguage.fromCode(getDeviceLanguageCode())
@@ -61,16 +75,14 @@ fun MathApp() {
                         appLanguageRaw = it
                         AppSettings.setString("appLanguage", it)
                     },
-                    onResumeClick = { (op, num) ->
-                        saveLastPlayedStage(op, num)
-                        screen = Screen.Game(op, num)
-                    },
+                    onResumeClick = { (op, num) -> enterGame(op, num) },
                     onNewStartClick = { screen = Screen.Category },
                     onResetProgress = {
                         resetAllProgress()
                         progressVersion++
                     },
-                    progressVersion = progressVersion
+                    progressVersion = progressVersion,
+                    heartsVersion = heartsVersion
                 )
 
                 is Screen.Category -> CategoryScreen(
@@ -83,12 +95,10 @@ fun MathApp() {
                 is Screen.StageMap -> StageMapScreen(
                     operation = s.operation,
                     appLanguage = appLanguage,
-                    onStageSelected = { num ->
-                        saveLastPlayedStage(s.operation, num)
-                        screen = Screen.Game(s.operation, num)
-                    },
+                    onStageSelected = { num -> enterGame(s.operation, num) },
                     onBack = { screen = Screen.Category },
-                    progressVersion = progressVersion
+                    progressVersion = progressVersion,
+                    heartsVersion = heartsVersion
                 )
 
                 is Screen.Game -> GameScreen(
@@ -97,8 +107,10 @@ fun MathApp() {
                     appLanguage = appLanguage,
                     onComplete = { stars, correctCount, avgSec ->
                         saveStageResult(s.operation, s.stageNumber, stars)
+                        val points = calcPoints(s.stageNumber, stars)
+                        addPoints(points)
                         progressVersion++
-                        screen = Screen.Result(s.operation, s.stageNumber, stars, correctCount, avgSec)
+                        screen = Screen.Result(s.operation, s.stageNumber, stars, correctCount, avgSec, points)
                     },
                     onBack = { screen = Screen.StageMap(s.operation) }
                 )
@@ -106,17 +118,20 @@ fun MathApp() {
                 is Screen.Result -> {
                     val nextNum = s.stageNumber + 1
                     val hasNextStage = nextNum <= 10 && StageInfo(s.operation, nextNum).isUnlocked
+                    val hearts = rememberLiveHearts(heartsVersion)
                     ResultScreen(
                         operation = s.operation,
                         stageNumber = s.stageNumber,
                         stars = s.stars,
                         correctCount = s.correctCount,
                         avgSeconds = s.avgSeconds,
+                        points = s.points,
+                        hearts = hearts,
                         appLanguage = appLanguage,
                         hasNextStage = hasNextStage,
-                        onRetry = { screen = Screen.Game(s.operation, s.stageNumber) },
+                        onRetry = { enterGame(s.operation, s.stageNumber) },
                         onNextStage = {
-                            if (hasNextStage) screen = Screen.Game(s.operation, nextNum)
+                            if (hasNextStage) enterGame(s.operation, nextNum)
                             else screen = Screen.StageMap(s.operation)
                         },
                         onToStageMap = { screen = Screen.StageMap(s.operation) }

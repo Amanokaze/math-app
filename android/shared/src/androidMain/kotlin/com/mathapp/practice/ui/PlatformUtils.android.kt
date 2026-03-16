@@ -16,6 +16,8 @@ actual fun getDeviceLanguageCode(): String {
 
 actual fun currentTimeMillis(): Long = System.currentTimeMillis()
 
+actual fun getCurrentEpochSeconds(): Long = System.currentTimeMillis() / 1000
+
 private var hardwareOnDigit: ((String) -> Unit)? = null
 private var hardwareOnBackspace: (() -> Unit)? = null
 private var hardwareOnSubmit: (() -> Unit)? = null

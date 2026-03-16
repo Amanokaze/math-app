@@ -91,6 +91,7 @@ fun resetAllProgress() {
     }
     AppSettings.setString("last_op", "")
     AppSettings.setInt("last_stage_num", 0)
+    AppSettings.setInt("total_points", 0)
 }
 
 // ─── Star calculation ─────────────────────────────────────────────────────────
@@ -100,10 +101,76 @@ fun resetAllProgress() {
 fun calcStars(correctCount: Int, totalSeconds: Float): Int {
     val avg = totalSeconds / 10f
     return when {
-        correctCount == 10 && avg <= 3f -> 3
+        correctCount == 10 && avg <= 6f -> 3
         correctCount >= 8               -> 2
         else                            -> 1
     }
+}
+
+// ─── Point calculation ────────────────────────────────────────────────────────
+
+/** Returns points earned for a stage result.
+ *  stageNumber 1~3 = easy tier, 4~6 = normal tier, 7~10 = hard tier. */
+fun calcPoints(stageNumber: Int, stars: Int): Int {
+    return when {
+        stageNumber <= 3 -> when (stars) { 1 -> 100; 2 -> 110; else -> 120 }
+        stageNumber <= 6 -> when (stars) { 1 -> 150; 2 -> 165; else -> 180 }
+        else             -> when (stars) { 1 -> 200; 2 -> 220; else -> 240 }
+    }
+}
+
+fun addPoints(points: Int) {
+    val current = AppSettings.getInt("total_points", 0)
+    AppSettings.setInt("total_points", current + points)
+}
+
+fun getTotalPoints(): Int = AppSettings.getInt("total_points", 0)
+
+// ─── Heart (Energy) System ────────────────────────────────────────────────────
+
+const val MAX_HEARTS = 15
+const val HEART_RECHARGE_SECONDS = 300L // 5 minutes per heart
+
+/** Must be called on screen entry to credit hearts earned while app was closed. */
+fun rechargeHearts() {
+    val hearts = AppSettings.getInt("hearts", MAX_HEARTS)
+    if (hearts >= MAX_HEARTS) return
+    val currentTime = getCurrentEpochSeconds()
+    val lastChargeTime = AppSettings.getString("last_heart_charge_time", "0").toLongOrNull() ?: currentTime
+    val elapsed = currentTime - lastChargeTime
+    val toAdd = (elapsed / HEART_RECHARGE_SECONDS).toInt()
+    if (toAdd > 0) {
+        val newHearts = minOf(MAX_HEARTS, hearts + toAdd)
+        AppSettings.setInt("hearts", newHearts)
+        if (newHearts < MAX_HEARTS) {
+            val newLastChargeTime = lastChargeTime + toAdd * HEART_RECHARGE_SECONDS
+            AppSettings.setString("last_heart_charge_time", newLastChargeTime.toString())
+        }
+    }
+}
+
+fun getHearts(): Int = AppSettings.getInt("hearts", MAX_HEARTS)
+
+/** Removes one heart. Returns false if no hearts available. */
+fun consumeHeart(): Boolean {
+    val hearts = getHearts()
+    if (hearts <= 0) return false
+    AppSettings.setInt("hearts", hearts - 1)
+    if (hearts == MAX_HEARTS) {
+        // Was full — start recharge timer now
+        AppSettings.setString("last_heart_charge_time", getCurrentEpochSeconds().toString())
+    }
+    return true
+}
+
+/** Returns seconds remaining until the next heart recharges (0 if full). */
+fun secondsUntilNextHeart(): Long {
+    if (getHearts() >= MAX_HEARTS) return 0L
+    val lastChargeTime = AppSettings.getString("last_heart_charge_time", "0").toLongOrNull()
+        ?: return HEART_RECHARGE_SECONDS
+    val elapsed = getCurrentEpochSeconds() - lastChargeTime
+    val secondsInCurrentCycle = elapsed % HEART_RECHARGE_SECONDS
+    return HEART_RECHARGE_SECONDS - secondsInCurrentCycle
 }
 
 // ─── Aggregate progress ───────────────────────────────────────────────────────

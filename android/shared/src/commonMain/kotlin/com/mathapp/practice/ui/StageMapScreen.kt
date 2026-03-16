@@ -25,14 +25,19 @@ fun StageMapScreen(
     appLanguage: AppLanguage,
     onStageSelected: (Int) -> Unit,
     onBack: () -> Unit,
-    progressVersion: Int
+    progressVersion: Int,
+    heartsVersion: Int
 ) {
     val stages = remember(progressVersion) { stagesFor(operation) }
     // "Current" stage = first unlocked stage with 0 stars, else last stage
     val currentIdx = stages.indexOfFirst { it.isUnlocked && it.stars == 0 }
         .let { if (it == -1) stages.size - 1 else it }
+    val hearts = rememberLiveHearts(heartsVersion)
 
     Column(modifier = Modifier.fillMaxSize()) {
+        // ── Hearts header ──
+        HeartsHeader(hearts = hearts, appLanguage = appLanguage)
+
         // ── Top bar ──
         Row(
             modifier = Modifier
@@ -74,7 +79,7 @@ fun StageMapScreen(
                     stageNumber = idx + 1,
                     isCurrent = isCurrent,
                     appLanguage = appLanguage,
-                    onClick = if (isLocked) null else ({ onStageSelected(stage.number) })
+                    onClick = if (isLocked || hearts <= 0) null else ({ onStageSelected(stage.number) })
                 )
             }
             Spacer(modifier = Modifier.height(32.dp))

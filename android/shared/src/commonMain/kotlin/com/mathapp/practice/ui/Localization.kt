@@ -63,9 +63,13 @@ object L10n {
             "retry" to "다시 하기",
             "next_stage" to "다음 단계로",
             "to_stage_map" to "스테이지 맵으로",
-            "star_cond_3" to "⭐⭐⭐  만점 + 평균 3초 이하",
+            "star_cond_3" to "⭐⭐⭐  만점 + 평균 6초 이하",
             "star_cond_2" to "⭐⭐  8문제 이상 정답",
-            "star_cond_1" to "⭐  완주 성공"
+            "star_cond_1" to "⭐  완주 성공",
+            "points_earned" to "%d P 획득!",
+            "hearts_display" to "❤️ %d / %d",
+            "next_heart_timer" to "+1 %02d:%02d",
+            "total_points_format" to "누적 %d P"
         ),
         AppLanguage.ENGLISH to mapOf(
             "reset_records" to "Reset Records",
@@ -116,9 +120,13 @@ object L10n {
             "retry" to "Try Again",
             "next_stage" to "Next Stage",
             "to_stage_map" to "Stage Map",
-            "star_cond_3" to "⭐⭐⭐  Perfect score + avg ≤ 3s",
+            "star_cond_3" to "⭐⭐⭐  Perfect score + avg ≤ 6s",
             "star_cond_2" to "⭐⭐  8 or more correct",
-            "star_cond_1" to "⭐  Finish all 10"
+            "star_cond_1" to "⭐  Finish all 10",
+            "points_earned" to "%d P earned!",
+            "hearts_display" to "❤️ %d / %d",
+            "next_heart_timer" to "+1 %02d:%02d",
+            "total_points_format" to "Total %d P"
         ),
         AppLanguage.CHINESE_TRADITIONAL to mapOf(
             "reset_records" to "重置紀錄",
@@ -169,9 +177,13 @@ object L10n {
             "retry" to "再試一次",
             "next_stage" to "下一關",
             "to_stage_map" to "關卡地圖",
-            "star_cond_3" to "⭐⭐⭐  滿分 + 平均≤3秒",
+            "star_cond_3" to "⭐⭐⭐  滿分 + 平均≤6秒",
             "star_cond_2" to "⭐⭐  答對8題以上",
-            "star_cond_1" to "⭐  完成全部題目"
+            "star_cond_1" to "⭐  完成全部題目",
+            "points_earned" to "獲得 %d P！",
+            "hearts_display" to "❤️ %d / %d",
+            "next_heart_timer" to "+1 %02d:%02d",
+            "total_points_format" to "累計 %d P"
         ),
         AppLanguage.CHINESE_SIMPLIFIED to mapOf(
             "reset_records" to "重置记录",
@@ -222,9 +234,13 @@ object L10n {
             "retry" to "再试一次",
             "next_stage" to "下一关",
             "to_stage_map" to "关卡地图",
-            "star_cond_3" to "⭐⭐⭐  满分 + 平均≤3秒",
+            "star_cond_3" to "⭐⭐⭐  满分 + 平均≤6秒",
             "star_cond_2" to "⭐⭐  答对8题以上",
-            "star_cond_1" to "⭐  完成全部题目"
+            "star_cond_1" to "⭐  完成全部题目",
+            "points_earned" to "获得 %d P！",
+            "hearts_display" to "❤️ %d / %d",
+            "next_heart_timer" to "+1 %02d:%02d",
+            "total_points_format" to "累计 %d P"
         ),
         AppLanguage.JAPANESE to mapOf(
             "reset_records" to "記録をリセット",
@@ -275,9 +291,13 @@ object L10n {
             "retry" to "もう一度",
             "next_stage" to "次のステージへ",
             "to_stage_map" to "ステージマップ",
-            "star_cond_3" to "⭐⭐⭐  満点 + 平均3秒以内",
+            "star_cond_3" to "⭐⭐⭐  満点 + 平均6秒以内",
             "star_cond_2" to "⭐⭐  8問以上正解",
-            "star_cond_1" to "⭐  全問クリア"
+            "star_cond_1" to "⭐  全問クリア",
+            "points_earned" to "%d P 獲得！",
+            "hearts_display" to "❤️ %d / %d",
+            "next_heart_timer" to "+1 %02d:%02d",
+            "total_points_format" to "累計 %d P"
         )
     )
 
@@ -296,6 +316,7 @@ private fun kmpFormat(template: String, vararg args: Any): String {
         if (template[i] == '%' && i + 1 < template.length) {
             val rest = template.substring(i + 1)
             val floatMatch = Regex("^\\.(\\d+)f").find(rest)
+            val paddedIntMatch = Regex("^0(\\d+)d").find(rest)
             val stringMatch = rest.startsWith("s")
             val intMatch = rest.startsWith("d")
             when {
@@ -304,6 +325,12 @@ private fun kmpFormat(template: String, vararg args: Any): String {
                     val value = (args.getOrNull(argIndex++) as? Number)?.toFloat() ?: 0f
                     result.append(formatFloat(value, decimals))
                     i += 1 + floatMatch.value.length
+                }
+                paddedIntMatch != null -> {
+                    val width = paddedIntMatch.groupValues[1].toInt()
+                    val value = (args.getOrNull(argIndex++) as? Number)?.toInt() ?: 0
+                    result.append(value.toString().padStart(width, '0'))
+                    i += 1 + paddedIntMatch.value.length
                 }
                 stringMatch -> {
                     result.append(args.getOrNull(argIndex++)?.toString() ?: "")
