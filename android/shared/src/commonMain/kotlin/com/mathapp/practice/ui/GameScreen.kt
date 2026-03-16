@@ -1,6 +1,5 @@
 package com.mathapp.practice.ui
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.*
@@ -16,9 +15,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.text.input.ImeAction
@@ -29,47 +27,20 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.yield
-import kotlin.random.Random
-
-enum class GameLevel { EASY, NORMAL }
-
-data class MathProblem(val num1: Int, val num2: Int, val op: String) {
-    val answer: Int = if (op == "+") num1 + num2 else num1 - num2
-    val displayText: String = "$num1 $op $num2"
-}
 
 @Composable
 fun GameScreen(
-    level: GameLevel,
-    bestTime: Float,
+    operation: MathOperation,
+    stageNumber: Int,
     appLanguage: AppLanguage,
-    onComplete: (Float) -> Unit,
+    onComplete: (stars: Int, correctCount: Int, avgSeconds: Float) -> Unit,
     onBack: () -> Unit
 ) {
-    val problems = remember(level) {
-        List(10) {
-            when (level) {
-                GameLevel.EASY -> {
-                    val num1 = Random.nextInt(0, 100)
-                    val num2 = Random.nextInt(0, 11)
-                    val op = if (Random.nextBoolean()) "+" else "-"
-                    if (op == "-" && num2 > num1) {
-                        MathProblem(num1 = num2, num2 = num1, op = op)
-                    } else {
-                        MathProblem(num1 = num1, num2 = num2, op = op)
-                    }
-                }
-                GameLevel.NORMAL -> MathProblem(
-                    num1 = Random.nextInt(0, 100),
-                    num2 = Random.nextInt(0, 100),
-                    op = if (Random.nextBoolean()) "+" else "-"
-                )
-            }
-        }
-    }
+    val problems = remember(operation, stageNumber) { generateProblems(operation, stageNumber) }
 
     var currentIndex by remember { mutableIntStateOf(0) }
     var userAnswer by remember { mutableStateOf("") }
+    // Hidden timer: track elapsed wall-clock time from game start
     var elapsedTime by remember { mutableFloatStateOf(0f) }
     var showResult by remember { mutableStateOf<Boolean?>(null) }
     var showQuitDialog by remember { mutableStateOf(false) }
@@ -78,15 +49,19 @@ fun GameScreen(
     var lastInputMutationAt by remember { mutableLongStateOf(0L) }
     val effectiveStart = remember { mutableLongStateOf(currentTimeMillis()) }
 
+    // Track first-attempt correctness for each problem (for star calculation)
+    val firstAttemptDone = remember { BooleanArray(10) { false } }
+    val correctOnFirstAttempt = remember { BooleanArray(10) { false } }
+
+    // Countdown before game starts
+    var showCountdown by remember { mutableStateOf(true) }
+
     val focusRequester = remember { FocusRequester() }
 
-    LaunchedEffect(Unit) {
-        // Focus is sometimes not immediately granted on iOS; retry a few times.
-        repeat(6) {
-            yield()
-            focusRequester.requestFocus()
-            delay(80)
-        }
+    // Timer loop (runs after countdown, hidden from UI)
+    LaunchedEffect(showCountdown) {
+        if (showCountdown) return@LaunchedEffect
+        repeat(6) { yield(); focusRequester.requestFocus(); delay(80) }
         while (currentIndex < 10) {
             delay(10)
             if (!isPaused) {
@@ -102,65 +77,71 @@ fun GameScreen(
     }
 
     LaunchedEffect(showResult) {
-        if (showResult == null && currentIndex < 10) {
+        if (showResult == null && currentIndex < 10 && !showCountdown) {
             focusRequester.requestFocus()
         }
     }
 
     val onSubmit = {
-        val currentProblem = if (currentIndex < problems.size) problems[currentIndex] else null
+        val prob = if (currentIndex < problems.size) problems[currentIndex] else null
         val ans = userAnswer.toIntOrNull()
-        if (userAnswer.isNotEmpty() && userAnswer != "-" && ans != null && currentProblem != null) {
-            showResult = (ans == currentProblem.answer)
+        if (userAnswer.isNotEmpty() && userAnswer != "-" && ans != null && prob != null) {
+            val isCorrect = ans == prob.answer
+            if (!firstAttemptDone[currentIndex]) {
+                firstAttemptDone[currentIndex] = true
+                if (isCorrect) correctOnFirstAttempt[currentIndex] = true
+            }
+            showResult = isCorrect
             lastInputMutationAt = currentTimeMillis()
         }
     }
 
     val currentProblem = if (currentIndex < problems.size) problems[currentIndex] else null
+    val showMinus = operation == MathOperation.SUBTRACTION
 
     DisposableEffect(Unit) {
         setHardwareKeyboardHandler(
             onDigit = { digit ->
                 val now = currentTimeMillis()
-                if (currentIndex < 10 && showResult == null && !showQuitDialog && now - lastInputMutationAt > 35) {
+                if (currentIndex < 10 && showResult == null && !showQuitDialog && !showCountdown && now - lastInputMutationAt > 35) {
                     appendDigit(digit, userAnswer) { userAnswer = it }
                     lastInputMutationAt = now
                 }
             },
             onBackspace = {
                 val now = currentTimeMillis()
-                if (currentIndex < 10 && showResult == null && !showQuitDialog && now - lastInputMutationAt > 35) {
+                if (currentIndex < 10 && showResult == null && !showQuitDialog && !showCountdown && now - lastInputMutationAt > 35) {
                     if (userAnswer.isNotEmpty()) userAnswer = userAnswer.dropLast(1)
                     lastInputMutationAt = now
                 }
             },
             onSubmit = {
                 val now = currentTimeMillis()
-                if (currentIndex < 10 && showResult == null && !showQuitDialog && now - lastInputMutationAt > 35) {
+                if (currentIndex < 10 && showResult == null && !showQuitDialog && !showCountdown && now - lastInputMutationAt > 35) {
                     onSubmit()
                     lastInputMutationAt = now
                 }
             },
             onMinus = {
                 val now = currentTimeMillis()
-                if (currentIndex < 10 && showResult == null && !showQuitDialog && now - lastInputMutationAt > 35) {
+                if (showMinus && currentIndex < 10 && showResult == null && !showQuitDialog && !showCountdown && now - lastInputMutationAt > 35) {
                     if (userAnswer.isEmpty()) userAnswer = "-"
                     lastInputMutationAt = now
                 }
             }
         )
-        onDispose {
-            setHardwareKeyboardHandler()
-        }
+        onDispose { setHardwareKeyboardHandler() }
     }
 
-    BoxWithConstraints(
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        // Countdown overlay
+        if (showCountdown) {
+            CountdownOverlay(appLanguage = appLanguage, onComplete = { showCountdown = false })
+            return@BoxWithConstraints
+        }
+
+        // Hidden iOS text input bridge
         if (requiresHiddenTextInputBridge()) {
-            // iOS hardware keyboard input is much more reliable through the platform
-            // text input system than through raw key events. Keep this hidden field focused.
             BasicTextField(
                 value = userAnswer,
                 onValueChange = { raw ->
@@ -170,17 +151,9 @@ fun GameScreen(
                     if (submitRequested) onSubmit()
                 },
                 singleLine = true,
-                keyboardOptions = KeyboardOptions(
-                    // Use Ascii so hardware keyboard input is not filtered at the platform layer;
-                    // we sanitize manually.
-                    keyboardType = KeyboardType.Ascii,
-                    imeAction = ImeAction.Done
-                ),
-                keyboardActions = KeyboardActions(
-                    onDone = { onSubmit() }
-                ),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Ascii, imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(onDone = { onSubmit() }),
                 modifier = Modifier
-                    // Needs a real (non-zero) size and non-zero alpha on iOS to reliably become first responder.
                     .align(Alignment.TopStart)
                     .size(12.dp)
                     .alpha(0.01f)
@@ -188,27 +161,18 @@ fun GameScreen(
                     .onFocusChanged { state -> isInputFocused = state.isFocused }
                     .focusable()
                     .onKeyEvent { keyEvent ->
-                        // Fallback path for platforms where Enter doesn't get reflected into text.
                         if (keyEvent.type == KeyEventType.KeyUp) {
                             when (keyEvent.key) {
-                                Key.Enter, Key.NumPadEnter -> {
-                                    onSubmit()
-                                    true
-                                }
-                                else -> {
-                                    when (keyEvent.utf16CodePoint) {
-                                        10, 13 -> { onSubmit(); true }
-                                        else -> false
-                                    }
+                                Key.Enter, Key.NumPadEnter -> { onSubmit(); true }
+                                else -> when (keyEvent.utf16CodePoint) {
+                                    10, 13 -> { onSubmit(); true }
+                                    else -> false
                                 }
                             }
-                        } else {
-                            false
-                        }
+                        } else false
                     }
             )
         } else {
-            // Android uses Activity-level dispatch for hardware keys; keep only a focus target.
             Box(
                 modifier = Modifier
                     .align(Alignment.TopStart)
@@ -221,66 +185,56 @@ fun GameScreen(
         }
 
         val isLandscape = maxWidth > maxHeight
+
         if (currentProblem != null) {
             Column(modifier = Modifier.fillMaxSize()) {
-                // Top Bar
+                // ── Top bar (no timer shown) ──
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(onClick = { showQuitDialog = true; isPaused = true }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                     }
+                    // Stage label
                     Text(
-                        L10n.string("time_format", appLanguage, elapsedTime),
-                        style = MaterialTheme.typography.titleMedium
+                        "${opName(operation, appLanguage)} ${L10n.string("stage_num_format", appLanguage, stageNumber)}",
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                    // Problem progress (e.g. "3 / 10")
                     Text(
-                        "${currentIndex + 1}/10",
+                        L10n.string("problem_progress", appLanguage, currentIndex + 1),
                         style = MaterialTheme.typography.titleMedium
                     )
                 }
 
+                // Progress bar (thin, shows problem index visually)
+                LinearProgressIndicator(
+                    progress = { (currentIndex + 1) / 10f },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(4.dp),
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+
                 if (isLandscape) {
                     Row(modifier = Modifier.weight(1f).fillMaxWidth()) {
-                        // Left: Problem
+                        // Left: problem
                         Box(
                             modifier = Modifier.weight(1f).fillMaxHeight(),
                             contentAlignment = Alignment.Center
                         ) {
-                            Surface(
-                                shape = RoundedCornerShape(24.dp),
-                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+                            ProblemCard(
+                                problem = currentProblem,
+                                userAnswer = userAnswer,
                                 modifier = Modifier.padding(24.dp)
-                            ) {
-                                Column(
-                                    modifier = Modifier.padding(40.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.spacedBy(24.dp)
-                                ) {
-                                    Text(
-                                        currentProblem.displayText,
-                                        style = MaterialTheme.typography.displayLarge,
-                                        fontSize = 64.sp
-                                    )
-                                    Surface(
-                                        shape = RoundedCornerShape(16.dp),
-                                        color = MaterialTheme.colorScheme.surfaceVariant
-                                    ) {
-                                        Text(
-                                            text = userAnswer.ifEmpty { " " },
-                                            modifier = Modifier.padding(horizontal = 48.dp, vertical = 12.dp),
-                                            style = MaterialTheme.typography.displayMedium,
-                                            fontSize = 48.sp
-                                        )
-                                    }
-                                }
-                            }
+                            )
                         }
-                        // Right: Keypad
+                        // Right: keypad
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth(0.5f)
@@ -291,31 +245,15 @@ fun GameScreen(
                             NumberKeypad(
                                 modifier = Modifier.padding(24.dp),
                                 confirmTitle = L10n.string("confirm", appLanguage),
-                                onDigit = { d ->
-                                    appendDigit(d, userAnswer) { userAnswer = it }
-                                    lastInputMutationAt = currentTimeMillis()
-                                    focusRequester.requestFocus()
-                                },
-                                onBackspace = {
-                                    if (userAnswer.isNotEmpty()) userAnswer = userAnswer.dropLast(1)
-                                    lastInputMutationAt = currentTimeMillis()
-                                    focusRequester.requestFocus()
-                                },
-                                onSubmit = {
-                                    onSubmit()
-                                    lastInputMutationAt = currentTimeMillis()
-                                    focusRequester.requestFocus()
-                                },
-                                onMinus = {
-                                    if (userAnswer.isEmpty()) userAnswer = "-"
-                                    lastInputMutationAt = currentTimeMillis()
-                                    focusRequester.requestFocus()
-                                }
+                                showMinus = showMinus,
+                                onDigit = { d -> appendDigit(d, userAnswer) { userAnswer = it }; lastInputMutationAt = currentTimeMillis(); focusRequester.requestFocus() },
+                                onBackspace = { if (userAnswer.isNotEmpty()) userAnswer = userAnswer.dropLast(1); lastInputMutationAt = currentTimeMillis(); focusRequester.requestFocus() },
+                                onSubmit = { onSubmit(); lastInputMutationAt = currentTimeMillis(); focusRequester.requestFocus() },
+                                onMinus = { if (showMinus && userAnswer.isEmpty()) userAnswer = "-"; lastInputMutationAt = currentTimeMillis(); focusRequester.requestFocus() }
                             )
                         }
                     }
                 } else {
-                    // Portrait Mode
                     Column(
                         modifier = Modifier.weight(1f).fillMaxWidth().padding(24.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -339,58 +277,47 @@ fun GameScreen(
                         }
                     }
                     NumberKeypad(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
+                        modifier = Modifier.fillMaxWidth().padding(16.dp),
                         confirmTitle = L10n.string("confirm", appLanguage),
-                        onDigit = { d ->
-                            appendDigit(d, userAnswer) { userAnswer = it }
-                            lastInputMutationAt = currentTimeMillis()
-                            focusRequester.requestFocus()
-                        },
-                        onBackspace = {
-                            if (userAnswer.isNotEmpty()) userAnswer = userAnswer.dropLast(1)
-                            lastInputMutationAt = currentTimeMillis()
-                            focusRequester.requestFocus()
-                        },
-                        onSubmit = {
-                            onSubmit()
-                            lastInputMutationAt = currentTimeMillis()
-                            focusRequester.requestFocus()
-                        },
-                        onMinus = {
-                            if (userAnswer.isEmpty()) userAnswer = "-"
-                            lastInputMutationAt = currentTimeMillis()
-                            focusRequester.requestFocus()
-                        }
+                        showMinus = showMinus,
+                        onDigit = { d -> appendDigit(d, userAnswer) { userAnswer = it }; lastInputMutationAt = currentTimeMillis(); focusRequester.requestFocus() },
+                        onBackspace = { if (userAnswer.isNotEmpty()) userAnswer = userAnswer.dropLast(1); lastInputMutationAt = currentTimeMillis(); focusRequester.requestFocus() },
+                        onSubmit = { onSubmit(); lastInputMutationAt = currentTimeMillis(); focusRequester.requestFocus() },
+                        onMinus = { if (showMinus && userAnswer.isEmpty()) userAnswer = "-"; lastInputMutationAt = currentTimeMillis(); focusRequester.requestFocus() }
                     )
                 }
             }
         } else {
-            // Result Screen
-            ResultView(elapsedTime, bestTime, appLanguage, onComplete)
+            // All 10 problems done — calculate and report
+            val correctCount = correctOnFirstAttempt.count { it }
+            val avgSeconds = elapsedTime / 10f
+            val stars = calcStars(correctCount, elapsedTime)
+            LaunchedEffect(Unit) {
+                onComplete(stars, correctCount, avgSeconds)
+            }
         }
 
-        // Feedback & Dialogs
+        // Feedback overlay (correct / wrong)
         showResult?.let { correct ->
             LaunchedEffect(correct) {
-                delay(500)
+                delay(if (correct) 400L else 700L)
                 showResult = null
-                if (correct) {
-                    currentIndex++
-                    userAnswer = ""
-                } else {
-                    userAnswer = ""
-                }
+                userAnswer = ""
+                if (correct) currentIndex++
             }
             Box(
-                modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.3f)),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        if (correct) Color(0x4400CC44)
+                        else Color(0x44FF4444)
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = if (correct) "✓" else "✗",
                     fontSize = 120.sp,
-                    color = if (correct) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                    color = if (correct) Color(0xFF00AA00) else Color(0xFFCC0000)
                 )
             }
         }
@@ -405,114 +332,41 @@ fun GameScreen(
     }
 }
 
+// ─── Problem card (landscape mode) ───────────────────────────────────────────
+
 @Composable
-fun ResultView(elapsedTime: Float, bestTime: Float, appLanguage: AppLanguage, onComplete: (Float) -> Unit) {
-    val isNewRecord = bestTime == 0f || elapsedTime <= bestTime
-    Box(modifier = Modifier.fillMaxSize()) {
-        if (isNewRecord) {
-            ConfettiView(modifier = Modifier.fillMaxSize())
-        }
+private fun ProblemCard(problem: MathProblem, userAnswer: String, modifier: Modifier = Modifier) {
+    Surface(
+        shape = RoundedCornerShape(24.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+        modifier = modifier
+    ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(24.dp),
+            modifier = Modifier.padding(40.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            Spacer(modifier = Modifier.weight(1f))
             Text(
-                L10n.string("complete", appLanguage),
-                style = MaterialTheme.typography.headlineLarge,
-                fontSize = 38.sp
+                problem.displayText,
+                style = MaterialTheme.typography.displayLarge,
+                fontSize = 64.sp
             )
-            Spacer(modifier = Modifier.height(28.dp))
-            if (isNewRecord) {
-                Text(
-                    L10n.string("new_record_title", appLanguage),
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Text(
-                    L10n.string("new_record_message", appLanguage),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 24.dp)
-                )
-            } else {
-                Text(
-                    L10n.string("well_done", appLanguage),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            Text(
-                L10n.string("time_format", appLanguage, elapsedTime),
-                style = MaterialTheme.typography.headlineMedium,
-                fontSize = 32.sp,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(top = 8.dp)
-            )
-            if (!isNewRecord && bestTime > 0) {
-                Text(
-                    L10n.string("best_record_format", appLanguage, L10n.string("time_format", appLanguage, bestTime)),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
-            }
-            Button(
-                onClick = { onComplete(elapsedTime) },
-                modifier = Modifier
-                    .padding(top = 32.dp)
-                    .padding(horizontal = 40.dp, vertical = 14.dp)
+            Surface(
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant
             ) {
-                Text(L10n.string("to_main", appLanguage), style = MaterialTheme.typography.titleMedium)
+                Text(
+                    text = userAnswer.ifEmpty { " " },
+                    modifier = Modifier.padding(horizontal = 48.dp, vertical = 12.dp),
+                    style = MaterialTheme.typography.displayMedium,
+                    fontSize = 48.sp
+                )
             }
-            Spacer(modifier = Modifier.weight(1f))
         }
     }
 }
 
-@Composable
-fun ConfettiView(modifier: Modifier = Modifier) {
-    val startTime = remember { currentTimeMillis() }
-    var elapsed by remember { mutableFloatStateOf(0f) }
-    LaunchedEffect(Unit) {
-        while (true) {
-            delay(16)
-            elapsed = (currentTimeMillis() - startTime) / 1000f
-        }
-    }
-    val particleCount = 80
-    val particles = remember {
-        List(particleCount) { i ->
-            ConfettiParticle(
-                startX = Random.nextFloat(),
-                startY = 1f + Random.nextFloat() * 0.2f,
-                size = (8 + Random.nextInt(11)).toFloat(),
-                color = listOf(
-                    Color(0xFF, 0x69, 0xB4), Color(0xFF, 0x8C, 0x00), Color(0xFF, 0xFF, 0x00), Color(0x00, 0xFF, 0x00),
-                    Color(0x98, 0xFB, 0x98), Color(0x00, 0xFF, 0xFF), Color(0x00, 0x00, 0xFF), Color(0x8A, 0x2B, 0xE2), Color(0xFF, 0x00, 0x00)
-                ).random(),
-                startDelay = i * 0.05f,
-                speed = 100f + Random.nextFloat() * 120f,
-                drift = -120f + Random.nextFloat() * 240f
-            )
-        }
-    }
-    Canvas(modifier = modifier) {
-        val w = size.width
-        val h = size.height
-        particles.forEach { p ->
-            val t = maxOf(0f, elapsed - p.startDelay)
-            val y = (p.startY * h) - (p.speed * t)
-            val x = (p.startX * w) + (p.drift * t * 0.25f) + (kotlin.math.sin(t.toDouble() * 2.5).toFloat() * 25f)
-            if (y > -50) {
-                drawCircle(color = p.color.copy(alpha = 0.85f), radius = p.size, center = Offset(x, y))
-            }
-        }
-    }
-}
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 private fun appendDigit(digit: String, current: String, update: (String) -> Unit) {
     val maxLen = if (current.startsWith("-")) 5 else 4
@@ -520,13 +374,12 @@ private fun appendDigit(digit: String, current: String, update: (String) -> Unit
 }
 
 private fun sanitizeAnswerInput(raw: String): String {
-    // Keep digits and an optional leading '-' only.
     val stripped = raw.filterNot { it == '\n' || it == '\r' }
     val cleaned = buildString {
         for (c in stripped) {
             when {
-                c.isDigit() -> append(c)
-                c == '-' && isEmpty() -> append(c)
+                c.isDigit()              -> append(c)
+                c == '-' && isEmpty()    -> append(c)
             }
         }
     }
@@ -534,25 +387,29 @@ private fun sanitizeAnswerInput(raw: String): String {
     return cleaned.take(maxLen)
 }
 
-private data class ConfettiParticle(
-    val startX: Float,
-    val startY: Float,
-    val size: Float,
-    val color: Color,
-    val startDelay: Float,
-    val speed: Float,
-    val drift: Float
-)
+// ─── Quit dialog ──────────────────────────────────────────────────────────────
 
 @Composable
 fun QuitConfirmDialog(appLanguage: AppLanguage, onDismiss: () -> Unit, onConfirm: () -> Unit) {
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         Surface(shape = RoundedCornerShape(28.dp), modifier = Modifier.fillMaxWidth(0.85f).padding(24.dp)) {
             Column(modifier = Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(L10n.string("quit_confirm", appLanguage), style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(bottom = 24.dp))
+                Text(
+                    L10n.string("quit_confirm", appLanguage),
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.padding(bottom = 24.dp)
+                )
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    OutlinedButton(onClick = onDismiss, modifier = Modifier.weight(1f)) { Text(L10n.string("no", appLanguage)) }
-                    Button(onClick = onConfirm, colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error), modifier = Modifier.weight(1f)) { Text(L10n.string("yes", appLanguage)) }
+                    OutlinedButton(onClick = onDismiss, modifier = Modifier.weight(1f)) {
+                        Text(L10n.string("no", appLanguage))
+                    }
+                    Button(
+                        onClick = onConfirm,
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(L10n.string("yes", appLanguage))
+                    }
                 }
             }
         }

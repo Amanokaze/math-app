@@ -41,7 +41,31 @@ object L10n {
             "level_normal" to "보통",
             "help_title" to "레벨 설명",
             "help_easy_desc" to "• 왼쪽 숫자: 0~99\n• 오른쪽 숫자: 0~10\n• 뺄셈 시 결과가 음수가 되지 않음",
-            "help_normal_desc" to "• 왼쪽 숫자: 0~99\n• 오른쪽 숫자: 0~99\n• 덧셈과 뺄셈 (음수 가능)"
+            "help_normal_desc" to "• 왼쪽 숫자: 0~99\n• 오른쪽 숫자: 0~99\n• 덧셈과 뺄셈 (음수 가능)",
+            // ── New strings for stage UX ──
+            "resume" to "이어서 하기",
+            "new_start" to "새로 시작하기",
+            "select_operation" to "연산 선택",
+            "overall_progress" to "전체 진척도",
+            "locked" to "잠김",
+            "stage_map_title" to "스테이지 선택",
+            "reset_progress" to "진척도 초기화",
+            "reset_progress_confirm_title" to "진척도를 초기화하시겠습니까?",
+            "reset_progress_confirm_message" to "모든 스테이지 기록이 삭제됩니다.",
+            "stage_num_format" to "%d단계",
+            "resume_hint" to "%s %d단계",
+            "problem_progress" to "%d / 10",
+            "result_title_3star" to "완벽해요!",
+            "result_title_2star" to "잘했어요!",
+            "result_title_1star" to "완주했어요!",
+            "correct_format" to "맞힌 문제: %d / 10",
+            "avg_time_format" to "평균 %.1f초",
+            "retry" to "다시 하기",
+            "next_stage" to "다음 단계로",
+            "to_stage_map" to "스테이지 맵으로",
+            "star_cond_3" to "⭐⭐⭐  만점 + 평균 3초 이하",
+            "star_cond_2" to "⭐⭐  8문제 이상 정답",
+            "star_cond_1" to "⭐  완주 성공"
         ),
         AppLanguage.ENGLISH to mapOf(
             "reset_records" to "Reset Records",
@@ -70,7 +94,31 @@ object L10n {
             "level_normal" to "Normal",
             "help_title" to "Level Guide",
             "help_easy_desc" to "• Left number: 0~99\n• Right number: 0~10\n• Subtraction: result is never negative",
-            "help_normal_desc" to "• Left number: 0~99\n• Right number: 0~99\n• Addition and subtraction (negative allowed)"
+            "help_normal_desc" to "• Left number: 0~99\n• Right number: 0~99\n• Addition and subtraction (negative allowed)",
+            // ── New strings for stage UX ──
+            "resume" to "Continue",
+            "new_start" to "Choose Operation",
+            "select_operation" to "Select Operation",
+            "overall_progress" to "Overall Progress",
+            "locked" to "Locked",
+            "stage_map_title" to "Select Stage",
+            "reset_progress" to "Reset Progress",
+            "reset_progress_confirm_title" to "Reset all progress?",
+            "reset_progress_confirm_message" to "All stage records will be deleted.",
+            "stage_num_format" to "Stage %d",
+            "resume_hint" to "%s Stage %d",
+            "problem_progress" to "%d / 10",
+            "result_title_3star" to "Perfect!",
+            "result_title_2star" to "Great job!",
+            "result_title_1star" to "You did it!",
+            "correct_format" to "Correct: %d / 10",
+            "avg_time_format" to "Avg %.1fs",
+            "retry" to "Try Again",
+            "next_stage" to "Next Stage",
+            "to_stage_map" to "Stage Map",
+            "star_cond_3" to "⭐⭐⭐  Perfect score + avg ≤ 3s",
+            "star_cond_2" to "⭐⭐  8 or more correct",
+            "star_cond_1" to "⭐  Finish all 10"
         ),
         AppLanguage.CHINESE_TRADITIONAL to mapOf(
             "reset_records" to "重置紀錄",
@@ -99,7 +147,31 @@ object L10n {
             "level_normal" to "普通",
             "help_title" to "難度說明",
             "help_easy_desc" to "• 左側數字：0~99\n• 右側數字：0~10\n• 減法時結果不為負數",
-            "help_normal_desc" to "• 左側數字：0~99\n• 右側數字：0~99\n• 加法和減法（可為負數）"
+            "help_normal_desc" to "• 左側數字：0~99\n• 右側數字：0~99\n• 加法和減法（可為負數）",
+            // ── New strings for stage UX ──
+            "resume" to "繼續",
+            "new_start" to "選擇運算",
+            "select_operation" to "選擇運算",
+            "overall_progress" to "整體進度",
+            "locked" to "已鎖定",
+            "stage_map_title" to "選擇關卡",
+            "reset_progress" to "重置進度",
+            "reset_progress_confirm_title" to "確定要重置進度嗎？",
+            "reset_progress_confirm_message" to "所有關卡記錄將被刪除。",
+            "stage_num_format" to "第%d關",
+            "resume_hint" to "%s 第%d關",
+            "problem_progress" to "%d / 10",
+            "result_title_3star" to "太棒了！",
+            "result_title_2star" to "做得好！",
+            "result_title_1star" to "完成了！",
+            "correct_format" to "答對：%d / 10",
+            "avg_time_format" to "平均 %.1f秒",
+            "retry" to "再試一次",
+            "next_stage" to "下一關",
+            "to_stage_map" to "關卡地圖",
+            "star_cond_3" to "⭐⭐⭐  滿分 + 平均≤3秒",
+            "star_cond_2" to "⭐⭐  答對8題以上",
+            "star_cond_1" to "⭐  完成全部題目"
         ),
         AppLanguage.CHINESE_SIMPLIFIED to mapOf(
             "reset_records" to "重置记录",
@@ -128,7 +200,31 @@ object L10n {
             "level_normal" to "普通",
             "help_title" to "难度说明",
             "help_easy_desc" to "• 左侧数字：0~99\n• 右侧数字：0~10\n• 减法时结果不为负数",
-            "help_normal_desc" to "• 左侧数字：0~99\n• 右侧数字：0~99\n• 加法和减法（可为负数）"
+            "help_normal_desc" to "• 左侧数字：0~99\n• 右侧数字：0~99\n• 加法和减法（可为负数）",
+            // ── New strings for stage UX ──
+            "resume" to "继续",
+            "new_start" to "选择运算",
+            "select_operation" to "选择运算",
+            "overall_progress" to "整体进度",
+            "locked" to "已锁定",
+            "stage_map_title" to "选择关卡",
+            "reset_progress" to "重置进度",
+            "reset_progress_confirm_title" to "确定要重置进度吗？",
+            "reset_progress_confirm_message" to "所有关卡记录将被删除。",
+            "stage_num_format" to "第%d关",
+            "resume_hint" to "%s 第%d关",
+            "problem_progress" to "%d / 10",
+            "result_title_3star" to "太棒了！",
+            "result_title_2star" to "做得好！",
+            "result_title_1star" to "完成了！",
+            "correct_format" to "答对：%d / 10",
+            "avg_time_format" to "平均 %.1f秒",
+            "retry" to "再试一次",
+            "next_stage" to "下一关",
+            "to_stage_map" to "关卡地图",
+            "star_cond_3" to "⭐⭐⭐  满分 + 平均≤3秒",
+            "star_cond_2" to "⭐⭐  答对8题以上",
+            "star_cond_1" to "⭐  完成全部题目"
         ),
         AppLanguage.JAPANESE to mapOf(
             "reset_records" to "記録をリセット",
@@ -157,7 +253,31 @@ object L10n {
             "level_normal" to "ふつう",
             "help_title" to "レベル説明",
             "help_easy_desc" to "• 左の数字：0~99\n• 右の数字：0~10\n• 引き算は結果がマイナスにならない",
-            "help_normal_desc" to "• 左の数字：0~99\n• 右の数字：0~99\n• 足し算と引き算（マイナス可）"
+            "help_normal_desc" to "• 左の数字：0~99\n• 右の数字：0~99\n• 足し算と引き算（マイナス可）",
+            // ── New strings for stage UX ──
+            "resume" to "続ける",
+            "new_start" to "演算を選ぶ",
+            "select_operation" to "演算を選択",
+            "overall_progress" to "全体の進捗",
+            "locked" to "ロック中",
+            "stage_map_title" to "ステージ選択",
+            "reset_progress" to "進捗をリセット",
+            "reset_progress_confirm_title" to "進捗をリセットしますか？",
+            "reset_progress_confirm_message" to "すべてのステージ記録が削除されます。",
+            "stage_num_format" to "第%dステージ",
+            "resume_hint" to "%s 第%dステージ",
+            "problem_progress" to "%d / 10",
+            "result_title_3star" to "完璧！",
+            "result_title_2star" to "よくできました！",
+            "result_title_1star" to "クリア！",
+            "correct_format" to "正解: %d / 10",
+            "avg_time_format" to "平均 %.1f秒",
+            "retry" to "もう一度",
+            "next_stage" to "次のステージへ",
+            "to_stage_map" to "ステージマップ",
+            "star_cond_3" to "⭐⭐⭐  満点 + 平均3秒以内",
+            "star_cond_2" to "⭐⭐  8問以上正解",
+            "star_cond_1" to "⭐  全問クリア"
         )
     )
 
@@ -167,7 +287,7 @@ object L10n {
     }
 }
 
-/** Multiplatform string formatter — supports %.Nf and %s specifiers only. */
+/** Multiplatform string formatter — supports %.Nf, %s, and %d specifiers. */
 private fun kmpFormat(template: String, vararg args: Any): String {
     val result = StringBuilder()
     var argIndex = 0
@@ -177,6 +297,7 @@ private fun kmpFormat(template: String, vararg args: Any): String {
             val rest = template.substring(i + 1)
             val floatMatch = Regex("^\\.(\\d+)f").find(rest)
             val stringMatch = rest.startsWith("s")
+            val intMatch = rest.startsWith("d")
             when {
                 floatMatch != null -> {
                     val decimals = floatMatch.groupValues[1].toInt()
@@ -186,6 +307,10 @@ private fun kmpFormat(template: String, vararg args: Any): String {
                 }
                 stringMatch -> {
                     result.append(args.getOrNull(argIndex++)?.toString() ?: "")
+                    i += 2
+                }
+                intMatch -> {
+                    result.append((args.getOrNull(argIndex++) as? Number)?.toInt() ?: 0)
                     i += 2
                 }
                 else -> {
