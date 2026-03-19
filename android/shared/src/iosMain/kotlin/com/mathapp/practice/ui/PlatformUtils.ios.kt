@@ -3,6 +3,7 @@ package com.mathapp.practice.ui
 import platform.Foundation.NSUserDefaults
 import platform.Foundation.NSNotification
 import platform.Foundation.NSNotificationCenter
+import platform.posix.time
 import kotlin.time.TimeSource
 
 private val originMark = TimeSource.Monotonic.markNow()
@@ -31,6 +32,9 @@ actual fun getDeviceLanguageCode(): String {
 }
 
 actual fun currentTimeMillis(): Long = originMark.elapsedNow().inWholeMilliseconds
+
+@OptIn(kotlinx.cinterop.ExperimentalForeignApi::class)
+actual fun getCurrentEpochSeconds(): Long = time(null).toLong()
 
 actual fun setHardwareKeyboardHandler(
     onDigit: ((String) -> Unit)?,

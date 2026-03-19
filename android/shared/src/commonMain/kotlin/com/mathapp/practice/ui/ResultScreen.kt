@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -24,6 +25,8 @@ fun ResultScreen(
     stars: Int,
     correctCount: Int,
     avgSeconds: Float,
+    points: Int,
+    hearts: Int,
     appLanguage: AppLanguage,
     hasNextStage: Boolean,
     onRetry: () -> Unit,
@@ -48,6 +51,8 @@ fun ResultScreen(
                 .padding(horizontal = 24.dp, vertical = 32.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            HeartsHeader(hearts = hearts, appLanguage = appLanguage)
+
             Spacer(modifier = Modifier.weight(1f))
 
             // Stage label
@@ -74,6 +79,11 @@ fun ResultScreen(
 
             Spacer(modifier = Modifier.height(28.dp))
 
+            // Animated points display
+            PointsDisplay(points = points, appLanguage = appLanguage)
+
+            Spacer(modifier = Modifier.height(20.dp))
+
             // Stats card
             Surface(
                 shape = RoundedCornerShape(16.dp),
@@ -97,26 +107,6 @@ fun ResultScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Star condition hints
-            Column(
-                horizontalAlignment = Alignment.Start,
-                modifier = Modifier.fillMaxWidth(0.8f)
-            ) {
-                listOf("star_cond_3", "star_cond_2", "star_cond_1").forEachIndexed { idx, key ->
-                    val condStars = 3 - idx
-                    Text(
-                        L10n.string(key, appLanguage),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = if (stars >= condStars)
-                            MaterialTheme.colorScheme.primary
-                        else
-                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                    )
-                }
-            }
-
             Spacer(modifier = Modifier.weight(1f))
 
             // Action buttons
@@ -136,6 +126,7 @@ fun ResultScreen(
                 // "다시 하기" — always visible
                 OutlinedButton(
                     onClick = onRetry,
+                    enabled = hearts > 0,
                     modifier = Modifier.fillMaxWidth().height(52.dp),
                     shape = RoundedCornerShape(14.dp)
                 ) {
@@ -146,6 +137,7 @@ fun ResultScreen(
                 if (hasNextStage) {
                     Button(
                         onClick = onNextStage,
+                        enabled = hearts > 0,
                         modifier = Modifier.fillMaxWidth().height(52.dp),
                         shape = RoundedCornerShape(14.dp)
                     ) {
@@ -210,6 +202,38 @@ private fun StarDisplay(stars: Int) {
                     else MaterialTheme.colorScheme.onSurface.copy(alpha = emptyAlpha)
         )
     }
+}
+
+// ─── Animated points display ──────────────────────────────────────────────────
+
+@Composable
+private fun PointsDisplay(points: Int, appLanguage: AppLanguage) {
+    var displayedPoints by remember { mutableIntStateOf(0) }
+    val scale = remember { Animatable(0.5f) }
+
+    LaunchedEffect(points) {
+        kotlinx.coroutines.delay(600)
+        scale.animateTo(1.15f, animationSpec = tween(300))
+        scale.animateTo(1f, animationSpec = tween(150))
+        // Count-up animation
+        val steps = 20
+        val stepDelay = 500L / steps
+        for (i in 1..steps) {
+            displayedPoints = (points * i / steps)
+            kotlinx.coroutines.delay(stepDelay)
+        }
+        displayedPoints = points
+    }
+
+    Text(
+        L10n.string("points_earned", appLanguage, displayedPoints),
+        style = MaterialTheme.typography.headlineMedium,
+        fontSize = 44.sp,
+        fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.scale(scale.value),
+        textAlign = TextAlign.Center
+    )
 }
 
 // ─── Confetti (3-star celebration) ───────────────────────────────────────────

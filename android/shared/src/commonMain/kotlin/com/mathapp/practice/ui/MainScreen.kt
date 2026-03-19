@@ -15,6 +15,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.delay
 
 // ─── Home Screen ──────────────────────────────────────────────────────────────
 
@@ -28,11 +29,14 @@ fun HomeScreen(
     onResumeClick: (Pair<MathOperation, Int>) -> Unit,
     onNewStartClick: () -> Unit,
     onResetProgress: () -> Unit,
-    progressVersion: Int
+    progressVersion: Int,
+    heartsVersion: Int
 ) {
     val lastStage = remember(progressVersion) { getLastPlayedStage() }
     var showResetConfirm by remember { mutableStateOf(false) }
     var showLanguageSheet by remember { mutableStateOf(false) }
+    val hearts = rememberLiveHearts(heartsVersion)
+    val totalPoints = remember(progressVersion) { getTotalPoints() }
 
     LaunchedEffect(Unit) {
         if (appLanguageRaw.isEmpty()) onAppLanguageChange(getDeviceLanguageCode())
@@ -46,6 +50,11 @@ fun HomeScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
+            // ── Hearts + Points header ──
+            HeartsHeader(hearts = hearts, appLanguage = appLanguage, totalPoints = totalPoints)
+
+            Spacer(modifier = Modifier.height(4.dp))
+
             // ── Top bar ──
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -138,6 +147,7 @@ fun HomeScreen(
                 val (op, num) = lastStage
                 Button(
                     onClick = { onResumeClick(lastStage) },
+                    enabled = hearts > 0,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(64.dp)
@@ -212,6 +222,75 @@ fun HomeScreen(
                         Text(L10n.string("cancel", appLanguage))
                     }
                 }
+            )
+        }
+    }
+}
+
+@Composable
+fun rememberLiveHearts(refreshKey: Int): Int {
+    var hearts by remember(refreshKey) {
+        mutableIntStateOf(run {
+            rechargeHearts()
+            getHearts()
+        })
+    }
+
+    LaunchedEffect(refreshKey) {
+        while (true) {
+            rechargeHearts()
+            hearts = getHearts()
+            delay(1000)
+        }
+    }
+
+    return hearts
+}
+
+// ─── Hearts Header ────────────────────────────────────────────────────────────
+
+@Composable
+fun HeartsHeader(hearts: Int, appLanguage: AppLanguage, totalPoints: Int? = null) {
+    var secondsLeft by remember { mutableLongStateOf(secondsUntilNextHeart()) }
+
+    LaunchedEffect(hearts) {
+        while (true) {
+            secondsLeft = secondsUntilNextHeart()
+            delay(1000)
+        }
+    }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = if (totalPoints != null) Arrangement.SpaceBetween else Arrangement.Center
+    ) {
+        // Hearts + recharge timer
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                L10n.string("hearts_display", appLanguage, hearts, MAX_HEARTS),
+                style = MaterialTheme.typography.titleMedium
+            )
+            if (hearts < MAX_HEARTS) {
+                Spacer(modifier = Modifier.width(6.dp))
+                val m = secondsLeft / 60
+                val s = secondsLeft % 60
+                Text(
+                    L10n.string("next_heart_timer", appLanguage, m, s),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
+        // Total points (HomeScreen only)
+        if (totalPoints != null && totalPoints > 0) {
+            Text(
+                L10n.string("total_points_format", appLanguage, totalPoints),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary
             )
         }
     }
