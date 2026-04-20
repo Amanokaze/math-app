@@ -1,0 +1,317 @@
+<!DOCTYPE html><html lang="ko"><head><base href="https://forge.moonchild.ai/site/20b8fdf69441a5bf1a02e5ad65700e00c2de9c19ef48cdd63c4408e6feafb1a3/">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>수학 모험 시작 - 온보딩</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&amp;family=Baloo+2:wght@700&amp;family=Nunito:wght@700&amp;display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            width: 430px;
+            height: 932px;
+            margin: 0 auto;
+            overflow: hidden;
+            background: linear-gradient(135deg, #FFE5F4 0%, #E5F4FF 50%, #FFFACD 100%);
+            position: relative;
+        }
+
+        .container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            position: relative;
+        }
+
+        /* Decorative elements */
+        .decoration {
+            position: absolute;
+            z-index: 1;
+        }
+
+        .rainbow {
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            height: 150px;
+        }
+
+        .cloud {
+            width: 80px;
+            height: 50px;
+        }
+
+        .cloud-1 {
+            top: 120px;
+            left: 30px;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .cloud-2 {
+            top: 180px;
+            right: 40px;
+            animation: float 7s ease-in-out infinite 1s;
+        }
+
+        .cloud-3 {
+            bottom: 280px;
+            left: 20px;
+            animation: float 5s ease-in-out infinite 2s;
+        }
+
+        .star {
+            width: 40px;
+            height: 40px;
+            animation: twinkle 2s ease-in-out infinite;
+        }
+
+        .star-1 {
+            top: 140px;
+            right: 60px;
+        }
+
+        .star-2 {
+            top: 260px;
+            left: 50px;
+            animation-delay: 0.5s;
+        }
+
+        .star-3 {
+            bottom: 320px;
+            right: 50px;
+            animation-delay: 1s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+
+        @keyframes twinkle {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1) rotate(0deg);
+            }
+            50% {
+                opacity: 0.6;
+                transform: scale(1.2) rotate(180deg);
+            }
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        /* Main content */
+        .content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 2;
+            position: relative;
+        }
+
+        .title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 40px;
+            color: #FF69B4;
+            text-align: center;
+            margin-bottom: 48px;
+            text-shadow: 0 2px 8px rgba(255, 105, 180, 0.3);
+        }
+
+        .character-container {
+            margin-bottom: 56px;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        .character {
+            width: 220px;
+            height: 220px;
+        }
+
+        .subtitle {
+            font-family: 'Baloo 2', cursive;
+            font-size: 24px;
+            color: #6B4FB8;
+            text-align: center;
+            margin-bottom: 56px;
+            line-height: 1.4;
+        }
+
+        /* Primary Button - 90px height */
+        .primary-button {
+            width: 100%;
+            max-width: 340px;
+            height: 90px;
+            background: linear-gradient(135deg, #FF69B4 0%, #FF1493 100%);
+            border: none;
+            border-radius: 45px;
+            font-family: 'Baloo 2', cursive;
+            font-size: 24px;
+            font-weight: 700;
+            color: #FFFFFF;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(255, 105, 180, 0.4);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .primary-button:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(255, 105, 180, 0.5);
+        }
+
+        .primary-button:active {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 105, 180, 0.4);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 430px) {
+            body {
+                width: 100%;
+            }
+            
+            .title {
+                font-size: 36px;
+            }
+            
+            .character {
+                width: 200px;
+                height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Decorative elements -->
+        <svg class="decoration rainbow" viewBox="0 0 300 150">
+            <defs>
+                <linearGradient id="rainbow1" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" style="stop-color:#FF69B4;stop-opacity:0.8"></stop>
+                    <stop offset="50%" style="stop-color:#FFB800;stop-opacity:0.8"></stop>
+                    <stop offset="100%" style="stop-color:#4FC3F7;stop-opacity:0.8"></stop>
+                </linearGradient>
+            </defs>
+            <path d="M 30 140 Q 150 20 270 140" stroke="url(#rainbow1)" stroke-width="20" fill="none" stroke-linecap="round"></path>
+            <path d="M 40 140 Q 150 30 260 140" stroke="#7FE89A" stroke-width="18" fill="none" stroke-linecap="round" opacity="0.7"></path>
+            <path d="M 50 140 Q 150 40 250 140" stroke="#FFD93D" stroke-width="16" fill="none" stroke-linecap="round" opacity="0.6"></path>
+        </svg>
+
+        <!-- Clouds -->
+        <svg class="decoration cloud cloud-1" viewBox="0 0 80 50">
+            <ellipse cx="25" cy="30" rx="20" ry="18" fill="#FFFFFF" opacity="0.9"></ellipse>
+            <ellipse cx="40" cy="25" rx="22" ry="20" fill="#FFFFFF" opacity="0.9"></ellipse>
+            <ellipse cx="55" cy="30" rx="18" ry="16" fill="#FFFFFF" opacity="0.9"></ellipse>
+        </svg>
+
+        <svg class="decoration cloud cloud-2" viewBox="0 0 80 50">
+            <ellipse cx="25" cy="30" rx="20" ry="18" fill="#FFFFFF" opacity="0.85"></ellipse>
+            <ellipse cx="40" cy="25" rx="22" ry="20" fill="#FFFFFF" opacity="0.85"></ellipse>
+            <ellipse cx="55" cy="30" rx="18" ry="16" fill="#FFFFFF" opacity="0.85"></ellipse>
+        </svg>
+
+        <svg class="decoration cloud cloud-3" viewBox="0 0 80 50">
+            <ellipse cx="25" cy="30" rx="20" ry="18" fill="#FFFFFF" opacity="0.8"></ellipse>
+            <ellipse cx="40" cy="25" rx="22" ry="20" fill="#FFFFFF" opacity="0.8"></ellipse>
+            <ellipse cx="55" cy="30" rx="18" ry="16" fill="#FFFFFF" opacity="0.8"></ellipse>
+        </svg>
+
+        <!-- Stars -->
+        <svg class="decoration star star-1" viewBox="0 0 40 40">
+            <path d="M 20 5 L 24 16 L 35 16 L 26 23 L 30 34 L 20 27 L 10 34 L 14 23 L 5 16 L 16 16 Z" fill="#FFD93D"></path>
+        </svg>
+
+        <svg class="decoration star star-2" viewBox="0 0 40 40">
+            <path d="M 20 5 L 24 16 L 35 16 L 26 23 L 30 34 L 20 27 L 10 34 L 14 23 L 5 16 L 16 16 Z" fill="#FFD93D"></path>
+        </svg>
+
+        <svg class="decoration star star-3" viewBox="0 0 40 40">
+            <path d="M 20 5 L 24 16 L 35 16 L 26 23 L 30 34 L 20 27 L 10 34 L 14 23 L 5 16 L 16 16 Z" fill="#FFD93D"></path>
+        </svg>
+
+        <!-- Main content -->
+        <div class="content">
+            <h1 class="title">수학 모험을<br>시작해요!</h1>
+
+            <div class="character-container">
+                <svg class="character" viewBox="0 0 220 220">
+                    <!-- Large Bear Character (220px) -->
+                    <!-- Body -->
+                    <ellipse cx="110" cy="140" rx="70" ry="65" fill="#8B6F47"></ellipse>
+                    
+                    <!-- Head -->
+                    <circle cx="110" cy="80" r="55" fill="#A0826D"></circle>
+                    
+                    <!-- Ears -->
+                    <circle cx="75" cy="50" r="22" fill="#8B6F47"></circle>
+                    <circle cx="75" cy="50" r="14" fill="#D4A574"></circle>
+                    <circle cx="145" cy="50" r="22" fill="#8B6F47"></circle>
+                    <circle cx="145" cy="50" r="14" fill="#D4A574"></circle>
+                    
+                    <!-- Snout -->
+                    <ellipse cx="110" cy="95" rx="32" ry="28" fill="#D4A574"></ellipse>
+                    
+                    <!-- Nose -->
+                    <ellipse cx="110" cy="92" rx="12" ry="10" fill="#4A3F35"></ellipse>
+                    
+                    <!-- Eyes -->
+                    <circle cx="92" cy="72" r="8" fill="#4A3F35"></circle>
+                    <circle cx="94" cy="70" r="3" fill="#FFFFFF"></circle>
+                    <circle cx="128" cy="72" r="8" fill="#4A3F35"></circle>
+                    <circle cx="130" cy="70" r="3" fill="#FFFFFF"></circle>
+                    
+                    <!-- Smile -->
+                    <path d="M 95 100 Q 110 108 125 100" stroke="#4A3F35" stroke-width="3" fill="none" stroke-linecap="round"></path>
+                    
+                    <!-- Arms -->
+                    <ellipse cx="60" cy="140" rx="18" ry="45" fill="#8B6F47" transform="rotate(-20 60 140)"></ellipse>
+                    <ellipse cx="160" cy="140" rx="18" ry="45" fill="#8B6F47" transform="rotate(20 160 140)"></ellipse>
+                    
+                    <!-- Legs -->
+                    <ellipse cx="85" cy="190" rx="20" ry="30" fill="#8B6F47"></ellipse>
+                    <ellipse cx="135" cy="190" rx="20" ry="30" fill="#8B6F47"></ellipse>
+                    
+                    <!-- Paws -->
+                    <ellipse cx="85" cy="205" rx="18" ry="12" fill="#D4A574"></ellipse>
+                    <ellipse cx="135" cy="205" rx="18" ry="12" fill="#D4A574"></ellipse>
+                    
+                    <!-- Belly -->
+                    <ellipse cx="110" cy="145" rx="35" ry="40" fill="#D4A574" opacity="0.6"></ellipse>
+                </svg>
+            </div>
+
+            <p class="subtitle">재미있는 문제를 풀면서<br>별을 모아보아요!</p>
+
+            <button class="primary-button">
+                🚀 모험 시작하기
+            </button>
+        </div>
+    </div>
+
+</body></html>

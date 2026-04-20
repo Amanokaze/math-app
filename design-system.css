@@ -1,0 +1,441 @@
+/* ============================================
+   어린이 수학 학습 앱 - Design System CSS
+   ============================================ */
+
+/* ============================================
+   CSS Variables
+   ============================================ */
+
+   :root {
+    /* Colors - Primary & Secondary */
+    --color-primary-pink: #FF69B4;
+    --color-secondary-purple: #6B4FB8;
+    --color-success-green: #7FE89A;
+    --color-warning-gold: #FFB800;
+    
+    /* Colors - Pastel Gradient Background */
+    --gradient-pastel: linear-gradient(135deg, #FFE5F0 0%, #E5F0FF 50%, #F0FFE5 100%);
+    
+    /* Colors - UI Elements */
+    --color-ui-white: #FFFFFF;
+    --color-ui-light-gray: #F5F5F5;
+    --color-ui-gray: #E0E0E0;
+    --color-ui-dark-gray: #757575;
+    --color-ui-black: #2C2C2C;
+    
+    /* Typography */
+    --font-title: 'Fredoka One', cursive;
+    --font-ui: 'Baloo 2', cursive;
+    --font-body: 'Nunito', sans-serif;
+    
+    /* Font Sizes */
+    --font-size-display: 48px;
+    --font-size-title: 32px;
+    --font-size-heading: 24px;
+    --font-size-subheading: 20px;
+    --font-size-body-large: 18px;
+    --font-size-body: 16px;
+    --font-size-small: 14px;
+    --font-size-caption: 12px;
+    
+    /* Spacing */
+    --spacing-xs: 8px;
+    --spacing-sm: 16px;
+    --spacing-md: 24px;
+    --spacing-lg: 32px;
+    --spacing-xl: 48px;
+    
+    /* Shadows */
+    --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --shadow-medium: 0 6px 16px rgba(0, 0, 0, 0.1);
+    --shadow-emphasized: 0 8px 24px rgba(0, 0, 0, 0.15);
+    
+    /* Border Radius */
+    --radius-sm: 12px;
+    --radius-md: 16px;
+    --radius-lg: 20px;
+    --radius-xl: 24px;
+    --radius-full: 50%;
+    
+    /* Animation */
+    --transition-fast: 0.2s ease;
+    --transition-normal: 0.3s ease;
+    --transition-slow: 0.5s ease;
+  }
+  
+  /* ============================================
+     Typography Utility Classes
+     ============================================ */
+  
+  .text-display {
+    font-family: var(--font-title);
+    font-size: var(--font-size-display);
+    font-weight: 400;
+    line-height: 1.2;
+  }
+  
+  .text-title {
+    font-family: var(--font-title);
+    font-size: var(--font-size-title);
+    font-weight: 400;
+    line-height: 1.3;
+  }
+  
+  .text-heading {
+    font-family: var(--font-ui);
+    font-size: var(--font-size-heading);
+    font-weight: 700;
+    line-height: 1.4;
+  }
+  
+  .text-subheading {
+    font-family: var(--font-ui);
+    font-size: var(--font-size-subheading);
+    font-weight: 600;
+    line-height: 1.4;
+  }
+  
+  .text-body-large {
+    font-family: var(--font-body);
+    font-size: var(--font-size-body-large);
+    font-weight: 400;
+    line-height: 1.5;
+  }
+  
+  .text-body {
+    font-family: var(--font-body);
+    font-size: var(--font-size-body);
+    font-weight: 400;
+    line-height: 1.5;
+  }
+  
+  .text-small {
+    font-family: var(--font-body);
+    font-size: var(--font-size-small);
+    font-weight: 400;
+    line-height: 1.5;
+  }
+  
+  .text-caption {
+    font-family: var(--font-body);
+    font-size: var(--font-size-caption);
+    font-weight: 400;
+    line-height: 1.4;
+  }
+  
+  /* ============================================
+     Button Components
+     ============================================ */
+  
+  .btn {
+    /* Base button styles */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-sm) var(--spacing-md);
+    min-height: 56px;
+    border: none;
+    border-radius: var(--radius-lg);
+    font-family: var(--font-ui);
+    font-size: var(--font-size-body-large);
+    font-weight: 700;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    box-shadow: var(--shadow-medium);
+  }
+  
+  .btn-primary {
+    background: linear-gradient(135deg, var(--color-primary-pink) 0%, #FF85C8 100%);
+    color: var(--color-ui-white);
+  }
+  
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-emphasized);
+  }
+  
+  .btn-primary:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow-light);
+  }
+  
+  .btn-secondary {
+    background: linear-gradient(135deg, var(--color-secondary-purple) 0%, #8B6FD8 100%);
+    color: var(--color-ui-white);
+  }
+  
+  .btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-emphasized);
+  }
+  
+  .btn-secondary:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow-light);
+  }
+  
+  .btn-success {
+    background: linear-gradient(135deg, var(--color-success-green) 0%, #9FFFB0 100%);
+    color: var(--color-ui-black);
+  }
+  
+  .btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-emphasized);
+  }
+  
+  .btn-icon {
+    min-width: 80px;
+    min-height: 80px;
+    width: 80px;
+    height: 80px;
+    padding: 0;
+    border-radius: var(--radius-full);
+    background: var(--color-ui-white);
+    color: var(--color-ui-black);
+    font-size: 32px;
+  }
+  
+  .btn-icon:hover {
+    transform: scale(1.05);
+    box-shadow: var(--shadow-emphasized);
+  }
+  
+  /* ============================================
+     Card Components
+     ============================================ */
+  
+  .card {
+    /* Base card styles */
+    background: var(--color-ui-white);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-md);
+    transition: all var(--transition-normal);
+  }
+  
+  .card-light {
+    box-shadow: var(--shadow-light);
+  }
+  
+  .card-light:hover {
+    box-shadow: var(--shadow-medium);
+  }
+  
+  .card-medium {
+    box-shadow: var(--shadow-medium);
+  }
+  
+  .card-medium:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-emphasized);
+  }
+  
+  .card-emphasized {
+    box-shadow: var(--shadow-emphasized);
+  }
+  
+  .card-emphasized:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* ============================================
+     Input Components
+     ============================================ */
+  
+  .input-field {
+    width: 100%;
+    padding: var(--spacing-sm);
+    border: 3px solid var(--color-ui-gray);
+    border-radius: var(--radius-md);
+    font-family: var(--font-body);
+    font-size: var(--font-size-body-large);
+    color: var(--color-ui-black);
+    background: var(--color-ui-white);
+    transition: all var(--transition-normal);
+    box-shadow: var(--shadow-light);
+  }
+  
+  .input-field:focus {
+    outline: none;
+    border-color: var(--color-secondary-purple);
+    box-shadow: var(--shadow-medium);
+  }
+  
+  .input-field::placeholder {
+    color: var(--color-ui-dark-gray);
+    opacity: 0.6;
+  }
+  
+  /* ============================================
+     Toggle Switch Component
+     ============================================ */
+  
+  .toggle-switch {
+    position: relative;
+    width: 64px;
+    height: 32px;
+    background: var(--color-ui-gray);
+    border-radius: 16px;
+    cursor: pointer;
+    transition: background var(--transition-normal);
+  }
+  
+  .toggle-switch.active {
+    background: var(--color-success-green);
+  }
+  
+  .toggle-switch::after {
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: 24px;
+    height: 24px;
+    background: var(--color-ui-white);
+    border-radius: 50%;
+    transition: transform var(--transition-normal);
+    box-shadow: var(--shadow-light);
+  }
+  
+  .toggle-switch.active::after {
+    transform: translateX(32px);
+  }
+  
+  /* ============================================
+     Badge Components
+     ============================================ */
+  
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 12px;
+    border-radius: var(--radius-lg);
+    font-family: var(--font-ui);
+    font-size: var(--font-size-small);
+    font-weight: 700;
+    box-shadow: var(--shadow-light);
+  }
+  
+  .badge-gold {
+    background: linear-gradient(135deg, var(--color-warning-gold) 0%, #FFD700 100%);
+    color: var(--color-ui-black);
+  }
+  
+  .badge-pink {
+    background: linear-gradient(135deg, var(--color-primary-pink) 0%, #FF85C8 100%);
+    color: var(--color-ui-white);
+  }
+  
+  .badge-purple {
+    background: linear-gradient(135deg, var(--color-secondary-purple) 0%, #8B6FD8 100%);
+    color: var(--color-ui-white);
+  }
+  
+  .badge-green {
+    background: linear-gradient(135deg, var(--color-success-green) 0%, #9FFFB0 100%);
+    color: var(--color-ui-black);
+  }
+  
+  /* ============================================
+     Progress Bar Component
+     ============================================ */
+  
+  .progress-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--color-ui-light-gray);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--color-success-green) 0%, #9FFFB0 100%);
+    border-radius: 4px;
+    transition: width var(--transition-slow);
+  }
+  
+  /* ============================================
+     Container & Layout Utilities
+     ============================================ */
+  
+  .container {
+    width: 100%;
+    max-width: 430px;
+    margin: 0 auto;
+    padding: 0 var(--spacing-sm);
+  }
+  
+  .bg-gradient-pastel {
+    background: var(--gradient-pastel);
+  }
+  
+  /* Spacing Utilities */
+  .mt-xs { margin-top: var(--spacing-xs); }
+  .mt-sm { margin-top: var(--spacing-sm); }
+  .mt-md { margin-top: var(--spacing-md); }
+  .mt-lg { margin-top: var(--spacing-lg); }
+  
+  .mb-xs { margin-bottom: var(--spacing-xs); }
+  .mb-sm { margin-bottom: var(--spacing-sm); }
+  .mb-md { margin-bottom: var(--spacing-md); }
+  .mb-lg { margin-bottom: var(--spacing-lg); }
+  
+  .p-xs { padding: var(--spacing-xs); }
+  .p-sm { padding: var(--spacing-sm); }
+  .p-md { padding: var(--spacing-md); }
+  .p-lg { padding: var(--spacing-lg); }
+  
+  /* ============================================
+     Animation Utilities
+     ============================================ */
+  
+  @keyframes bounce-in {
+    0% {
+      transform: scale(0.8);
+      opacity: 0;
+    }
+    50% {
+      transform: scale(1.05);
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes pulse {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.05);
+    }
+  }
+  
+  @keyframes sparkle {
+    0%, 100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.5;
+      transform: scale(1.2);
+    }
+  }
+  
+  .animate-bounce-in {
+    animation: bounce-in 0.5s ease;
+  }
+  
+  .animate-pulse {
+    animation: pulse 2s ease infinite;
+  }
+  
+  .animate-sparkle {
+    animation: sparkle 1.5s ease infinite;
+  }
+  

@@ -1,0 +1,308 @@
+<!DOCTYPE html><html lang="ko"><head><base href="https://forge.moonchild.ai/site/4119ffc3842d848b5602ed4a7f44b2e0733bc36d7d7055ad34567ebbc5f652d7/">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>캐릭터 선택 - 수학 학습 앱</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&amp;family=Baloo+2:wght@700&amp;family=Nunito:wght@700&amp;display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #FFE5F1 0%, #E5D4FF 50%, #D4F1FF 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 24px 16px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 430px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-family: 'Fredoka One', cursive;
+            font-size: 36px;
+            color: #4A3F35;
+            margin-bottom: 12px;
+        }
+
+        .subtitle {
+            font-family: 'Baloo 2', cursive;
+            font-size: 20px;
+            color: #6B4FB8;
+        }
+
+        .characters-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            width: 100%;
+            margin-bottom: 32px;
+        }
+
+        .character-card {
+            background: white;
+            border-radius: 24px;
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border: 3px solid transparent;
+        }
+
+        .character-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .character-card.selected {
+            border-color: #FF69B4;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .character-illustration {
+            width: 120px;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .character-name {
+            font-family: 'Baloo 2', cursive;
+            font-size: 20px;
+            color: #4A3F35;
+            font-weight: 700;
+        }
+
+        .primary-button {
+            width: 100%;
+            height: 80px;
+            background: linear-gradient(135deg, #FF69B4 0%, #FF1493 100%);
+            border: none;
+            border-radius: 40px;
+            font-family: 'Baloo 2', cursive;
+            font-size: 24px;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(255, 105, 180, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .primary-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px rgba(255, 105, 180, 0.4);
+        }
+
+        .primary-button:active {
+            transform: translateY(0);
+        }
+
+        /* Character SVG Illustrations */
+        .bear {
+            fill: #8B6F47;
+        }
+
+        .rabbit {
+            fill: #FFE5E5;
+        }
+
+        .fox {
+            fill: #FF8C42;
+        }
+
+        .owl {
+            fill: #9B8B7E;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>친구를 선택해요!</h1>
+            <p class="subtitle">함께 공부할 친구를 골라주세요</p>
+        </div>
+
+        <div class="characters-grid">
+            <!-- Bear Character -->
+            <div class="character-card" onclick="selectCharacter(this)">
+                <div class="character-illustration">
+                    <svg width="120" height="120" viewBox="0 0 120 120">
+                        <defs>
+                            <linearGradient id="bearGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" style="stop-color:#A0826D;stop-opacity:1"></stop>
+                                <stop offset="100%" style="stop-color:#8B6F47;stop-opacity:1"></stop>
+                            </linearGradient>
+                        </defs>
+                        <!-- Ears -->
+                        <circle cx="35" cy="30" r="15" fill="url(#bearGradient)"></circle>
+                        <circle cx="85" cy="30" r="15" fill="url(#bearGradient)"></circle>
+                        <!-- Head -->
+                        <circle cx="60" cy="60" r="35" fill="url(#bearGradient)"></circle>
+                        <!-- Inner ears -->
+                        <circle cx="35" cy="30" r="8" fill="#D4A574"></circle>
+                        <circle cx="85" cy="30" r="8" fill="#D4A574"></circle>
+                        <!-- Eyes -->
+                        <circle cx="48" cy="55" r="5" fill="#4A3F35"></circle>
+                        <circle cx="72" cy="55" r="5" fill="#4A3F35"></circle>
+                        <circle cx="50" cy="53" r="2" fill="white"></circle>
+                        <circle cx="74" cy="53" r="2" fill="white"></circle>
+                        <!-- Nose -->
+                        <ellipse cx="60" cy="68" rx="8" ry="6" fill="#4A3F35"></ellipse>
+                        <!-- Smile -->
+                        <path d="M 52 72 Q 60 78 68 72" stroke="#4A3F35" stroke-width="2.5" fill="none" stroke-linecap="round"></path>
+                    </svg>
+                </div>
+                <div class="character-name">곰돌이</div>
+            </div>
+
+            <!-- Rabbit Character -->
+            <div class="character-card" onclick="selectCharacter(this)">
+                <div class="character-illustration">
+                    <svg width="120" height="120" viewBox="0 0 120 120">
+                        <defs>
+                            <linearGradient id="rabbitGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" style="stop-color:#FFF0F0;stop-opacity:1"></stop>
+                                <stop offset="100%" style="stop-color:#FFE5E5;stop-opacity:1"></stop>
+                            </linearGradient>
+                        </defs>
+                        <!-- Ears -->
+                        <ellipse cx="42" cy="30" rx="8" ry="28" fill="url(#rabbitGradient)"></ellipse>
+                        <ellipse cx="78" cy="30" rx="8" ry="28" fill="url(#rabbitGradient)"></ellipse>
+                        <ellipse cx="42" cy="30" rx="4" ry="20" fill="#FFB6C1"></ellipse>
+                        <ellipse cx="78" cy="30" rx="4" ry="20" fill="#FFB6C1"></ellipse>
+                        <!-- Head -->
+                        <circle cx="60" cy="65" r="32" fill="url(#rabbitGradient)"></circle>
+                        <!-- Eyes -->
+                        <circle cx="48" cy="60" r="5" fill="#4A3F35"></circle>
+                        <circle cx="72" cy="60" r="5" fill="#4A3F35"></circle>
+                        <circle cx="50" cy="58" r="2" fill="white"></circle>
+                        <circle cx="74" cy="58" r="2" fill="white"></circle>
+                        <!-- Nose -->
+                        <circle cx="60" cy="72" r="4" fill="#FFB6C1"></circle>
+                        <!-- Smile -->
+                        <path d="M 54 76 Q 60 80 66 76" stroke="#4A3F35" stroke-width="2" fill="none" stroke-linecap="round"></path>
+                        <!-- Cheeks -->
+                        <circle cx="40" cy="68" r="6" fill="#FFB6C1" opacity="0.4"></circle>
+                        <circle cx="80" cy="68" r="6" fill="#FFB6C1" opacity="0.4"></circle>
+                    </svg>
+                </div>
+                <div class="character-name">토끼</div>
+            </div>
+
+            <!-- Fox Character -->
+            <div class="character-card selected" onclick="selectCharacter(this)">
+                <div class="character-illustration">
+                    <svg width="120" height="120" viewBox="0 0 120 120">
+                        <defs>
+                            <linearGradient id="foxGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" style="stop-color:#FFB366;stop-opacity:1"></stop>
+                                <stop offset="100%" style="stop-color:#FF8C42;stop-opacity:1"></stop>
+                            </linearGradient>
+                        </defs>
+                        <!-- Ears -->
+                        <path d="M 35 35 L 25 10 L 45 30 Z" fill="url(#foxGradient)"></path>
+                        <path d="M 85 35 L 95 10 L 75 30 Z" fill="url(#foxGradient)"></path>
+                        <path d="M 35 30 L 30 15 L 42 28 Z" fill="white"></path>
+                        <path d="M 85 30 L 90 15 L 78 28 Z" fill="white"></path>
+                        <!-- Head -->
+                        <circle cx="60" cy="60" r="34" fill="url(#foxGradient)"></circle>
+                        <!-- White muzzle area -->
+                        <ellipse cx="60" cy="72" rx="22" ry="18" fill="white"></ellipse>
+                        <!-- Eyes -->
+                        <circle cx="48" cy="56" r="6" fill="#4A3F35"></circle>
+                        <circle cx="72" cy="56" r="6" fill="#4A3F35"></circle>
+                        <circle cx="50" cy="54" r="2.5" fill="white"></circle>
+                        <circle cx="74" cy="54" r="2.5" fill="white"></circle>
+                        <!-- Nose -->
+                        <circle cx="60" cy="70" r="4" fill="#4A3F35"></circle>
+                        <!-- Smile -->
+                        <path d="M 52 74 Q 60 78 68 74" stroke="#4A3F35" stroke-width="2" fill="none" stroke-linecap="round"></path>
+                        <!-- Cheeks -->
+                        <circle cx="42" cy="66" r="5" fill="#FF6B35" opacity="0.3"></circle>
+                        <circle cx="78" cy="66" r="5" fill="#FF6B35" opacity="0.3"></circle>
+                    </svg>
+                </div>
+                <div class="character-name">여우</div>
+            </div>
+
+            <!-- Owl Character -->
+            <div class="character-card" onclick="selectCharacter(this)">
+                <div class="character-illustration">
+                    <svg width="120" height="120" viewBox="0 0 120 120">
+                        <defs>
+                            <linearGradient id="owlGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" style="stop-color:#B8A99A;stop-opacity:1"></stop>
+                                <stop offset="100%" style="stop-color:#9B8B7E;stop-opacity:1"></stop>
+                            </linearGradient>
+                        </defs>
+                        <!-- Ear tufts -->
+                        <path d="M 30 25 L 25 10 L 35 20 Z" fill="url(#owlGradient)"></path>
+                        <path d="M 90 25 L 95 10 L 85 20 Z" fill="url(#owlGradient)"></path>
+                        <!-- Body -->
+                        <ellipse cx="60" cy="65" rx="36" ry="40" fill="url(#owlGradient)"></ellipse>
+                        <!-- Wing patterns -->
+                        <path d="M 30 60 Q 25 70 30 80" stroke="#7A6F64" stroke-width="2" fill="none"></path>
+                        <path d="M 90 60 Q 95 70 90 80" stroke="#7A6F64" stroke-width="2" fill="none"></path>
+                        <!-- Eye circles -->
+                        <circle cx="48" cy="55" r="14" fill="white"></circle>
+                        <circle cx="72" cy="55" r="14" fill="white"></circle>
+                        <!-- Eyes -->
+                        <circle cx="48" cy="55" r="8" fill="#4A3F35"></circle>
+                        <circle cx="72" cy="55" r="8" fill="#4A3F35"></circle>
+                        <circle cx="50" cy="53" r="3" fill="white"></circle>
+                        <circle cx="74" cy="53" r="3" fill="white"></circle>
+                        <!-- Beak -->
+                        <path d="M 60 65 L 54 72 L 66 72 Z" fill="#FFB800"></path>
+                        <!-- Belly -->
+                        <ellipse cx="60" cy="80" rx="18" ry="20" fill="#D4C4B0" opacity="0.5"></ellipse>
+                    </svg>
+                </div>
+                <div class="character-name">부엉이</div>
+            </div>
+        </div>
+
+        <button class="primary-button" onclick="startLearning()">친구와 함께하기 🎉</button>
+    </div>
+
+    <script>
+        function selectCharacter(card) {
+            // Remove selected class from all cards
+            document.querySelectorAll('.character-card').forEach(c => {
+                c.classList.remove('selected');
+            });
+            // Add selected class to clicked card
+            card.classList.add('selected');
+        }
+
+        function startLearning() {
+            const selectedCard = document.querySelector('.character-card.selected');
+            const characterName = selectedCard.querySelector('.character-name').textContent;
+            console.log(`Starting learning with ${characterName}`);
+            // Navigate to next screen
+        }
+    </script>
+
+</body></html>

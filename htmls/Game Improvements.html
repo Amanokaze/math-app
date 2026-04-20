@@ -1,0 +1,422 @@
+<!DOCTYPE html><html lang="ko"><head><base href="https://forge.moonchild.ai/site/6914978503f452aec5e2236ddfb35746cbcab4d82450c70aa6a38f1d33d241dc/">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>모험 지도 - 수학 학습 앱</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&amp;family=Baloo+2:wght@700&amp;family=Nunito:wght@700&amp;display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #FFE5F1 0%, #E8D5FF 50%, #D5F0FF 100%);
+            width: 430px;
+            height: 932px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Header */
+        .header {
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            z-index: 10;
+        }
+
+        .back-button {
+            width: 56px;
+            height: 56px;
+            background: white;
+            border: none;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+        }
+
+        .back-button:active {
+            transform: translateY(0);
+        }
+
+        .header-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 32px;
+            color: #6B4FB8;
+            text-align: center;
+            flex: 1;
+        }
+
+        /* Map Container */
+        .map-container {
+            position: absolute;
+            top: 100px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow-y: auto;
+            padding: 0 40px 80px 40px;
+        }
+
+        /* Winding Path SVG */
+        .path-svg {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 350px;
+            height: 700px;
+            z-index: 1;
+        }
+
+        /* Stage Nodes Container */
+        .stages-container {
+            position: relative;
+            height: 700px;
+            z-index: 2;
+        }
+
+        /* Individual Stage Node */
+        .stage-node {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+
+        /* Stage Positions */
+        .stage-1 { top: 580px; left: 50%; transform: translateX(-50%); }
+        .stage-2 { top: 440px; left: 25%; }
+        .stage-3 { top: 300px; left: 65%; }
+        .stage-4 { top: 160px; left: 20%; }
+        .stage-5 { top: 20px; left: 55%; }
+
+        /* Stage States */
+        .stage-completed {
+            background: linear-gradient(135deg, #7FE89A 0%, #4FC3F7 100%);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+        }
+
+        .stage-current {
+            background: linear-gradient(135deg, #FFB800 0%, #FF69B4 100%);
+            box-shadow: 0 8px 24px rgba(255,184,0,0.4);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .stage-locked {
+            background: #E5E7EB;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: translateX(-50%) scale(1);
+                box-shadow: 0 8px 24px rgba(255,184,0,0.4);
+            }
+            50% {
+                transform: translateX(-50%) scale(1.05);
+                box-shadow: 0 10px 28px rgba(255,184,0,0.5);
+            }
+        }
+
+        .stage-2.stage-current {
+            animation: pulse-stage-2 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-stage-2 {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 8px 24px rgba(255,184,0,0.4);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 10px 28px rgba(255,184,0,0.5);
+            }
+        }
+
+        /* Stage Number */
+        .stage-number {
+            font-family: 'Fredoka One', cursive;
+            font-size: 24px;
+            color: white;
+            margin-bottom: 4px;
+        }
+
+        .stage-locked .stage-number {
+            color: #9CA3AF;
+        }
+
+        /* Stars Container */
+        .stars-container {
+            display: flex;
+            gap: 2px;
+        }
+
+        .star-icon {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Fox Character */
+        .fox-character {
+            position: absolute;
+            width: 70px;
+            height: 70px;
+            top: 420px;
+            left: 55%;
+            z-index: 3;
+            animation: bounce 1.5s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-12px);
+            }
+        }
+
+        /* Decorations */
+        .decoration {
+            position: absolute;
+            z-index: 0;
+        }
+
+        .tree-1 { top: 550px; left: 10px; width: 60px; height: 70px; }
+        .tree-2 { top: 380px; right: 20px; width: 50px; height: 60px; }
+        .tree-3 { top: 220px; left: 15px; width: 55px; height: 65px; }
+        .grass-1 { top: 640px; right: 30px; width: 40px; height: 30px; }
+        .grass-2 { top: 500px; left: 80px; width: 35px; height: 25px; }
+        .grass-3 { top: 340px; right: 70px; width: 38px; height: 28px; }
+        .grass-4 { top: 180px; right: 25px; width: 42px; height: 32px; }
+        .cloud-1 { top: 80px; left: 20px; width: 60px; height: 35px; opacity: 0.6; }
+        .cloud-2 { top: 120px; right: 30px; width: 55px; height: 32px; opacity: 0.5; }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <button class="back-button" aria-label="뒤로 가기">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M15 18L9 12L15 6" stroke="#4A3F35" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+        </button>
+        <div class="header-title">모험 지도</div>
+        <div style="width: 56px;"></div>
+    </div>
+
+    <!-- Decorations -->
+    <svg class="decoration tree-1" viewBox="0 0 60 70">
+        <ellipse cx="30" cy="25" rx="25" ry="20" fill="#7FE89A"></ellipse>
+        <ellipse cx="30" cy="35" rx="20" ry="18" fill="#4FC3F7" opacity="0.6"></ellipse>
+        <rect x="25" y="45" width="10" height="25" rx="2" fill="#FF8C42"></rect>
+    </svg>
+
+    <svg class="decoration tree-2" viewBox="0 0 50 60">
+        <ellipse cx="25" cy="20" rx="20" ry="16" fill="#7FE89A"></ellipse>
+        <ellipse cx="25" cy="28" rx="16" ry="14" fill="#4FC3F7" opacity="0.6"></ellipse>
+        <rect x="21" y="38" width="8" height="22" rx="2" fill="#FF8C42"></rect>
+    </svg>
+
+    <svg class="decoration tree-3" viewBox="0 0 55 65">
+        <ellipse cx="27" cy="22" rx="22" ry="18" fill="#7FE89A"></ellipse>
+        <ellipse cx="27" cy="32" rx="18" ry="16" fill="#4FC3F7" opacity="0.6"></ellipse>
+        <rect x="23" y="42" width="8" height="23" rx="2" fill="#FF8C42"></rect>
+    </svg>
+
+    <svg class="decoration grass-1" viewBox="0 0 40 30">
+        <path d="M5 30 Q5 15 10 5 T15 30" fill="#7FE89A"></path>
+        <path d="M15 30 Q15 18 20 8 T25 30" fill="#7FE89A"></path>
+        <path d="M25 30 Q25 20 30 10 T35 30" fill="#7FE89A"></path>
+    </svg>
+
+    <svg class="decoration grass-2" viewBox="0 0 35 25">
+        <path d="M5 25 Q5 12 8 5 T12 25" fill="#7FE89A"></path>
+        <path d="M12 25 Q12 15 16 7 T20 25" fill="#7FE89A"></path>
+        <path d="M20 25 Q20 17 24 9 T28 25" fill="#7FE89A"></path>
+    </svg>
+
+    <svg class="decoration grass-3" viewBox="0 0 38 28">
+        <path d="M5 28 Q5 14 9 6 T13 28" fill="#7FE89A"></path>
+        <path d="M13 28 Q13 16 18 8 T23 28" fill="#7FE89A"></path>
+        <path d="M23 28 Q23 18 28 10 T33 28" fill="#7FE89A"></path>
+    </svg>
+
+    <svg class="decoration grass-4" viewBox="0 0 42 32">
+        <path d="M6 32 Q6 16 10 7 T14 32" fill="#7FE89A"></path>
+        <path d="M14 32 Q14 18 20 9 T26 32" fill="#7FE89A"></path>
+        <path d="M26 32 Q26 20 32 11 T38 32" fill="#7FE89A"></path>
+    </svg>
+
+    <svg class="decoration cloud-1" viewBox="0 0 60 35">
+        <ellipse cx="20" cy="20" rx="15" ry="12" fill="white"></ellipse>
+        <ellipse cx="35" cy="18" rx="18" ry="14" fill="white"></ellipse>
+        <ellipse cx="45" cy="22" rx="12" ry="10" fill="white"></ellipse>
+    </svg>
+
+    <svg class="decoration cloud-2" viewBox="0 0 55 32">
+        <ellipse cx="18" cy="18" rx="13" ry="11" fill="white"></ellipse>
+        <ellipse cx="32" cy="16" rx="16" ry="13" fill="white"></ellipse>
+        <ellipse cx="42" cy="20" rx="11" ry="9" fill="white"></ellipse>
+    </svg>
+
+    <!-- Map Container -->
+    <div class="map-container">
+        <!-- Winding Path -->
+        <svg class="path-svg" viewBox="0 0 350 700">
+            <defs>
+                <linearGradient id="pathGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:#FFB800;stop-opacity:0.3"></stop>
+                    <stop offset="100%" style="stop-color:#FF69B4;stop-opacity:0.3"></stop>
+                </linearGradient>
+            </defs>
+            <path d="M 175 620 Q 100 560 80 480 T 240 340 T 70 200 T 200 60" stroke="url(#pathGradient)" stroke-width="30" fill="none" stroke-linecap="round" stroke-dasharray="10 5" opacity="0.8"></path>
+        </svg>
+
+        <!-- Stages Container -->
+        <div class="stages-container">
+            <!-- Stage 1 - Completed -->
+            <div class="stage-node stage-1 stage-completed">
+                <div class="stage-number">1</div>
+                <div class="stars-container">
+                    <svg class="star-icon" viewBox="0 0 24 24">
+                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="#FFD93D"></path>
+                    </svg>
+                    <svg class="star-icon" viewBox="0 0 24 24">
+                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="#FFD93D"></path>
+                    </svg>
+                    <svg class="star-icon" viewBox="0 0 24 24">
+                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="#FFD93D"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Stage 2 - Current -->
+            <div class="stage-node stage-2 stage-current">
+                <div class="stage-number">2</div>
+                <div class="stars-container">
+                    <svg class="star-icon" viewBox="0 0 24 24">
+                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="#FFD93D"></path>
+                    </svg>
+                    <svg class="star-icon" viewBox="0 0 24 24">
+                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="#9CA3AF" stroke-width="2" fill="none"></path>
+                    </svg>
+                    <svg class="star-icon" viewBox="0 0 24 24">
+                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="#9CA3AF" stroke-width="2" fill="none"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Stage 3 - Locked -->
+            <div class="stage-node stage-3 stage-locked">
+                <div class="stage-number">3</div>
+                <div class="stars-container">
+                    <svg class="star-icon" viewBox="0 0 24 24">
+                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="#9CA3AF" stroke-width="2" fill="none"></path>
+                    </svg>
+                    <svg class="star-icon" viewBox="0 0 24 24">
+                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="#9CA3AF" stroke-width="2" fill="none"></path>
+                    </svg>
+                    <svg class="star-icon" viewBox="0 0 24 24">
+                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="#9CA3AF" stroke-width="2" fill="none"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Stage 4 - Locked -->
+            <div class="stage-node stage-4 stage-locked">
+                <div class="stage-number">4</div>
+                <div class="stars-container">
+                    <svg class="star-icon" viewBox="0 0 24 24">
+                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="#9CA3AF" stroke-width="2" fill="none"></path>
+                    </svg>
+                    <svg class="star-icon" viewBox="0 0 24 24">
+                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="#9CA3AF" stroke-width="2" fill="none"></path>
+                    </svg>
+                    <svg class="star-icon" viewBox="0 0 24 24">
+                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="#9CA3AF" stroke-width="2" fill="none"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Stage 5 - Locked -->
+            <div class="stage-node stage-5 stage-locked">
+                <div class="stage-number">5</div>
+                <div class="stars-container">
+                    <svg class="star-icon" viewBox="0 0 24 24">
+                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="#9CA3AF" stroke-width="2" fill="none"></path>
+                    </svg>
+                    <svg class="star-icon" viewBox="0 0 24 24">
+                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="#9CA3AF" stroke-width="2" fill="none"></path>
+                    </svg>
+                    <svg class="star-icon" viewBox="0 0 24 24">
+                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="#9CA3AF" stroke-width="2" fill="none"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fox Character -->
+        <svg class="fox-character" viewBox="0 0 100 100">
+            <!-- Fox Body -->
+            <ellipse cx="50" cy="65" rx="28" ry="25" fill="#FF8C42"></ellipse>
+            
+            <!-- Fox Head -->
+            <circle cx="50" cy="35" r="22" fill="#FF8C42"></circle>
+            
+            <!-- Fox Ears -->
+            <path d="M 35 25 L 30 10 L 40 22 Z" fill="#FF8C42"></path>
+            <path d="M 65 25 L 70 10 L 60 22 Z" fill="#FF8C42"></path>
+            <path d="M 35 22 L 32 14 L 38 20 Z" fill="#FFF5E1"></path>
+            <path d="M 65 22 L 68 14 L 62 20 Z" fill="#FFF5E1"></path>
+            
+            <!-- Fox Eyes -->
+            <circle cx="43" cy="33" r="3.5" fill="#4A3F35"></circle>
+            <circle cx="57" cy="33" r="3.5" fill="#4A3F35"></circle>
+            <circle cx="44" cy="32" r="1.5" fill="white"></circle>
+            <circle cx="58" cy="32" r="1.5" fill="white"></circle>
+            
+            <!-- Fox Nose -->
+            <circle cx="50" cy="40" r="2.5" fill="#4A3F35"></circle>
+            
+            <!-- Fox Smile -->
+            <path d="M 50 40 Q 45 44 42 42" stroke="#4A3F35" stroke-width="1.5" fill="none" stroke-linecap="round"></path>
+            <path d="M 50 40 Q 55 44 58 42" stroke="#4A3F35" stroke-width="1.5" fill="none" stroke-linecap="round"></path>
+            
+            <!-- Fox Tail -->
+            <ellipse cx="72" cy="70" rx="15" ry="20" fill="#FF8C42" transform="rotate(-30 72 70)"></ellipse>
+            <ellipse cx="75" cy="75" rx="8" ry="12" fill="#FFF5E1" transform="rotate(-30 75 75)"></ellipse>
+            
+            <!-- Fox Legs -->
+            <rect x="38" y="85" width="8" height="12" rx="4" fill="#FF8C42"></rect>
+            <rect x="54" y="85" width="8" height="12" rx="4" fill="#FF8C42"></rect>
+            
+            <!-- Backpack -->
+            <rect x="56" y="50" width="16" height="20" rx="3" fill="#4FC3F7"></rect>
+            <rect x="59" y="53" width="10" height="3" rx="1.5" fill="#FFB800"></rect>
+            <circle cx="64" cy="60" r="2" fill="#FFB800"></circle>
+        </svg>
+    </div>
+
+</body></html>

@@ -1,0 +1,369 @@
+<!DOCTYPE html><html lang="ko"><head><base href="https://forge.moonchild.ai/site/401981694ba76d7ca03b6a7f15f415e6fcd3180406ad5e03ec52019c5423d503/">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>문제 풀이 - 객관식</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&amp;family=Baloo+2:wght@700&amp;family=Nunito:wght@700&amp;display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #FFE5F0 0%, #E5F0FF 50%, #F0FFE5 100%);
+            min-height: 932px;
+            width: 430px;
+            margin: 0 auto;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Timer Bar */
+        .timer-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 12px;
+            background: linear-gradient(90deg, #7FE89A 0%, #4FC3F7 100%);
+            border-radius: 0 0 6px 6px;
+            z-index: 10;
+        }
+
+        /* Header */
+        .header {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 24px 20px 16px;
+            margin-top: 12px;
+        }
+
+        .back-button {
+            width: 56px;
+            height: 56px;
+            background: white;
+            border: none;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: all 0.2s ease-in-out;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+        }
+
+        .back-button svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* Progress Dots */
+        .progress-dots {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .progress-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(107, 79, 184, 0.3);
+            transition: all 0.3s ease-in-out;
+        }
+
+        .progress-dot.completed {
+            background: #7FE89A;
+            width: 8px;
+            height: 8px;
+        }
+
+        .progress-dot.active {
+            background: #FF69B4;
+            width: 24px;
+            height: 8px;
+            border-radius: 4px;
+        }
+
+        /* Main Content */
+        .content {
+            padding: 0 20px;
+            margin-top: 8px;
+        }
+
+        /* Problem Label with Fox */
+        .problem-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .fox-character {
+            width: 56px;
+            height: 56px;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .problem-label {
+            font-family: 'Baloo 2', cursive;
+            font-size: 24px;
+            font-weight: 700;
+            color: #6B4FB8;
+        }
+
+        /* Math Expression Card */
+        .expression-card {
+            background: white;
+            border-radius: 24px;
+            padding: 32px 24px;
+            text-align: center;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+            margin-bottom: 24px;
+        }
+
+        .math-expression {
+            font-family: 'Fredoka One', cursive;
+            font-size: 48px;
+            color: #4A3F35;
+            line-height: 1.2;
+        }
+
+        .operator {
+            color: #FF69B4;
+        }
+
+        .equals {
+            color: #6B4FB8;
+        }
+
+        /* Answer Grid */
+        .answer-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .answer-button {
+            height: 88px;
+            border: none;
+            border-radius: 20px;
+            font-family: 'Fredoka One', cursive;
+            font-size: 32px;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: all 0.2s ease-in-out;
+            background: linear-gradient(135deg, #FF69B4 0%, #6B4FB8 100%);
+        }
+
+        .answer-button:nth-child(1) {
+            background: linear-gradient(135deg, #FF69B4 0%, #FF8C42 100%);
+        }
+
+        .answer-button:nth-child(2) {
+            background: linear-gradient(135deg, #4FC3F7 0%, #6B4FB8 100%);
+        }
+
+        .answer-button:nth-child(3) {
+            background: linear-gradient(135deg, #7FE89A 0%, #4FC3F7 100%);
+        }
+
+        .answer-button:nth-child(4) {
+            background: linear-gradient(135deg, #FFB800 0%, #FF8C42 100%);
+        }
+
+        .answer-button:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+        }
+
+        .answer-button:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        /* Decorative Elements */
+        .cloud {
+            position: absolute;
+            opacity: 0.6;
+        }
+
+        .cloud-1 {
+            top: 120px;
+            left: 30px;
+            width: 80px;
+            height: 50px;
+        }
+
+        .cloud-2 {
+            top: 280px;
+            right: 40px;
+            width: 100px;
+            height: 60px;
+        }
+
+        .star {
+            position: absolute;
+            animation: twinkle 3s ease-in-out infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        .star-1 {
+            top: 160px;
+            right: 60px;
+            width: 20px;
+            height: 20px;
+            animation-delay: 0s;
+        }
+
+        .star-2 {
+            top: 350px;
+            left: 50px;
+            width: 16px;
+            height: 16px;
+            animation-delay: 1s;
+        }
+
+        .star-3 {
+            top: 500px;
+            right: 80px;
+            width: 18px;
+            height: 18px;
+            animation-delay: 2s;
+        }
+    </style>
+</head>
+<body>
+    <!-- Timer Bar -->
+    <div class="timer-bar"></div>
+
+    <!-- Decorative Clouds -->
+    <svg class="cloud cloud-1" viewBox="0 0 100 60">
+        <ellipse cx="30" cy="35" rx="25" ry="20" fill="white" opacity="0.8"></ellipse>
+        <ellipse cx="50" cy="30" rx="30" ry="25" fill="white" opacity="0.8"></ellipse>
+        <ellipse cx="70" cy="35" rx="25" ry="20" fill="white" opacity="0.8"></ellipse>
+    </svg>
+
+    <svg class="cloud cloud-2" viewBox="0 0 120 70">
+        <ellipse cx="35" cy="40" rx="30" ry="25" fill="white" opacity="0.8"></ellipse>
+        <ellipse cx="60" cy="35" rx="35" ry="30" fill="white" opacity="0.8"></ellipse>
+        <ellipse cx="85" cy="40" rx="30" ry="25" fill="white" opacity="0.8"></ellipse>
+    </svg>
+
+    <!-- Decorative Stars -->
+    <svg class="star star-1" viewBox="0 0 24 24">
+        <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5Z" fill="#FFD93D"></path>
+    </svg>
+
+    <svg class="star star-2" viewBox="0 0 24 24">
+        <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5Z" fill="#FFB800"></path>
+    </svg>
+
+    <svg class="star star-3" viewBox="0 0 24 24">
+        <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5Z" fill="#4FC3F7"></path>
+    </svg>
+
+    <!-- Header -->
+    <div class="header">
+        <button class="back-button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#6B4FB8" stroke-width="3" stroke-linecap="round">
+                <path d="M15 18L9 12L15 6"></path>
+            </svg>
+        </button>
+
+        <!-- Progress Dots -->
+        <div class="progress-dots">
+            <div class="progress-dot completed"></div>
+            <div class="progress-dot completed"></div>
+            <div class="progress-dot completed"></div>
+            <div class="progress-dot active"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+        <!-- Problem Header with Fox -->
+        <div class="problem-header">
+            <!-- Small Fox Character (56px) -->
+            <svg class="fox-character" viewBox="0 0 80 80">
+                <defs>
+                    <filter id="foxShadow" x="-50%" y="-50%" width="200%" height="200%">
+                        <fedropshadow dx="0" dy="2" stdDeviation="2" flood-opacity="0.2"></fedropshadow>
+                    </filter>
+                </defs>
+                <!-- Fox body -->
+                <ellipse cx="40" cy="50" rx="22" ry="20" fill="#FF8C42" filter="url(#foxShadow)"></ellipse>
+                <!-- Fox head -->
+                <circle cx="40" cy="32" r="18" fill="#FF8C42" filter="url(#foxShadow)"></circle>
+                <!-- Fox ears -->
+                <path d="M28 20 L24 10 L32 18 Z" fill="#FF8C42" filter="url(#foxShadow)"></path>
+                <path d="M52 20 L56 10 L48 18 Z" fill="#FF8C42" filter="url(#foxShadow)"></path>
+                <path d="M28 20 L26 14 L30 20 Z" fill="#FFE5CC"></path>
+                <path d="M52 20 L54 14 L50 20 Z" fill="#FFE5CC"></path>
+                <!-- Fox eyes -->
+                <circle cx="34" cy="30" r="3" fill="#4A3F35"></circle>
+                <circle cx="46" cy="30" r="3" fill="#4A3F35"></circle>
+                <circle cx="35" cy="29" r="1.5" fill="white"></circle>
+                <circle cx="47" cy="29" r="1.5" fill="white"></circle>
+                <!-- Fox snout -->
+                <ellipse cx="40" cy="38" rx="4" ry="3" fill="#FFE5CC"></ellipse>
+                <!-- Fox nose -->
+                <circle cx="40" cy="36" r="2" fill="#4A3F35"></circle>
+                <!-- Fox smile -->
+                <path d="M40 36 Q35 40 32 38" stroke="#4A3F35" stroke-width="1.5" fill="none" stroke-linecap="round"></path>
+                <path d="M40 36 Q45 40 48 38" stroke="#4A3F35" stroke-width="1.5" fill="none" stroke-linecap="round"></path>
+                <!-- Backpack -->
+                <rect x="44" y="48" width="12" height="14" rx="2" fill="#4FC3F7" filter="url(#foxShadow)"></rect>
+                <rect x="46" y="50" width="8" height="3" rx="1" fill="white" opacity="0.6"></rect>
+            </svg>
+
+            <div class="problem-label">문제 4/10</div>
+        </div>
+
+        <!-- Math Expression Card -->
+        <div class="expression-card">
+            <div class="math-expression">
+                7 <span class="operator">+</span> 3 <span class="equals">=</span> ?
+            </div>
+        </div>
+
+        <!-- Answer Grid (2x2) -->
+        <div class="answer-grid">
+            <button class="answer-button">8</button>
+            <button class="answer-button">10</button>
+            <button class="answer-button">9</button>
+            <button class="answer-button">11</button>
+        </div>
+    </div>
+
+</body></html>

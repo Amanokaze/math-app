@@ -1,0 +1,473 @@
+<!DOCTYPE html><html lang="ko"><head><base href="https://forge.moonchild.ai/site/bb54057494dbc6849ae8418f929d7b9cc174ad94f84fa2403ead165d3ab42ad2/">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>학습 리포트 - Kids Math Learning</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&amp;family=Baloo+2:wght@700&amp;family=Nunito:wght@700;800&amp;display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #FFE5F4 0%, #E5D4FF 50%, #D4F0FF 100%);
+            min-height: 100vh;
+            padding: 16px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 430px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .back-button {
+            width: 56px;
+            height: 56px;
+            background: white;
+            border: none;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: all 0.2s ease-in-out;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+        }
+
+        .back-button:active {
+            transform: translateY(0);
+        }
+
+        .back-button i {
+            color: #6B4FB8;
+            font-size: 24px;
+        }
+
+        .header-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 32px;
+            color: #4A3F35;
+            flex: 1;
+            text-align: center;
+            margin-right: 56px;
+        }
+
+        /* Character Section */
+        .character-section {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .character-container {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 16px;
+            position: relative;
+        }
+
+        /* Statistics Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: all 0.2s ease-in-out;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+        }
+
+        .stat-card.streak {
+            grid-column: span 2;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+        }
+
+        .stat-card.streak:hover {
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        .stat-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-family: 'Fredoka One', cursive;
+            font-size: 36px;
+            color: #FF69B4;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-family: 'Baloo 2', cursive;
+            font-size: 18px;
+            color: #4A3F35;
+        }
+
+        /* Weekly Chart */
+        .chart-container {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+        }
+
+        .chart-title {
+            font-family: 'Baloo 2', cursive;
+            font-size: 24px;
+            color: #4A3F35;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        #weeklyChart {
+            width: 100%;
+            height: 200px;
+        }
+
+        /* Badges Section */
+        .badges-section {
+            margin-bottom: 80px;
+        }
+
+        .section-title {
+            font-family: 'Baloo 2', cursive;
+            font-size: 24px;
+            color: #4A3F35;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .badges-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .badge-card {
+            background: white;
+            border-radius: 20px;
+            padding: 16px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: all 0.2s ease-in-out;
+        }
+
+        .badge-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+        }
+
+        .badge-icon {
+            font-size: 48px;
+            margin-bottom: 8px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+
+        .badge-name {
+            font-family: 'Nunito', sans-serif;
+            font-weight: 700;
+            font-size: 16px;
+            color: #4A3F35;
+        }
+
+        .badge-locked {
+            opacity: 0.4;
+        }
+
+        /* Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .character-container {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stat-card {
+            animation: fadeInUp 0.5s ease-out forwards;
+        }
+
+        .stat-card:nth-child(1) { animation-delay: 0.1s; }
+        .stat-card:nth-child(2) { animation-delay: 0.2s; }
+        .stat-card:nth-child(3) { animation-delay: 0.3s; }
+
+        .badge-card {
+            animation: fadeInUp 0.5s ease-out forwards;
+        }
+
+        .badge-card:nth-child(1) { animation-delay: 0.1s; }
+        .badge-card:nth-child(2) { animation-delay: 0.2s; }
+        .badge-card:nth-child(3) { animation-delay: 0.3s; }
+        .badge-card:nth-child(4) { animation-delay: 0.4s; }
+        .badge-card:nth-child(5) { animation-delay: 0.5s; }
+        .badge-card:nth-child(6) { animation-delay: 0.6s; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <button class="back-button">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <h1 class="header-title">학습 리포트</h1>
+        </div>
+
+        <!-- Character Section -->
+        <div class="character-section">
+            <div class="character-container">
+                <svg width="100" height="100" viewBox="0 0 100 100">
+                    <!-- Bear Character - Medium Size (100px) -->
+                    <!-- Head -->
+                    <ellipse cx="50" cy="50" rx="28" ry="32" fill="#8B6F47"></ellipse>
+                    
+                    <!-- Ears -->
+                    <circle cx="30" cy="30" r="12" fill="#8B6F47"></circle>
+                    <circle cx="70" cy="30" r="12" fill="#8B6F47"></circle>
+                    <circle cx="30" cy="30" r="8" fill="#D4A574"></circle>
+                    <circle cx="70" cy="30" r="8" fill="#D4A574"></circle>
+                    
+                    <!-- Face -->
+                    <ellipse cx="50" cy="55" rx="18" ry="15" fill="#F5DEB3"></ellipse>
+                    
+                    <!-- Eyes -->
+                    <circle cx="42" cy="48" r="4" fill="#4A3F35"></circle>
+                    <circle cx="58" cy="48" r="4" fill="#4A3F35"></circle>
+                    <circle cx="43" cy="47" r="2" fill="white"></circle>
+                    <circle cx="59" cy="47" r="2" fill="white"></circle>
+                    
+                    <!-- Nose -->
+                    <ellipse cx="50" cy="58" rx="5" ry="4" fill="#4A3F35"></ellipse>
+                    
+                    <!-- Smile -->
+                    <path d="M 45 60 Q 50 65 55 60" stroke="#4A3F35" stroke-width="2" fill="none" stroke-linecap="round"></path>
+                    
+                    <!-- Body -->
+                    <ellipse cx="50" cy="85" rx="20" ry="15" fill="#8B6F47"></ellipse>
+                    
+                    <!-- Belly -->
+                    <ellipse cx="50" cy="85" rx="12" ry="10" fill="#D4A574"></ellipse>
+                    
+                    <!-- Arms (raised in celebration) -->
+                    <ellipse cx="32" cy="75" rx="6" ry="12" fill="#8B6F47" transform="rotate(-30 32 75)"></ellipse>
+                    <ellipse cx="68" cy="75" rx="6" ry="12" fill="#8B6F47" transform="rotate(30 68 75)"></ellipse>
+                    
+                    <!-- Sparkles -->
+                    <circle cx="25" cy="40" r="2" fill="#FFD93D" opacity="0.8">
+                        <animate attributeName="opacity" values="0.8;0.3;0.8" dur="1.5s" repeatCount="indefinite"></animate>
+                    </circle>
+                    <circle cx="75" cy="45" r="2" fill="#FFD93D" opacity="0.6">
+                        <animate attributeName="opacity" values="0.6;0.3;0.6" dur="2s" repeatCount="indefinite"></animate>
+                    </circle>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Statistics Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">📚</div>
+                <div class="stat-value">45</div>
+                <div class="stat-label">완료한 문제</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">⭐</div>
+                <div class="stat-value">92%</div>
+                <div class="stat-label">정확도</div>
+            </div>
+            
+            <div class="stat-card streak">
+                <div class="stat-icon">🔥</div>
+                <div class="stat-value">7일</div>
+                <div class="stat-label">연속 학습</div>
+            </div>
+        </div>
+
+        <!-- Weekly Chart -->
+        <div class="chart-container">
+            <div class="chart-title">주간 학습 기록</div>
+            <svg id="weeklyChart"></svg>
+        </div>
+
+        <!-- Badges Section -->
+        <div class="badges-section">
+            <h2 class="section-title">획득한 배지</h2>
+            <div class="badges-grid">
+                <div class="badge-card">
+                    <div class="badge-icon">🏆</div>
+                    <div class="badge-name">첫 완료</div>
+                </div>
+                <div class="badge-card">
+                    <div class="badge-icon">⭐</div>
+                    <div class="badge-name">별 10개</div>
+                </div>
+                <div class="badge-card">
+                    <div class="badge-icon">🔥</div>
+                    <div class="badge-name">일주일</div>
+                </div>
+                <div class="badge-card badge-locked">
+                    <div class="badge-icon">💎</div>
+                    <div class="badge-name">완벽한 날</div>
+                </div>
+                <div class="badge-card badge-locked">
+                    <div class="badge-icon">🎯</div>
+                    <div class="badge-name">100문제</div>
+                </div>
+                <div class="badge-card badge-locked">
+                    <div class="badge-icon">👑</div>
+                    <div class="badge-name">수학왕</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Weekly Chart Data
+        const data = [
+            { day: '월', problems: 5 },
+            { day: '화', problems: 8 },
+            { day: '수', problems: 6 },
+            { day: '목', problems: 10 },
+            { day: '금', problems: 7 },
+            { day: '토', problems: 4 },
+            { day: '일', problems: 5 }
+        ];
+
+        // Chart dimensions
+        const margin = { top: 10, right: 10, bottom: 30, left: 30 };
+        const width = 340;
+        const height = 200;
+
+        // Create SVG
+        const svg = d3.select('#weeklyChart')
+            .attr('width', width)
+            .attr('height', height);
+
+        // Scales
+        const x = d3.scaleBand()
+            .domain(data.map(d => d.day))
+            .range([margin.left, width - margin.right])
+            .padding(0.3);
+
+        const y = d3.scaleLinear()
+            .domain([0, d3.max(data, d => d.problems)])
+            .nice()
+            .range([height - margin.bottom, margin.top]);
+
+        // Gradient for bars
+        const gradient = svg.append('defs')
+            .append('linearGradient')
+            .attr('id', 'barGradient')
+            .attr('x1', '0%')
+            .attr('y1', '0%')
+            .attr('x2', '0%')
+            .attr('y2', '100%');
+
+        gradient.append('stop')
+            .attr('offset', '0%')
+            .attr('style', 'stop-color:#FF69B4;stop-opacity:1');
+
+        gradient.append('stop')
+            .attr('offset', '100%')
+            .attr('style', 'stop-color:#FF69B4;stop-opacity:0.6');
+
+        // Bars
+        svg.selectAll('.bar')
+            .data(data)
+            .join('rect')
+            .attr('class', 'bar')
+            .attr('x', d => x(d.day))
+            .attr('y', d => y(d.problems))
+            .attr('width', x.bandwidth())
+            .attr('height', d => y(0) - y(d.problems))
+            .attr('rx', 8)
+            .attr('fill', 'url(#barGradient)')
+            .style('filter', 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))')
+            .on('mouseover', function() {
+                d3.select(this)
+                    .transition()
+                    .duration(200)
+                    .attr('opacity', 0.8);
+            })
+            .on('mouseout', function() {
+                d3.select(this)
+                    .transition()
+                    .duration(200)
+                    .attr('opacity', 1);
+            });
+
+        // X Axis
+        svg.append('g')
+            .attr('transform', `translate(0,${height - margin.bottom})`)
+            .call(d3.axisBottom(x))
+            .selectAll('text')
+            .style('font-family', 'Nunito')
+            .style('font-weight', '700')
+            .style('font-size', '16px')
+            .style('fill', '#4A3F35');
+
+        // Remove axis line and ticks
+        svg.selectAll('.domain').remove();
+        svg.selectAll('.tick line').remove();
+
+        // Y Axis (simple)
+        svg.append('g')
+            .attr('transform', `translate(${margin.left},0)`)
+            .call(d3.axisLeft(y).ticks(5))
+            .selectAll('text')
+            .style('font-family', 'Nunito')
+            .style('font-weight', '700')
+            .style('font-size', '14px')
+            .style('fill', '#4A3F35');
+
+        svg.selectAll('.domain').remove();
+        svg.selectAll('.tick line').remove();
+    </script>
+
+</body></html>

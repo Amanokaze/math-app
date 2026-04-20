@@ -3,27 +3,24 @@ package com.mathapp.practice.ui
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.mathapp.practice.ui.theme.MathTheme
 
 // ─── Navigation ───────────────────────────────────────────────────────────────
 
 sealed class Screen {
+    object Onboarding : Screen()
+    object CharacterSelection : Screen()
     object Home : Screen()
     object Category : Screen()
-    data class StageMap(val operation: MathOperation) : Screen()
+    object ParentSettings : Screen()
+    data class StageMap(val operation: MathOperation, val autoSelectStage: Int? = null) : Screen()
     data class Game(val operation: MathOperation, val stageNumber: Int) : Screen()
     data class Result(
         val operation: MathOperation,
         val stageNumber: Int,
         val stars: Int,
-        val correctCount: Int,
         val avgSeconds: Float,
         val points: Int
     ) : Screen()
@@ -35,11 +32,18 @@ sealed class Screen {
 fun MathApp() {
     var colorSchemeMode by remember { mutableStateOf(AppSettings.getInt("colorSchemeMode", 1)) }
     var appLanguageRaw by remember { mutableStateOf(AppSettings.getString("appLanguage", "")) }
-    var screen by remember { mutableStateOf<Screen>(Screen.Home) }
-    // Bump this whenever stage progress changes so child screens re-read AppSettings
     var progressVersion by remember { mutableIntStateOf(0) }
-    // Bump this whenever hearts are consumed/recharged so UI refreshes
     var heartsVersion by remember { mutableIntStateOf(0) }
+
+    // Determine initial screen based on onboarding / character selection state
+    val initialScreen: Screen = remember {
+        when {
+            !hasSeenOnboarding() -> Screen.Onboarding
+            getSelectedCharacter() == null -> Screen.CharacterSelection
+            else -> Screen.Home
+        }
+    }
+    var screen by remember { mutableStateOf<Screen>(initialScreen) }
 
     fun enterGame(op: MathOperation, num: Int) {
         rechargeHearts()
@@ -49,6 +53,7 @@ fun MathApp() {
         }
         heartsVersion++
         saveLastPlayedStage(op, num)
+        recordPlayToday()
         screen = Screen.Game(op, num)
     }
 
@@ -63,26 +68,52 @@ fun MathApp() {
             color = MaterialTheme.colorScheme.background
         ) {
             when (val s = screen) {
+                is Screen.Onboarding -> OnboardingScreen(
+                    appLanguage = appLanguage,
+                    onFinish = {
+                        markOnboardingSeen()
+                        screen = Screen.CharacterSelection
+                    }
+                )
+
+                is Screen.CharacterSelection -> CharacterSelectionScreen(
+                    appLanguage = appLanguage,
+                    onCharacterSelected = { char ->
+                        setSelectedCharacter(char)
+                        screen = Screen.Home
+                    }
+                )
+
                 is Screen.Home -> HomeScreen(
                     appLanguage = appLanguage,
-                    colorSchemeMode = colorSchemeMode,
-                    onColorSchemeChange = {
-                        colorSchemeMode = it
-                        AppSettings.setInt("colorSchemeMode", it)
-                    },
                     appLanguageRaw = appLanguageRaw,
                     onAppLanguageChange = {
                         appLanguageRaw = it
                         AppSettings.setString("appLanguage", it)
                     },
-                    onResumeClick = { (op, num) -> enterGame(op, num) },
-                    onNewStartClick = { screen = Screen.Category },
+                    onOperationSelected = { op -> screen = Screen.StageMap(op) },
+                    onOpenParentSettings = { screen = Screen.ParentSettings },
+                    progressVersion = progressVersion,
+                    heartsVersion = heartsVersion
+                )
+
+                is Screen.ParentSettings -> ParentSettingsScreen(
+                    appLanguage = appLanguage,
+                    appLanguageRaw = appLanguageRaw,
+                    onAppLanguageChange = {
+                        appLanguageRaw = it
+                        AppSettings.setString("appLanguage", it)
+                    },
+                    colorSchemeMode = colorSchemeMode,
+                    onColorSchemeChange = {
+                        colorSchemeMode = it
+                        AppSettings.setInt("colorSchemeMode", it)
+                    },
                     onResetProgress = {
                         resetAllProgress()
                         progressVersion++
                     },
-                    progressVersion = progressVersion,
-                    heartsVersion = heartsVersion
+                    onBack = { screen = Screen.Home }
                 )
 
                 is Screen.Category -> CategoryScreen(
@@ -96,9 +127,10 @@ fun MathApp() {
                     operation = s.operation,
                     appLanguage = appLanguage,
                     onStageSelected = { num -> enterGame(s.operation, num) },
-                    onBack = { screen = Screen.Category },
+                    onBack = { screen = Screen.Home },
                     progressVersion = progressVersion,
-                    heartsVersion = heartsVersion
+                    heartsVersion = heartsVersion,
+                    autoSelectStage = s.autoSelectStage
                 )
 
                 is Screen.Game -> GameScreen(
@@ -109,21 +141,26 @@ fun MathApp() {
                         saveStageResult(s.operation, s.stageNumber, stars)
                         val points = calcPoints(s.stageNumber, stars)
                         addPoints(points)
+                        // Update daily quest progress (count correct answers)
+                        addQuestProgress(correctCount)
+                        // Record stats for report
+                        recordDailyStats(solvedCount = 10, correctCount = correctCount)
+                        // Check badges
+                        checkAndAwardBadges()
                         progressVersion++
-                        screen = Screen.Result(s.operation, s.stageNumber, stars, correctCount, avgSec, points)
+                        screen = Screen.Result(s.operation, s.stageNumber, stars, avgSec, points)
                     },
                     onBack = { screen = Screen.StageMap(s.operation) }
                 )
 
                 is Screen.Result -> {
                     val nextNum = s.stageNumber + 1
-                    val hasNextStage = nextNum <= 10 && StageInfo(s.operation, nextNum).isUnlocked
+                    val hasNextStage = nextNum <= 20 && StageInfo(s.operation, nextNum).isUnlocked
                     val hearts = rememberLiveHearts(heartsVersion)
                     ResultScreen(
                         operation = s.operation,
                         stageNumber = s.stageNumber,
                         stars = s.stars,
-                        correctCount = s.correctCount,
                         avgSeconds = s.avgSeconds,
                         points = s.points,
                         hearts = hearts,
@@ -131,10 +168,9 @@ fun MathApp() {
                         hasNextStage = hasNextStage,
                         onRetry = { enterGame(s.operation, s.stageNumber) },
                         onNextStage = {
-                            if (hasNextStage) enterGame(s.operation, nextNum)
-                            else screen = Screen.StageMap(s.operation)
+                            screen = Screen.StageMap(s.operation, if (hasNextStage) nextNum else null)
                         },
-                        onToStageMap = { screen = Screen.StageMap(s.operation) }
+                        onToHome = { screen = Screen.Home }
                     )
                 }
             }
