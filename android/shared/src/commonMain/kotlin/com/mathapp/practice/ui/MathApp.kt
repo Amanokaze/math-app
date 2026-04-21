@@ -17,6 +17,7 @@ sealed class Screen {
     object ParentSettings : Screen()
     data class StageMap(val operation: MathOperation, val autoSelectStage: Int? = null) : Screen()
     data class Game(val operation: MathOperation, val stageNumber: Int) : Screen()
+    data class Quest(val operation: MathOperation) : Screen()
     data class Result(
         val operation: MathOperation,
         val stageNumber: Int,
@@ -92,6 +93,7 @@ fun MathApp() {
                         AppSettings.setString("appLanguage", it)
                     },
                     onOperationSelected = { op -> screen = Screen.StageMap(op) },
+                    onQuestStart = { op -> screen = Screen.Quest(op) },
                     onOpenParentSettings = { screen = Screen.ParentSettings },
                     progressVersion = progressVersion,
                     heartsVersion = heartsVersion
@@ -141,8 +143,6 @@ fun MathApp() {
                         saveStageResult(s.operation, s.stageNumber, stars)
                         val points = calcPoints(s.stageNumber, stars)
                         addPoints(points)
-                        // Update daily quest progress (count correct answers)
-                        addQuestProgress(correctCount)
                         // Record stats for report
                         recordDailyStats(solvedCount = 10, correctCount = correctCount)
                         // Check badges
@@ -151,6 +151,19 @@ fun MathApp() {
                         screen = Screen.Result(s.operation, s.stageNumber, stars, avgSec, points)
                     },
                     onBack = { screen = Screen.StageMap(s.operation) }
+                )
+
+                is Screen.Quest -> GameScreen(
+                    operation = s.operation,
+                    stageNumber = QUEST_STAGE_NUMBER,
+                    appLanguage = appLanguage,
+                    isQuestMode = true,
+                    onComplete = { _, correctCount, _ ->
+                        addQuestProgress(correctCount)
+                        progressVersion++
+                        screen = Screen.Home
+                    },
+                    onBack = { screen = Screen.Home }
                 )
 
                 is Screen.Result -> {

@@ -62,7 +62,8 @@ fun GameScreen(
     stageNumber: Int,
     appLanguage: AppLanguage,
     onComplete: (stars: Int, correctCount: Int, avgSeconds: Float) -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    isQuestMode: Boolean = false
 ) {
     val isMultiChoice = remember { isMultiChoiceStage(stageNumber) }
     val problems = remember(operation, stageNumber) { generateProblems(operation, stageNumber) }
@@ -241,7 +242,8 @@ fun GameScreen(
                     stageNumber = stageNumber,
                     currentIndex = currentIndex,
                     appLanguage = appLanguage,
-                    onQuit = { showQuitDialog = true; isPaused = true }
+                    onQuit = { showQuitDialog = true; isPaused = true },
+                    isQuestMode = isQuestMode
                 )
 
                 // ── Progress dots ──
@@ -348,7 +350,8 @@ private fun GameTopBar(
     stageNumber: Int,
     currentIndex: Int,
     appLanguage: AppLanguage,
-    onQuit: () -> Unit
+    onQuit: () -> Unit,
+    isQuestMode: Boolean = false
 ) {
     Box(
         modifier = Modifier
@@ -360,7 +363,10 @@ private fun GameTopBar(
             Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, tint = Color.White)
         }
         Text(
-            text = "${opName(operation, appLanguage)} ${L10n.string("stage_num_format", appLanguage, stageNumber)}",
+            text = if (isQuestMode)
+                "🎯 ${L10n.string("quest_title", appLanguage)}"
+            else
+                "${opName(operation, appLanguage)} ${L10n.string("stage_num_format", appLanguage, stageNumber)}",
             fontSize = 16.sp,
             fontWeight = FontWeight.SemiBold,
             color = Color.White,

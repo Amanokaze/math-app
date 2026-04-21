@@ -26,6 +26,9 @@ fun markOnboardingSeen() = AppSettings.setInt("hasSeenOnboarding", 1)
 
 // ─── Daily Quest ──────────────────────────────────────────────────────────────
 
+/** Stage difficulty used for quest games (mid-range). */
+const val QUEST_STAGE_NUMBER = 5
+
 data class DailyQuest(
     val operation: MathOperation,
     val targetCount: Int,
@@ -286,6 +289,11 @@ fun resetAllProgress() {
     AppSettings.setString("last_op", "")
     AppSettings.setInt("last_stage_num", 0)
     AppSettings.setInt("total_points", 0)
+    // Reset daily quest
+    AppSettings.setString("questDate", "")
+    AppSettings.setString("questOp", "")
+    AppSettings.setInt("questTarget", 10)
+    AppSettings.setInt("questProgress", 0)
 }
 
 // ─── Star calculation ─────────────────────────────────────────────────────────

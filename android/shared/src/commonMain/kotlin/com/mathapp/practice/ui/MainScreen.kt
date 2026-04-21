@@ -35,6 +35,7 @@ fun HomeScreen(
     appLanguageRaw: String,
     onAppLanguageChange: (String) -> Unit,
     onOperationSelected: (MathOperation) -> Unit,
+    onQuestStart: (MathOperation) -> Unit,
     onOpenParentSettings: () -> Unit,
     progressVersion: Int,
     heartsVersion: Int
@@ -57,6 +58,7 @@ fun HomeScreen(
                     appLanguageRaw = appLanguageRaw,
                     onAppLanguageChange = onAppLanguageChange,
                     onOperationSelected = onOperationSelected,
+                    onQuestStart = onQuestStart,
                     onOpenParentSettings = onOpenParentSettings,
                     progressVersion = progressVersion,
                     heartsVersion = heartsVersion
@@ -110,6 +112,7 @@ private fun HomeContent(
     appLanguage: AppLanguage,
     appLanguageRaw: String,
     onAppLanguageChange: (String) -> Unit,
+    onQuestStart: (MathOperation) -> Unit,
     onOperationSelected: (MathOperation) -> Unit,
     onOpenParentSettings: () -> Unit,
     progressVersion: Int,
@@ -191,7 +194,7 @@ private fun HomeContent(
             DailyQuestCard(
                 quest = dailyQuest,
                 appLanguage = appLanguage,
-                onContinue = { onOperationSelected(dailyQuest.operation) },
+                onContinue = { onQuestStart(dailyQuest.operation) },
                 characterEmoji = character?.emoji ?: "🐻",
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
