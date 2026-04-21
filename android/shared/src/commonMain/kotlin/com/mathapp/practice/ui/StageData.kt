@@ -185,6 +185,16 @@ fun getStreakDays(): Int = AppSettings.getInt("streakDays", 0)
 
 fun recordDailyStats(solvedCount: Int, correctCount: Int) {
     val today = getTodayDateString()
+    val epochDay = today.toLongOrNull() ?: 0L
+
+    // Reset weekly slots when a new week starts (week boundary = Monday)
+    val currentWeek = (epochDay + 3L) / 7L
+    val savedWeek = AppSettings.getString("weekNumber", "-1").toLongOrNull() ?: -1L
+    if (currentWeek != savedWeek) {
+        (0..6).forEach { AppSettings.setInt("weekSolved_$it", 0) }
+        AppSettings.setString("weekNumber", currentWeek.toString())
+    }
+
     if (AppSettings.getString("todayDate", "") != today) {
         AppSettings.setString("todayDate", today)
         AppSettings.setInt("todaySolved", 0)
@@ -194,7 +204,7 @@ fun recordDailyStats(solvedCount: Int, correctCount: Int) {
     AppSettings.setInt("todayCorrect", AppSettings.getInt("todayCorrect", 0) + correctCount)
 
     // Weekly chart: dayOfWeek 0=Mon … 6=Sun (epoch day 0 = Thu, +3 aligns Mon to index 0)
-    val day = ((getTodayDateString().toLongOrNull() ?: 0L) + 3L) % 7
+    val day = (epochDay + 3L) % 7L
     val key = "weekSolved_$day"
     AppSettings.setInt(key, AppSettings.getInt(key, 0) + solvedCount)
 }
@@ -205,24 +215,46 @@ fun getTodayStats(): Pair<Int, Int> {
     return Pair(AppSettings.getInt("todaySolved", 0), AppSettings.getInt("todayCorrect", 0))
 }
 
-/** Returns list of solved counts for the last 7 days (Mon-Sun slot), today's slot last */
-fun getWeeklyStats(): List<Int> = (0..6).map { AppSettings.getInt("weekSolved_$it", 0) }
+/** Returns list of solved counts for the current week (Mon-Sun slots). Stale weeks return all zeros. */
+fun getWeeklyStats(): List<Int> {
+    val epochDay = getTodayDateString().toLongOrNull() ?: 0L
+    val currentWeek = (epochDay + 3L) / 7L
+    val savedWeek = AppSettings.getString("weekNumber", "-1").toLongOrNull() ?: -1L
+    if (currentWeek != savedWeek) return List(7) { 0 }
+    return (0..6).map { AppSettings.getInt("weekSolved_$it", 0) }
+}
 
 // ─── Treasure Chest ───────────────────────────────────────────────────────────
 
-data class TreasureItem(val id: Int, val emoji: String, val requiredPoints: Int)
+data class TreasureItem(
+    val id: Int,
+    val emoji: String,
+    val requiredPoints: Int,
+    val nameKey: String,
+    val descKey: String,
+    val praiseKey: String
+)
 
 val ALL_TREASURES = listOf(
-    TreasureItem(0, "🗝️",   100),
-    TreasureItem(1, "💍",   300),
-    TreasureItem(2, "📜",   600),
-    TreasureItem(3, "🏺",  1000),
-    TreasureItem(4, "🗡️", 1500),
-    TreasureItem(5, "🛡️", 2200),
-    TreasureItem(6, "💎",  3000),
-    TreasureItem(7, "👑",  4200),
-    TreasureItem(8, "🌟",  6000)
+    TreasureItem(0, "🗝️",   100, "treasure_name_0", "treasure_desc_0", "treasure_praise_0"),
+    TreasureItem(1, "💍",   300, "treasure_name_1", "treasure_desc_1", "treasure_praise_1"),
+    TreasureItem(2, "📜",   600, "treasure_name_2", "treasure_desc_2", "treasure_praise_2"),
+    TreasureItem(3, "🏺",  1000, "treasure_name_3", "treasure_desc_3", "treasure_praise_3"),
+    TreasureItem(4, "🗡️", 1500, "treasure_name_4", "treasure_desc_4", "treasure_praise_4"),
+    TreasureItem(5, "🛡️", 2200, "treasure_name_5", "treasure_desc_5", "treasure_praise_5"),
+    TreasureItem(6, "💎",  3000, "treasure_name_6", "treasure_desc_6", "treasure_praise_6"),
+    TreasureItem(7, "👑",  4200, "treasure_name_7", "treasure_desc_7", "treasure_praise_7"),
+    TreasureItem(8, "🌟",  6000, "treasure_name_8", "treasure_desc_8", "treasure_praise_8")
 )
+
+fun getFeaturedTreasureId(): Int = AppSettings.getInt("featured_treasure_id", -1)
+
+fun setFeaturedTreasureId(id: Int) = AppSettings.setInt("featured_treasure_id", id)
+
+fun getFeaturedTreasure(): TreasureItem? {
+    val id = getFeaturedTreasureId()
+    return ALL_TREASURES.find { it.id == id && isTreasureUnlocked(it) }
+}
 
 fun getTreasureLevel(): Int {
     val pts = getTotalPoints()
@@ -350,9 +382,12 @@ fun resetAllProgress() {
     AppSettings.setInt("total_points", 0)
     // Reset weekly / daily stats
     (0..6).forEach { AppSettings.setInt("weekSolved_$it", 0) }
+    AppSettings.setString("weekNumber", "-1")
     AppSettings.setString("todayDate", "")
     AppSettings.setInt("todaySolved", 0)
     AppSettings.setInt("todayCorrect", 0)
+    // Reset featured treasure
+    AppSettings.setInt("featured_treasure_id", -1)
     // Reset shop & coins
     resetShopProgress()
     // Reset daily quest
