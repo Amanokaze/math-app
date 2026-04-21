@@ -17,12 +17,89 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+private sealed class ShopDialog {
+    data class BuyConfirm(val item: ShopItem) : ShopDialog()
+    data class PostBuyEquip(val item: ShopItem) : ShopDialog()
+}
+
 @Composable
 fun ShopScreen(appLanguage: AppLanguage) {
     var selectedCategory by remember { mutableStateOf(ShopCategory.HEAD) }
     var shopVersion by remember { mutableIntStateOf(0) }
     val coinBalance = remember(shopVersion) { getCoinBalance() }
     val character   = remember { getSelectedCharacter() }
+    var activeDialog by remember { mutableStateOf<ShopDialog?>(null) }
+
+    // ── Dialogs ───────────────────────────────────────────────────────────────
+    activeDialog?.let { dialog ->
+        when (dialog) {
+            is ShopDialog.BuyConfirm -> {
+                val item = dialog.item
+                AlertDialog(
+                    onDismissRequest = { activeDialog = null },
+                    title = {
+                        Text(
+                            text = "${item.emoji} ${L10n.string(item.nameKey, appLanguage)}",
+                            fontWeight = FontWeight.Bold
+                        )
+                    },
+                    text = {
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text(L10n.string("shop_confirm_buy_title", appLanguage))
+                            Text(
+                                text = L10n.string("shop_confirm_buy_cost", appLanguage, item.price),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { activeDialog = null }) {
+                            Text(L10n.string("shop_cancel", appLanguage))
+                        }
+                    },
+                    confirmButton = {
+                        Button(onClick = {
+                            if (buyItem(item)) {
+                                shopVersion++
+                                activeDialog = ShopDialog.PostBuyEquip(item)
+                            } else {
+                                activeDialog = null
+                            }
+                        }) {
+                            Text(L10n.string("shop_buy", appLanguage))
+                        }
+                    }
+                )
+            }
+            is ShopDialog.PostBuyEquip -> {
+                val item = dialog.item
+                AlertDialog(
+                    onDismissRequest = { activeDialog = null },
+                    title = {
+                        Text(
+                            text = L10n.string("shop_bought_title", appLanguage),
+                            fontWeight = FontWeight.Bold
+                        )
+                    },
+                    text = { Text(L10n.string("shop_equip_now_question", appLanguage)) },
+                    dismissButton = {
+                        TextButton(onClick = { activeDialog = null }) {
+                            Text(L10n.string("shop_later", appLanguage))
+                        }
+                    },
+                    confirmButton = {
+                        Button(onClick = {
+                            equipItem(item)
+                            shopVersion++
+                            activeDialog = null
+                        }) {
+                            Text(L10n.string("shop_equip", appLanguage))
+                        }
+                    }
+                )
+            }
+        }
+    }
 
     Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         // ── Header ────────────────────────────────────────────────────────────
@@ -111,7 +188,8 @@ fun ShopScreen(appLanguage: AppLanguage) {
                             appLanguage = appLanguage,
                             shopVersion = shopVersion,
                             coinBalance = coinBalance,
-                            onAction = { shopVersion++ },
+                            onBuyRequest = { activeDialog = ShopDialog.BuyConfirm(it) },
+                            onEquip = { toggleEquip(it); shopVersion++ },
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -132,7 +210,8 @@ private fun ShopItemCard(
     appLanguage: AppLanguage,
     shopVersion: Int,
     coinBalance: Int,
-    onAction: () -> Unit,
+    onBuyRequest: (ShopItem) -> Unit,
+    onEquip: (ShopItem) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val owned    = remember(shopVersion) { isItemOwned(item.id) }
@@ -160,7 +239,6 @@ private fun ShopItemCard(
                 .padding(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Portrait preview for cosmetic categories; plain emoji for effects
             when (item.category) {
                 ShopCategory.HEAD -> CharacterPortrait(
                     character = character,
@@ -212,7 +290,7 @@ private fun ShopItemCard(
 
             when {
                 !owned -> Button(
-                    onClick = { buyItem(item); onAction() },
+                    onClick = { onBuyRequest(item) },
                     enabled = coinBalance >= item.price,
                     modifier = Modifier.fillMaxWidth().height(36.dp),
                     shape = RoundedCornerShape(10.dp),
@@ -225,7 +303,7 @@ private fun ShopItemCard(
                     )
                 }
                 equipped -> OutlinedButton(
-                    onClick = { toggleEquip(item); onAction() },
+                    onClick = { onEquip(item) },
                     modifier = Modifier.fillMaxWidth().height(36.dp),
                     shape = RoundedCornerShape(10.dp),
                     contentPadding = PaddingValues(horizontal = 8.dp)
@@ -238,7 +316,7 @@ private fun ShopItemCard(
                     )
                 }
                 else -> Button(
-                    onClick = { toggleEquip(item); onAction() },
+                    onClick = { onEquip(item) },
                     modifier = Modifier.fillMaxWidth().height(36.dp),
                     shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = AppColors.SuccessGreen),

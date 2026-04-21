@@ -193,8 +193,8 @@ fun recordDailyStats(solvedCount: Int, correctCount: Int) {
     AppSettings.setInt("todaySolved", AppSettings.getInt("todaySolved", 0) + solvedCount)
     AppSettings.setInt("todayCorrect", AppSettings.getInt("todayCorrect", 0) + correctCount)
 
-    // Weekly chart: dayOfWeek 0=Mon … 6=Sun
-    val day = (getTodayDateString().toLongOrNull() ?: 0L) % 7
+    // Weekly chart: dayOfWeek 0=Mon … 6=Sun (epoch day 0 = Thu, +3 aligns Mon to index 0)
+    val day = ((getTodayDateString().toLongOrNull() ?: 0L) + 3L) % 7
     val key = "weekSolved_$day"
     AppSettings.setInt(key, AppSettings.getInt(key, 0) + solvedCount)
 }

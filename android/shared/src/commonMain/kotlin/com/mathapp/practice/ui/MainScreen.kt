@@ -374,7 +374,12 @@ fun DailyQuestCard(
                     }
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "${quest.progress}/${quest.targetCount}",
+                        text = when {
+                            quest.progress == 0 ->
+                                L10n.string("quest_progress_start", appLanguage)
+                            else ->
+                                L10n.string("quest_progress_remaining", appLanguage, quest.targetCount - quest.progress)
+                        },
                         fontSize = 12.sp,
                         color = Color.White.copy(alpha = 0.9f)
                     )

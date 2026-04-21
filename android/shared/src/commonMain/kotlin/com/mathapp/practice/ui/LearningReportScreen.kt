@@ -224,14 +224,16 @@ private fun WeeklyBarChart(
                 modifier = Modifier.weight(1f)
             ) {
                 // Count label — always reserves the same height to keep bars aligned
-                Box(modifier = Modifier.height(16.dp)) {
+                Box(modifier = Modifier.height(18.dp).fillMaxWidth()) {
                     if (count > 0) {
                         Text(
                             text = count.toString(),
-                            fontSize = 10.sp,
+                            fontSize = 9.sp,
                             color = AppColors.SecondaryPurple,
                             fontWeight = FontWeight.Bold,
-                            modifier = Modifier.align(Alignment.Center)
+                            maxLines = 1,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.align(Alignment.Center).fillMaxWidth()
                         )
                     }
                 }
