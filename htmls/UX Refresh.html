@@ -1,0 +1,483 @@
+<!DOCTYPE html><html lang="ko"><head><base href="https://forge.moonchild.ai/site/a8e89a5ed3b2a94b0e2d61e787994817e032bee4e54d7ae0b6053e1aefd89dca/">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>보물 상자 - 키즈 수학 학습</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&amp;family=Baloo+2:wght@700&amp;family=Nunito:wght@700&amp;display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #FFE5F1 0%, #E5D4FF 50%, #D4F1FF 100%);
+            min-height: 932px;
+            width: 430px;
+            margin: 0 auto;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .icon-button {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+
+        .icon-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+        }
+
+        .icon-button svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .page-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 32px;
+            color: #FF69B4;
+            text-align: center;
+            flex: 1;
+        }
+
+        /* Treasure Chest Container */
+        .treasure-chest-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 24px 0;
+        }
+
+        .chest-wrapper {
+            position: relative;
+            margin-bottom: 16px;
+        }
+
+        .chest-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 280px;
+            height: 280px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.3) 0%, transparent 70%);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.1); }
+        }
+
+        .treasure-chest {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Stars floating around chest */
+        .floating-star {
+            position: absolute;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .floating-star:nth-child(1) {
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .floating-star:nth-child(2) {
+            top: 20%;
+            right: 15%;
+            animation-delay: 0.5s;
+        }
+
+        .floating-star:nth-child(3) {
+            bottom: 20%;
+            left: 15%;
+            animation-delay: 1s;
+        }
+
+        .floating-star:nth-child(4) {
+            bottom: 15%;
+            right: 10%;
+            animation-delay: 1.5s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(180deg); }
+        }
+
+        /* Content Container */
+        .content {
+            padding: 0 16px 100px 16px;
+        }
+
+        /* Section Title */
+        .section-title {
+            font-family: 'Baloo 2', cursive;
+            font-size: 24px;
+            color: #4A3F35;
+            margin: 24px 0 16px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Level Progress Card - Medium Shadow */
+        .level-card {
+            background: white;
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+            margin-bottom: 24px;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+
+        .level-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+
+        .level-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .level-text {
+            font-family: 'Baloo 2', cursive;
+            font-size: 20px;
+            color: #6B4FB8;
+        }
+
+        .level-number {
+            font-family: 'Fredoka One', cursive;
+            font-size: 28px;
+            color: #FF69B4;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: #F3F4F6;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #FFB800 0%, #FF69B4 100%);
+            border-radius: 12px;
+            transition: width 0.3s ease-in-out;
+        }
+
+        .progress-text {
+            font-family: 'Nunito', sans-serif;
+            font-size: 16px;
+            color: #4A3F35;
+            text-align: right;
+        }
+
+        /* Treasure Collection Grid - Light Shadow */
+        .treasure-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .treasure-item {
+            background: white;
+            border-radius: 20px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            cursor: pointer;
+        }
+
+        .treasure-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+        }
+
+        .treasure-item.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .treasure-item.locked:hover {
+            transform: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .treasure-icon-wrapper {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .treasure-name {
+            font-family: 'Nunito', sans-serif;
+            font-size: 14px;
+            color: #4A3F35;
+            text-align: center;
+        }
+
+        .treasure-count {
+            font-family: 'Baloo 2', cursive;
+            font-size: 16px;
+            color: #FF69B4;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <button class="icon-button" aria-label="뒤로가기">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#4A3F35" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 12H5M12 19l-7-7 7-7"></path>
+            </svg>
+        </button>
+        <div class="page-title">보물 상자</div>
+        <button class="icon-button" aria-label="메뉴">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#4A3F35" stroke-width="2.5" stroke-linecap="round">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Treasure Chest -->
+    <div class="treasure-chest-container">
+        <div class="chest-wrapper">
+            <div class="chest-glow"></div>
+            
+            <!-- Floating Stars -->
+            <svg class="floating-star" width="30" height="30" viewBox="0 0 30 30">
+                <path d="M15 2 L18 12 L28 15 L18 18 L15 28 L12 18 L2 15 L12 12 Z" fill="#FFD93D"></path>
+            </svg>
+            <svg class="floating-star" width="25" height="25" viewBox="0 0 30 30">
+                <path d="M15 2 L18 12 L28 15 L18 18 L15 28 L12 18 L2 15 L12 12 Z" fill="#4FC3F7"></path>
+            </svg>
+            <svg class="floating-star" width="28" height="28" viewBox="0 0 30 30">
+                <path d="M15 2 L18 12 L28 15 L18 18 L15 28 L12 18 L2 15 L12 12 Z" fill="#7FE89A"></path>
+            </svg>
+            <svg class="floating-star" width="24" height="24" viewBox="0 0 30 30">
+                <path d="M15 2 L18 12 L28 15 L18 18 L15 28 L12 18 L2 15 L12 12 Z" fill="#FF69B4"></path>
+            </svg>
+
+            <!-- Treasure Chest SVG -->
+            <svg class="treasure-chest" width="220" height="200" viewBox="0 0 220 200">
+                <defs>
+                    <linearGradient id="chestGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" style="stop-color:#FFB800;stop-opacity:1"></stop>
+                        <stop offset="100%" style="stop-color:#FF8C42;stop-opacity:1"></stop>
+                    </linearGradient>
+                    <filter id="chestShadow" x="-50%" y="-50%" width="200%" height="200%">
+                        <fedropshadow dx="0" dy="8" stdDeviation="12" flood-opacity="0.15"></fedropshadow>
+                    </filter>
+                </defs>
+                
+                <!-- Chest lid -->
+                <path d="M40 60 Q40 30 110 30 Q180 30 180 60 L180 90 L40 90 Z" fill="url(#chestGradient)" filter="url(#chestShadow)"></path>
+                
+                <!-- Chest body -->
+                <rect x="40" y="90" width="140" height="90" rx="8" fill="url(#chestGradient)" filter="url(#chestShadow)"></rect>
+                
+                <!-- Lock -->
+                <circle cx="110" cy="120" r="18" fill="#FFD93D"></circle>
+                <rect x="106" y="125" width="8" height="25" rx="4" fill="#FFD93D"></rect>
+                <circle cx="110" cy="120" r="8" fill="#4A3F35"></circle>
+                
+                <!-- Decorative bands -->
+                <rect x="40" y="105" width="140" height="4" fill="#4A3F35" opacity="0.2"></rect>
+                <rect x="40" y="160" width="140" height="4" fill="#4A3F35" opacity="0.2"></rect>
+                
+                <!-- Highlights -->
+                <ellipse cx="70" cy="50" rx="15" ry="8" fill="white" opacity="0.3"></ellipse>
+                <ellipse cx="150" cy="55" rx="12" ry="6" fill="white" opacity="0.2"></ellipse>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+        <!-- Level Progress Section -->
+        <div class="section-title">
+            <svg width="28" height="28" viewBox="0 0 28 28">
+                <path d="M14 2 L17 11 L26 14 L17 17 L14 26 L11 17 L2 14 L11 11 Z" fill="#FFB800"></path>
+            </svg>
+            레벨 진행
+        </div>
+
+        <div class="level-card">
+            <div class="level-header">
+                <span class="level-text">현재 레벨</span>
+                <span class="level-number">7</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 65%;"></div>
+            </div>
+            <div class="progress-text">650 / 1000 XP</div>
+        </div>
+
+        <!-- Treasure Collection Section -->
+        <div class="section-title">
+            <svg width="28" height="28" viewBox="0 0 28 28">
+                <circle cx="14" cy="14" r="12" fill="#7FE89A"></circle>
+                <path d="M9 14 L12 17 L19 10" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+            내 보물 컬렉션
+        </div>
+
+        <div class="treasure-grid">
+            <!-- Treasure Item 1 - Crown -->
+            <div class="treasure-item">
+                <div class="treasure-icon-wrapper">
+                    <svg width="60" height="60" viewBox="0 0 60 60">
+                        <defs>
+                            <linearGradient id="crownGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" style="stop-color:#FFD93D"></stop>
+                                <stop offset="100%" style="stop-color:#FFB800"></stop>
+                            </linearGradient>
+                        </defs>
+                        <path d="M10 40 L15 20 L25 30 L30 15 L35 30 L45 20 L50 40 Z" fill="url(#crownGradient)"></path>
+                        <circle cx="15" cy="20" r="4" fill="#FF69B4"></circle>
+                        <circle cx="30" cy="15" r="4" fill="#FF69B4"></circle>
+                        <circle cx="45" cy="20" r="4" fill="#FF69B4"></circle>
+                    </svg>
+                </div>
+                <div class="treasure-name">황금 왕관</div>
+                <div class="treasure-count">x3</div>
+            </div>
+
+            <!-- Treasure Item 2 - Diamond -->
+            <div class="treasure-item">
+                <div class="treasure-icon-wrapper">
+                    <svg width="60" height="60" viewBox="0 0 60 60">
+                        <defs>
+                            <linearGradient id="diamondGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#4FC3F7"></stop>
+                                <stop offset="100%" style="stop-color:#6B4FB8"></stop>
+                            </linearGradient>
+                        </defs>
+                        <path d="M30 15 L45 25 L40 45 L20 45 L15 25 Z" fill="url(#diamondGradient)"></path>
+                        <path d="M30 15 L35 25 L30 45 L25 25 Z" fill="white" opacity="0.3"></path>
+                    </svg>
+                </div>
+                <div class="treasure-name">다이아몬드</div>
+                <div class="treasure-count">x5</div>
+            </div>
+
+            <!-- Treasure Item 3 - Star Medal -->
+            <div class="treasure-item">
+                <div class="treasure-icon-wrapper">
+                    <svg width="60" height="60" viewBox="0 0 60 60">
+                        <circle cx="30" cy="30" r="20" fill="#FFB800"></circle>
+                        <path d="M30 18 L33 27 L42 30 L33 33 L30 42 L27 33 L18 30 L27 27 Z" fill="#FFD93D"></path>
+                    </svg>
+                </div>
+                <div class="treasure-name">별 메달</div>
+                <div class="treasure-count">x7</div>
+            </div>
+
+            <!-- Treasure Item 4 - Ruby -->
+            <div class="treasure-item">
+                <div class="treasure-icon-wrapper">
+                    <svg width="60" height="60" viewBox="0 0 60 60">
+                        <defs>
+                            <linearGradient id="rubyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" style="stop-color:#FF69B4"></stop>
+                                <stop offset="100%" style="stop-color:#C41E3A"></stop>
+                            </linearGradient>
+                        </defs>
+                        <circle cx="30" cy="30" r="15" fill="url(#rubyGradient)"></circle>
+                        <ellipse cx="25" cy="25" rx="6" ry="4" fill="white" opacity="0.4"></ellipse>
+                    </svg>
+                </div>
+                <div class="treasure-name">루비</div>
+                <div class="treasure-count">x2</div>
+            </div>
+
+            <!-- Treasure Item 5 - Trophy -->
+            <div class="treasure-item">
+                <div class="treasure-icon-wrapper">
+                    <svg width="60" height="60" viewBox="0 0 60 60">
+                        <defs>
+                            <linearGradient id="trophyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" style="stop-color:#FFD93D"></stop>
+                                <stop offset="100%" style="stop-color:#FFB800"></stop>
+                            </linearGradient>
+                        </defs>
+                        <path d="M20 45 L40 45 L38 40 L22 40 Z" fill="url(#trophyGradient)"></path>
+                        <rect x="28" y="30" width="4" height="10" fill="url(#trophyGradient)"></rect>
+                        <path d="M25 15 L35 15 L35 30 L25 30 Z" fill="url(#trophyGradient)"></path>
+                        <path d="M20 15 L25 15 L25 22 Q20 22 20 18 Z" fill="url(#trophyGradient)"></path>
+                        <path d="M35 15 L40 15 Q40 18 40 22 L35 22 Z" fill="url(#trophyGradient)"></path>
+                    </svg>
+                </div>
+                <div class="treasure-name">트로피</div>
+                <div class="treasure-count">x4</div>
+            </div>
+
+            <!-- Treasure Item 6 - Emerald (Locked) -->
+            <div class="treasure-item locked">
+                <div class="treasure-icon-wrapper">
+                    <svg width="60" height="60" viewBox="0 0 60 60">
+                        <defs>
+                            <linearGradient id="emeraldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#7FE89A"></stop>
+                                <stop offset="100%" style="stop-color:#50C878"></stop>
+                            </linearGradient>
+                        </defs>
+                        <rect x="20" y="20" width="20" height="20" fill="url(#emeraldGradient)" transform="rotate(45 30 30)"></rect>
+                        
+                        <!-- Lock overlay -->
+                        <circle cx="30" cy="35" r="10" fill="#E5E7EB"></circle>
+                        <rect x="26" y="38" width="8" height="8" rx="2" fill="#9CA3AF"></rect>
+                        <path d="M26 35 Q26 30 30 30 Q34 30 34 35" stroke="#9CA3AF" stroke-width="2" fill="none"></path>
+                    </svg>
+                </div>
+                <div class="treasure-name">에메랄드</div>
+                <div class="treasure-count">🔒</div>
+            </div>
+        </div>
+    </div>
+
+</body></html>

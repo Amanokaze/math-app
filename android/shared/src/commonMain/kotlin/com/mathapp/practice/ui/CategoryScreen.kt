@@ -1,14 +1,19 @@
 package com.mathapp.practice.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -22,40 +27,37 @@ fun CategoryScreen(
     val ops = MathOperation.entries
     val progressList = remember(progressVersion) { ops.map { operationProgress(it) } }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        // Top bar
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+    Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+        // ── Gradient header ──
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Brush.linearGradient(AppColors.GradientTealBlue))
+                .padding(top = 44.dp, bottom = 16.dp, start = 16.dp, end = 16.dp)
         ) {
-            IconButton(onClick = onBack) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
+            IconButton(onClick = onBack, modifier = Modifier.align(Alignment.CenterStart)) {
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, tint = Color.White)
             }
             Text(
                 L10n.string("select_operation", appLanguage),
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.weight(1f),
-                textAlign = TextAlign.Center
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White,
+                modifier = Modifier.align(Alignment.Center)
             )
-            Spacer(modifier = Modifier.width(48.dp))
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // 2x2 grid of operation cards
+        // ── 2×2 grid ──
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 8.dp),
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             ops.chunked(2).forEachIndexed { rowIdx, rowOps ->
                 Row(
-                    modifier = Modifier.fillMaxWidth().weight(1f),
+                    modifier = Modifier.fillMaxWidth().height(160.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     rowOps.forEachIndexed { colIdx, op ->
@@ -68,10 +70,10 @@ fun CategoryScreen(
                             onClick = { onOperationSelected(op) }
                         )
                     }
-                    // Fill gap if odd number of ops in last row
                     if (rowOps.size < 2) Spacer(modifier = Modifier.weight(1f))
                 }
             }
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
@@ -84,49 +86,60 @@ private fun OperationCard(
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
-    val stagesDone = (progress * 10).toInt()
+    val stagesDone = (progress * 20).toInt()
+    val cardGradient = when (operation) {
+        MathOperation.ADDITION       -> Brush.linearGradient(listOf(Color(0xFFFF6B9D), Color(0xFFFF8E53)))
+        MathOperation.SUBTRACTION    -> Brush.linearGradient(listOf(Color(0xFF667EEA), Color(0xFF764BA2)))
+        MathOperation.MULTIPLICATION -> Brush.linearGradient(listOf(Color(0xFF4FACFE), Color(0xFF00F2FE)))
+        MathOperation.DIVISION       -> Brush.linearGradient(listOf(Color(0xFF43E97B), Color(0xFF38F9D7)))
+    }
 
     Surface(
         modifier = modifier,
         onClick = onClick,
         shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant,
-        tonalElevation = 2.dp
+        color = Color.Transparent,
+        tonalElevation = 0.dp
     ) {
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+                .background(cardGradient, RoundedCornerShape(20.dp))
         ) {
-            // Operation symbol (big)
-            Text(
-                text = operation.symbol,
-                fontSize = 56.sp,
-                color = MaterialTheme.colorScheme.primary
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            // Operation name
-            Text(
-                text = opName(operation, appLanguage),
-                style = MaterialTheme.typography.titleMedium
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            // Progress bar
-            LinearProgressIndicator(
-                progress = { progress },
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(6.dp),
-                trackColor = MaterialTheme.colorScheme.background
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                    text = "$stagesDone / 10",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+                    .fillMaxSize()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = operation.symbol,
+                    fontSize = 52.sp,
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = opName(operation, appLanguage),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                LinearProgressIndicator(
+                    progress = { progress },
+                    modifier = Modifier.fillMaxWidth().height(6.dp),
+                    color = Color.White,
+                    trackColor = Color.White.copy(alpha = 0.3f)
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "$stagesDone / 20",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.White.copy(alpha = 0.9f)
+                )
+            }
         }
     }
 }

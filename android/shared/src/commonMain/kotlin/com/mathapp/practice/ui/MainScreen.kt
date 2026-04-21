@@ -4,7 +4,9 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
@@ -13,30 +15,113 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
+
+// ─── Home Tab ─────────────────────────────────────────────────────────────────
+
+enum class HomeTab { HOME, REPORT, TREASURE }
 
 // ─── Home Screen ──────────────────────────────────────────────────────────────
 
 @Composable
 fun HomeScreen(
     appLanguage: AppLanguage,
-    colorSchemeMode: Int,
-    onColorSchemeChange: (Int) -> Unit,
     appLanguageRaw: String,
     onAppLanguageChange: (String) -> Unit,
-    onResumeClick: (Pair<MathOperation, Int>) -> Unit,
-    onNewStartClick: () -> Unit,
-    onResetProgress: () -> Unit,
+    onOperationSelected: (MathOperation) -> Unit,
+    onQuestStart: (MathOperation) -> Unit,
+    onOpenParentSettings: () -> Unit,
     progressVersion: Int,
     heartsVersion: Int
 ) {
-    val lastStage = remember(progressVersion) { getLastPlayedStage() }
-    var showResetConfirm by remember { mutableStateOf(false) }
-    var showLanguageSheet by remember { mutableStateOf(false) }
+    var activeTab by remember { mutableStateOf(HomeTab.HOME) }
+
+    Scaffold(
+        bottomBar = {
+            HomeBottomBar(
+                activeTab = activeTab,
+                appLanguage = appLanguage,
+                onTabSelected = { activeTab = it }
+            )
+        }
+    ) { paddingValues ->
+        Box(modifier = Modifier.padding(paddingValues)) {
+            when (activeTab) {
+                HomeTab.HOME -> HomeContent(
+                    appLanguage = appLanguage,
+                    appLanguageRaw = appLanguageRaw,
+                    onAppLanguageChange = onAppLanguageChange,
+                    onOperationSelected = onOperationSelected,
+                    onQuestStart = onQuestStart,
+                    onOpenParentSettings = onOpenParentSettings,
+                    progressVersion = progressVersion,
+                    heartsVersion = heartsVersion
+                )
+                HomeTab.REPORT -> LearningReportScreen(
+                    appLanguage = appLanguage,
+                    onBack = { activeTab = HomeTab.HOME }
+                )
+                HomeTab.TREASURE -> TreasureChestScreen(
+                    appLanguage = appLanguage,
+                    onBack = { activeTab = HomeTab.HOME }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun HomeBottomBar(
+    activeTab: HomeTab,
+    appLanguage: AppLanguage,
+    onTabSelected: (HomeTab) -> Unit
+) {
+    NavigationBar(
+        containerColor = MaterialTheme.colorScheme.surface,
+        tonalElevation = 4.dp
+    ) {
+        NavigationBarItem(
+            selected = activeTab == HomeTab.HOME,
+            onClick = { onTabSelected(HomeTab.HOME) },
+            icon = { Text("🏠", fontSize = 22.sp) },
+            label = { Text(L10n.string("nav_home", appLanguage), fontSize = 11.sp) }
+        )
+        NavigationBarItem(
+            selected = activeTab == HomeTab.REPORT,
+            onClick = { onTabSelected(HomeTab.REPORT) },
+            icon = { Text("📊", fontSize = 22.sp) },
+            label = { Text(L10n.string("nav_report", appLanguage), fontSize = 11.sp) }
+        )
+        NavigationBarItem(
+            selected = activeTab == HomeTab.TREASURE,
+            onClick = { onTabSelected(HomeTab.TREASURE) },
+            icon = { Text("🎁", fontSize = 22.sp) },
+            label = { Text(L10n.string("nav_treasure", appLanguage), fontSize = 11.sp) }
+        )
+    }
+}
+
+@Composable
+private fun HomeContent(
+    appLanguage: AppLanguage,
+    appLanguageRaw: String,
+    onAppLanguageChange: (String) -> Unit,
+    onQuestStart: (MathOperation) -> Unit,
+    onOperationSelected: (MathOperation) -> Unit,
+    onOpenParentSettings: () -> Unit,
+    progressVersion: Int,
+    heartsVersion: Int
+) {
     val hearts = rememberLiveHearts(heartsVersion)
     val totalPoints = remember(progressVersion) { getTotalPoints() }
+    val character = remember { getSelectedCharacter() }
+    val dailyQuest = remember(progressVersion) { getOrCreateDailyQuest() }
 
     LaunchedEffect(Unit) {
         if (appLanguageRaw.isEmpty()) onAppLanguageChange(getDeviceLanguageCode())
@@ -46,183 +131,229 @@ fun HomeScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
+                .background(MaterialTheme.colorScheme.background)
+                .verticalScroll(rememberScrollState())
         ) {
-            // ── Hearts + Points header ──
-            HeartsHeader(hearts = hearts, appLanguage = appLanguage, totalPoints = totalPoints)
-
-            Spacer(modifier = Modifier.height(4.dp))
-
             // ── Top bar ──
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Spacer(modifier = Modifier.width(48.dp))
-
-                Text(
-                    text = "Math",
-                    style = MaterialTheme.typography.headlineLarge,
-                    fontSize = 40.sp
-                )
-
-                Box {
-                    var showMenu by remember { mutableStateOf(false) }
-                    IconButton(onClick = { showMenu = true }) {
-                        Icon(Icons.Default.Settings, contentDescription = null)
-                    }
-                    DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
-                        // Theme toggle
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    if (colorSchemeMode == 1)
-                                        L10n.string("dark", appLanguage)
-                                    else
-                                        L10n.string("light", appLanguage)
-                                )
-                            },
-                            onClick = {
-                                showMenu = false
-                                onColorSchemeChange(if (colorSchemeMode == 1) 2 else 1)
-                            }
-                        )
-                        // Language
-                        DropdownMenuItem(
-                            text = { Text(L10n.string("language", appLanguage)) },
-                            onClick = { showMenu = false; showLanguageSheet = true }
-                        )
-                        // Reset progress
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    L10n.string("reset_progress", appLanguage),
-                                    color = MaterialTheme.colorScheme.error
-                                )
-                            },
-                            onClick = { showMenu = false; showResetConfirm = true }
-                        )
-                    }
+                // Settings button → Settings
+                IconButton(onClick = onOpenParentSettings) {
+                    Icon(Icons.Default.Settings, contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-            }
 
-            Spacer(modifier = Modifier.weight(1f))
-
-            // ── Overall progress ──
-            val overallPct = remember(progressVersion) { (overallProgress() * 100).toInt() }
-            if (overallPct > 0) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.padding(bottom = 8.dp)
+                // Hearts + Points (right side)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text(
-                        L10n.string("overall_progress", appLanguage),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    LinearProgressIndicator(
-                        progress = { overallProgress() },
+                    // Coin badge
+                    if (totalPoints > 0) {
+                        Box(
+                            modifier = Modifier
+                                .background(
+                                    Brush.linearGradient(AppColors.GradientGold),
+                                    RoundedCornerShape(20.dp)
+                                )
+                                .padding(horizontal = 10.dp, vertical = 5.dp)
+                        ) {
+                            Text(
+                                text = "🪙 $totalPoints",
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                        }
+                    }
+                    // Heart badge
+                    Box(
                         modifier = Modifier
-                            .fillMaxWidth(0.7f)
-                            .height(6.dp),
-                        trackColor = MaterialTheme.colorScheme.surfaceVariant
-                    )
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        "$overallPct%",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            // ── Resume button ──
-            if (lastStage != null) {
-                val (op, num) = lastStage
-                Button(
-                    onClick = { onResumeClick(lastStage) },
-                    enabled = hearts > 0,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(64.dp)
-                        .padding(horizontal = 16.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary
-                    )
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            .background(AppColors.PrimaryPink, RoundedCornerShape(20.dp))
+                            .padding(horizontal = 10.dp, vertical = 5.dp)
+                    ) {
                         Text(
-                            L10n.string("resume", appLanguage),
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Text(
-                            L10n.string("resume_hint", appLanguage, opName(op, appLanguage), num),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
+                            text = "❤️ $hearts",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
                         )
                     }
                 }
-                Spacer(modifier = Modifier.height(12.dp))
             }
 
-            // ── New Start button ──
-            OutlinedButton(
-                onClick = onNewStartClick,
+            // Space before quest card: reduced when quest is completed (character moves into card)
+            Spacer(modifier = Modifier.height(if (dailyQuest.isCompleted) 8.dp else 72.dp))
+
+            // ── Daily Quest Card ──
+            DailyQuestCard(
+                quest = dailyQuest,
+                appLanguage = appLanguage,
+                onContinue = { onQuestStart(dailyQuest.operation) },
+                characterEmoji = character?.emoji ?: "🐻",
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // ── Operation Grid ──
+            Text(
+                text = L10n.string("select_operation", appLanguage),
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            OperationGrid(
+                appLanguage = appLanguage,
+                progressVersion = progressVersion,
+                onOperationSelected = onOperationSelected
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        // ── Character overlay (top-right, non-scrolling): only when quest is not completed ──
+        if (!dailyQuest.isCompleted) {
+            val charEmoji = character?.emoji ?: "🐻"
+            Text(
+                text = charEmoji,
+                fontSize = 72.sp,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-                    .padding(horizontal = 16.dp),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Text(
-                    L10n.string("new_start", appLanguage),
-                    style = MaterialTheme.typography.titleMedium
-                )
-            }
-
-            Spacer(modifier = Modifier.weight(1f))
-        }
-
-        // ── Language picker ──
-        if (showLanguageSheet) {
-            LanguagePickerSheet(
-                selectedLanguage = AppLanguage.fromCode(
-                    appLanguageRaw.ifEmpty { getDeviceLanguageCode() }
-                ),
-                onLanguageSelected = {
-                    onAppLanguageChange(it.code)
-                    showLanguageSheet = false
-                },
-                onDismiss = { showLanguageSheet = false },
-                appLanguage = appLanguage
+                    .align(Alignment.TopEnd)
+                    .padding(top = 52.dp, end = 8.dp)
             )
         }
+    }
+}
 
-        // ── Reset confirm ──
-        if (showResetConfirm) {
-            AlertDialog(
-                onDismissRequest = { showResetConfirm = false },
-                title = { Text(L10n.string("reset_progress_confirm_title", appLanguage)) },
-                text = { Text(L10n.string("reset_progress_confirm_message", appLanguage)) },
-                confirmButton = {
-                    Button(
-                        onClick = { onResetProgress(); showResetConfirm = false },
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
-                    ) { Text(L10n.string("reset", appLanguage)) }
-                },
-                dismissButton = {
-                    OutlinedButton(onClick = { showResetConfirm = false }) {
-                        Text(L10n.string("cancel", appLanguage))
+// ─── Daily Quest Card ─────────────────────────────────────────────────────────
+
+@Composable
+fun DailyQuestCard(
+    quest: DailyQuest,
+    appLanguage: AppLanguage,
+    onContinue: () -> Unit,
+    characterEmoji: String = "🐻",
+    modifier: Modifier = Modifier
+) {
+    val questGradient = if (quest.isCompleted)
+        listOf(Color(0xFF43A047), Color(0xFF66BB6A))
+    else
+        AppColors.GradientTealBlue
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(
+                Brush.linearGradient(questGradient),
+                shape = RoundedCornerShape(20.dp)
+            )
+            .padding(16.dp)
+    ) {
+        if (quest.isCompleted) {
+            // ── Completed state: character inside the card ──
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Character in white circle
+                Surface(
+                    shape = RoundedCornerShape(50),
+                    color = Color.White.copy(alpha = 0.25f),
+                    modifier = Modifier.size(72.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Text(characterEmoji, fontSize = 44.sp)
                     }
                 }
-            )
+                Column {
+                    Text(
+                        text = L10n.string("quest_completed_title", appLanguage),
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        repeat(3) {
+                            Text("⭐", fontSize = 24.sp)
+                        }
+                    }
+                }
+            }
+        } else {
+            // ── In progress state ──
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("🎯", fontSize = 36.sp)
+                Spacer(modifier = Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = L10n.string("quest_title", appLanguage),
+                        fontSize = 14.sp,
+                        color = Color.White.copy(alpha = 0.85f)
+                    )
+                    val descKey = when (quest.questType) {
+                        QuestType.PROGRESS -> "quest_desc_progress"
+                        QuestType.REVIEW   -> "quest_desc_review"
+                        QuestType.NEW      -> "quest_desc_new"
+                    }
+                    Text(
+                        text = "${L10n.string(descKey, appLanguage, opName(quest.operation, appLanguage), quest.stageNumber)}  " +
+                            L10n.string("quest_problems", appLanguage, quest.targetCount),
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    // Progress bar
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(6.dp)
+                            .background(Color.White.copy(alpha = 0.3f), RoundedCornerShape(3.dp))
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(quest.progressFraction)
+                                .fillMaxHeight()
+                                .background(Color.White, RoundedCornerShape(3.dp))
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "${quest.progress}/${quest.targetCount}",
+                        fontSize = 12.sp,
+                        color = Color.White.copy(alpha = 0.9f)
+                    )
+                }
+                Spacer(modifier = Modifier.width(12.dp))
+                // Continue button
+                Button(
+                    onClick = onContinue,
+                    modifier = Modifier.height(68.dp),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.White.copy(alpha = 0.25f)
+                    ),
+                    contentPadding = PaddingValues(horizontal = 12.dp)
+                ) {
+                    Text(
+                        text = L10n.string("quest_continue", appLanguage),
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
+            }
         }
     }
 }
@@ -267,7 +398,6 @@ fun HeartsHeader(hearts: Int, appLanguage: AppLanguage, totalPoints: Int? = null
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = if (totalPoints != null) Arrangement.SpaceBetween else Arrangement.Center
     ) {
-        // Hearts + recharge timer
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 L10n.string("hearts_display", appLanguage, hearts, MAX_HEARTS),
@@ -285,13 +415,124 @@ fun HeartsHeader(hearts: Int, appLanguage: AppLanguage, totalPoints: Int? = null
             }
         }
 
-        // Total points (HomeScreen only)
         if (totalPoints != null && totalPoints > 0) {
             Text(
                 L10n.string("total_points_format", appLanguage, totalPoints),
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary
+                color = AppColors.WarnGold,
+                fontWeight = FontWeight.Bold
             )
+        }
+    }
+}
+
+// ─── Operation Grid ───────────────────────────────────────────────────────────
+
+@Composable
+private fun OperationGrid(
+    appLanguage: AppLanguage,
+    progressVersion: Int,
+    onOperationSelected: (MathOperation) -> Unit
+) {
+    val operationInfo = listOf(
+        Triple(MathOperation.ADDITION,       "➕", AppColors.GradientPink),
+        Triple(MathOperation.SUBTRACTION,    "➖", AppColors.GradientTeal),
+        Triple(MathOperation.MULTIPLICATION, "✖️",  AppColors.GradientPurple),
+        Triple(MathOperation.DIVISION,       "➗", AppColors.GradientGold)
+    )
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        operationInfo.chunked(2).forEach { row ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                row.forEach { (op, icon, gradient) ->
+                    val progress = remember(progressVersion) { operationProgress(op) }
+                    val totalStars = remember(progressVersion) { stagesFor(op).sumOf { it.stars } }
+                    OperationTile(
+                        icon = icon,
+                        name = opName(op, appLanguage),
+                        totalStars = totalStars,
+                        progress = progress,
+                        gradient = gradient,
+                        onClick = { onOperationSelected(op) },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun OperationTile(
+    icon: String,
+    name: String,
+    totalStars: Int,
+    progress: Float,
+    gradient: List<Color>,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        onClick = onClick,
+        modifier = modifier,
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.surface,
+        shadowElevation = 4.dp
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(52.dp)
+                    .background(Brush.linearGradient(gradient), RoundedCornerShape(14.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(icon, fontSize = 26.sp)
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = name,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "⭐ $totalStars",
+                fontSize = 12.sp,
+                color = AppColors.WarnGold,
+                fontWeight = FontWeight.SemiBold
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(6.dp)
+                    .background(
+                        MaterialTheme.colorScheme.surfaceVariant,
+                        RoundedCornerShape(3.dp)
+                    )
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(progress.coerceIn(0f, 1f))
+                        .fillMaxHeight()
+                        .background(
+                            Brush.linearGradient(gradient),
+                            RoundedCornerShape(3.dp)
+                        )
+                )
+            }
         }
     }
 }

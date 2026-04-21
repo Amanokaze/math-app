@@ -1,0 +1,451 @@
+<!DOCTYPE html><html lang="ko"><head><base href="https://forge.moonchild.ai/site/7633071c17688dddda3f6c9e676fb4ded3cf9166481349f88615c0e4a0b56420/">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>수학 게임 - 문제 풀기</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&amp;family=Baloo+2:wght@700;800&amp;family=Nunito:wght@700;800&amp;display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #FFE5F0 0%, #E5F0FF 50%, #F0FFE5 100%);
+            min-height: 932px;
+            width: 430px;
+            margin: 0 auto;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Floating Clouds - Upper areas only */
+        .cloud {
+            position: absolute;
+            opacity: 0.6;
+            z-index: 1;
+        }
+
+        .cloud1 {
+            top: 80px;
+            left: 20px;
+            width: 80px;
+            height: 40px;
+        }
+
+        .cloud2 {
+            top: 120px;
+            right: 30px;
+            width: 100px;
+            height: 50px;
+        }
+
+        .cloud3 {
+            top: 200px;
+            left: 50%;
+            width: 70px;
+            height: 35px;
+        }
+
+        /* Timer Bar */
+        .timer-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.3);
+            z-index: 10;
+        }
+
+        .timer-progress {
+            height: 100%;
+            width: 20%;
+            background: linear-gradient(90deg, #FFD93D 0%, #FFB800 100%);
+            transition: width 1s linear;
+        }
+
+        /* Header */
+        .header {
+            position: relative;
+            z-index: 10;
+            padding: 24px 16px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 12px;
+        }
+
+        .back-button {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            background: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: all 0.2s ease-in-out;
+        }
+
+        .back-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+        }
+
+        .back-button:active {
+            transform: translateY(0);
+        }
+
+        /* Progress Dots */
+        .progress-dots {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .progress-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.6);
+            transition: all 0.3s ease;
+        }
+
+        .progress-dot.completed {
+            background: #7FE89A;
+            width: 8px;
+            height: 8px;
+        }
+
+        .progress-dot.active {
+            background: linear-gradient(135deg, #FFD93D 0%, #FFB800 100%);
+            width: 24px;
+            height: 8px;
+            border-radius: 4px;
+        }
+
+        /* Problem Section */
+        .problem-section {
+            position: relative;
+            z-index: 5;
+            padding: 0 24px;
+            margin-top: 24px;
+        }
+
+        .problem-label-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .fox-character {
+            width: 56px;
+            height: 56px;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .problem-label {
+            font-family: 'Baloo 2', cursive;
+            font-weight: 700;
+            font-size: 20px;
+            color: #6B4FB8;
+        }
+
+        /* Math Card */
+        .math-card {
+            background: white;
+            border-radius: 24px;
+            padding: 32px 24px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+            margin-bottom: 24px;
+        }
+
+        .math-expression {
+            font-family: 'Fredoka One', cursive;
+            font-size: 56px;
+            text-align: center;
+            margin-bottom: 24px;
+            line-height: 1.2;
+            color: #4A3F35;
+        }
+
+        .answer-input {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto;
+            border: 3px dashed #E5E7EB;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Fredoka One', cursive;
+            font-size: 48px;
+            color: #4A3F35;
+            background: #F9FAFB;
+        }
+
+        /* Calculator Section */
+        .calculator-section {
+            padding: 0 24px;
+            position: relative;
+            z-index: 5;
+        }
+
+        .calculator-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .calc-button {
+            width: 100%;
+            height: 80px;
+            border-radius: 16px;
+            background: white;
+            border: none;
+            font-family: 'Baloo 2', cursive;
+            font-weight: 700;
+            font-size: 28px;
+            color: #4A3F35;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: all 0.2s ease-in-out;
+        }
+
+        .calc-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+        }
+
+        .calc-button:active {
+            transform: translateY(0);
+        }
+
+        .calculator-bottom {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .calc-button-zero {
+            background: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .calc-button-backspace {
+            background: linear-gradient(135deg, #FF69B4 0%, #FF8FAB 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(255,105,180,0.3);
+        }
+
+        .calc-button-backspace:hover {
+            box-shadow: 0 6px 16px rgba(255,105,180,0.4);
+        }
+
+        /* Submit Button */
+        .submit-button {
+            width: 100%;
+            height: 70px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #4FC3F7 0%, #3BA5D8 100%);
+            border: none;
+            font-family: 'Baloo 2', cursive;
+            font-weight: 700;
+            font-size: 24px;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(79,195,247,0.3);
+            transition: all 0.2s ease-in-out;
+            margin-bottom: 32px;
+        }
+
+        .submit-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 28px rgba(79,195,247,0.4);
+        }
+
+        .submit-button:active {
+            transform: translateY(0);
+        }
+
+        /* Sparkles */
+        .sparkle {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            opacity: 0.6;
+            animation: twinkle 2s ease-in-out infinite;
+            z-index: 2;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(1) rotate(0deg); }
+            50% { opacity: 0.8; transform: scale(1.2) rotate(180deg); }
+        }
+
+        .sparkle1 {
+            top: 140px;
+            right: 40px;
+            animation-delay: 0s;
+        }
+
+        .sparkle2 {
+            top: 180px;
+            left: 30px;
+            animation-delay: 0.7s;
+        }
+
+        .sparkle3 {
+            top: 260px;
+            right: 60px;
+            animation-delay: 1.4s;
+        }
+    </style>
+</head>
+<body>
+    <!-- Timer Bar -->
+    <div class="timer-bar">
+        <div class="timer-progress"></div>
+    </div>
+
+    <!-- Floating Clouds -->
+    <svg class="cloud cloud1" viewBox="0 0 100 50">
+        <ellipse cx="25" cy="30" rx="20" ry="15" fill="white"></ellipse>
+        <ellipse cx="45" cy="25" rx="25" ry="18" fill="white"></ellipse>
+        <ellipse cx="65" cy="30" rx="20" ry="15" fill="white"></ellipse>
+    </svg>
+
+    <svg class="cloud cloud2" viewBox="0 0 120 60">
+        <ellipse cx="30" cy="35" rx="25" ry="18" fill="white"></ellipse>
+        <ellipse cx="55" cy="30" rx="30" ry="22" fill="white"></ellipse>
+        <ellipse cx="80" cy="35" rx="25" ry="18" fill="white"></ellipse>
+    </svg>
+
+    <svg class="cloud cloud3" viewBox="0 0 90 45">
+        <ellipse cx="22" cy="27" rx="18" ry="14" fill="white"></ellipse>
+        <ellipse cx="42" cy="23" rx="22" ry="16" fill="white"></ellipse>
+        <ellipse cx="62" cy="27" rx="18" ry="14" fill="white"></ellipse>
+    </svg>
+
+    <!-- Sparkles -->
+    <svg class="sparkle sparkle1" viewBox="0 0 24 24">
+        <path d="M12 0 L14 10 L24 12 L14 14 L12 24 L10 14 L0 12 L10 10 Z" fill="#FFD93D"></path>
+    </svg>
+    <svg class="sparkle sparkle2" viewBox="0 0 24 24">
+        <path d="M12 0 L14 10 L24 12 L14 14 L12 24 L10 14 L0 12 L10 10 Z" fill="#4FC3F7"></path>
+    </svg>
+    <svg class="sparkle sparkle3" viewBox="0 0 24 24">
+        <path d="M12 0 L14 10 L24 12 L14 14 L12 24 L10 14 L0 12 L10 10 Z" fill="#FF69B4"></path>
+    </svg>
+
+    <!-- Header -->
+    <div class="header">
+        <button class="back-button">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M15 18L9 12L15 6" stroke="#6B4FB8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+        </button>
+
+        <div class="progress-dots">
+            <div class="progress-dot completed"></div>
+            <div class="progress-dot active"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+        </div>
+    </div>
+
+    <!-- Problem Section -->
+    <div class="problem-section">
+        <div class="problem-label-container">
+            <!-- Small Fox Character -->
+            <svg class="fox-character" viewBox="0 0 120 120">
+                <defs>
+                    <filter id="foxShadow" x="-50%" y="-50%" width="200%" height="200%">
+                        <fedropshadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.15"></fedropshadow>
+                    </filter>
+                </defs>
+                <!-- Fox body -->
+                <ellipse cx="60" cy="75" rx="28" ry="32" fill="#FF8C42" filter="url(#foxShadow)"></ellipse>
+                <!-- Fox head -->
+                <circle cx="60" cy="45" r="22" fill="#FF8C42" filter="url(#foxShadow)"></circle>
+                <!-- Fox ears -->
+                <path d="M 45 35 L 40 20 L 50 30 Z" fill="#FF8C42" filter="url(#foxShadow)"></path>
+                <path d="M 75 35 L 80 20 L 70 30 Z" fill="#FF8C42" filter="url(#foxShadow)"></path>
+                <path d="M 45 32 L 42 24 L 48 30 Z" fill="#FFE5D9"></path>
+                <path d="M 75 32 L 78 24 L 72 30 Z" fill="#FFE5D9"></path>
+                <!-- Face details -->
+                <circle cx="52" cy="42" r="3" fill="#4A3F35"></circle>
+                <circle cx="68" cy="42" r="3" fill="#4A3F35"></circle>
+                <ellipse cx="60" cy="50" rx="3" ry="4" fill="#4A3F35"></ellipse>
+                <path d="M 60 50 Q 55 54 52 52" stroke="#4A3F35" stroke-width="1.5" fill="none" stroke-linecap="round"></path>
+                <path d="M 60 50 Q 65 54 68 52" stroke="#4A3F35" stroke-width="1.5" fill="none" stroke-linecap="round"></path>
+                <!-- Belly patch -->
+                <ellipse cx="60" cy="80" rx="16" ry="20" fill="#FFE5D9"></ellipse>
+                <!-- Tail -->
+                <ellipse cx="35" cy="85" rx="12" ry="18" fill="#FF8C42" filter="url(#foxShadow)"></ellipse>
+                <ellipse cx="35" cy="88" rx="8" ry="12" fill="#FFE5D9"></ellipse>
+                <!-- Small backpack -->
+                <rect x="65" y="70" width="14" height="16" rx="3" fill="#6B4FB8" filter="url(#foxShadow)"></rect>
+                <rect x="68" y="72" width="8" height="3" rx="1" fill="#4FC3F7"></rect>
+            </svg>
+            <span class="problem-label">문제 2/10</span>
+        </div>
+
+        <!-- Math Card -->
+        <div class="math-card">
+            <div class="math-expression">2 + 1</div>
+            <div class="answer-input">3</div>
+        </div>
+    </div>
+
+    <!-- Calculator Section -->
+    <div class="calculator-section">
+        <div class="calculator-grid">
+            <button class="calc-button">1</button>
+            <button class="calc-button">2</button>
+            <button class="calc-button">3</button>
+            <button class="calc-button">4</button>
+            <button class="calc-button">5</button>
+            <button class="calc-button">6</button>
+            <button class="calc-button">7</button>
+            <button class="calc-button">8</button>
+            <button class="calc-button">9</button>
+        </div>
+
+        <div class="calculator-bottom">
+            <button class="calc-button calc-button-zero">0</button>
+            <button class="calc-button calc-button-backspace">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" style="margin: 0 auto; display: block;">
+                    <path d="M20 5H9L3 12L9 19H20C21.1 19 22 18.1 22 17V7C22 5.9 21.1 5 20 5Z" stroke="white" stroke-width="2" fill="none"></path>
+                    <path d="M18 9L12 15M12 9L18 15" stroke="white" stroke-width="2" stroke-linecap="round"></path>
+                </svg>
+            </button>
+        </div>
+
+        <button class="submit-button">제출하기</button>
+    </div>
+
+</body></html>

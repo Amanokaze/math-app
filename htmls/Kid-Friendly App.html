@@ -1,0 +1,398 @@
+<!DOCTYPE html><html lang="ko"><head><base href="https://forge.moonchild.ai/site/6df7cdb63537f984165051772bef389088dfc942adc541ad58dbcfd9bf3585f3/">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>부모 설정 - 수학 학습 앱</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&amp;family=Baloo+2:wght@700&amp;family=Nunito:wght@700&amp;display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #FFE5F4 0%, #E5D4FF 50%, #D4F4FF 100%);
+            min-height: 100vh;
+            padding-bottom: 100px;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #6B4FB8 0%, #8B6FD8 100%);
+            padding: 24px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 12px rgba(107, 79, 184, 0.2);
+        }
+
+        .back-button {
+            width: 56px;
+            height: 56px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .back-button:active {
+            transform: translateY(0);
+        }
+
+        .back-button svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .header-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 32px;
+            color: #FFFFFF;
+            flex: 1;
+            text-align: center;
+            margin: 0 16px;
+        }
+
+        .header-spacer {
+            width: 56px;
+        }
+
+        .content {
+            padding: 24px 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .settings-section {
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-family: 'Baloo 2', cursive;
+            font-size: 20px;
+            color: #4A3F35;
+            margin-bottom: 16px;
+            padding-left: 8px;
+        }
+
+        .setting-card {
+            background: #FFFFFF;
+            border-radius: 20px;
+            padding: 20px 24px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .setting-card:hover {
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .setting-label {
+            font-family: 'Baloo 2', cursive;
+            font-size: 18px;
+            color: #4A3F35;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .setting-icon {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toggle-switch {
+            width: 64px;
+            height: 36px;
+            background: #E5E7EB;
+            border-radius: 18px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .toggle-switch.active {
+            background: linear-gradient(135deg, #7FE89A 0%, #5FD87A 100%);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 28px;
+            height: 28px;
+            background: #FFFFFF;
+            border-radius: 50%;
+            top: 4px;
+            left: 4px;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .toggle-switch.active::after {
+            left: 32px;
+        }
+
+        .input-card {
+            background: #FFFFFF;
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .input-label {
+            font-family: 'Baloo 2', cursive;
+            font-size: 18px;
+            color: #4A3F35;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .input-field {
+            width: 100%;
+            height: 64px;
+            border: 2px solid #E5E7EB;
+            border-radius: 16px;
+            padding: 0 20px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            color: #4A3F35;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #6B4FB8;
+            box-shadow: 0 0 0 3px rgba(107, 79, 184, 0.1);
+        }
+
+        .logout-button {
+            width: 100%;
+            height: 80px;
+            background: linear-gradient(135deg, #FF69B4 0%, #FF4D9E 100%);
+            border: none;
+            border-radius: 20px;
+            font-family: 'Baloo 2', cursive;
+            font-size: 24px;
+            color: #FFFFFF;
+            cursor: pointer;
+            margin-top: 8px;
+            box-shadow: 0 8px 24px rgba(255, 105, 180, 0.15);
+            transition: all 0.2s ease-in-out;
+        }
+
+        .logout-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(255, 105, 180, 0.2);
+        }
+
+        .logout-button:active {
+            transform: translateY(0);
+        }
+
+        .exit-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 16px 20px 24px;
+            background: linear-gradient(to top, rgba(255, 229, 244, 0.95) 0%, rgba(255, 229, 244, 0) 100%);
+            display: flex;
+            justify-content: center;
+        }
+
+        .hold-exit-button {
+            width: 100%;
+            max-width: 600px;
+            height: 70px;
+            background: #FFFFFF;
+            border: 2px solid #E5E7EB;
+            border-radius: 20px;
+            font-family: 'Baloo 2', cursive;
+            font-size: 20px;
+            color: #4A3F35;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .hold-exit-button:hover {
+            border-color: #FF69B4;
+            transform: translateY(-1px);
+        }
+
+        .hold-progress {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 0;
+            background: linear-gradient(135deg, #FFB8D8 0%, #FF69B4 100%);
+            transition: width 2s linear;
+            border-radius: 18px;
+        }
+
+        .hold-text {
+            position: relative;
+            z-index: 1;
+            font-weight: 700;
+        }
+
+        @media (max-width: 480px) {
+            .header-title {
+                font-size: 28px;
+            }
+
+            .setting-card {
+                padding: 16px 20px;
+            }
+
+            .setting-label {
+                font-size: 16px;
+            }
+
+            .logout-button {
+                height: 70px;
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <button class="back-button" onclick="goBack()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round">
+                <path d="M15 18l-6-6 6-6"></path>
+            </svg>
+        </button>
+        <h1 class="header-title">부모 설정</h1>
+        <div class="header-spacer"></div>
+    </div>
+
+    <div class="content">
+        <div class="settings-section">
+            <h2 class="section-title">알림 설정</h2>
+            <div class="setting-card">
+                <div class="setting-label">
+                    <div class="setting-icon">
+                        <svg width="32" height="32" viewBox="0 0 32 32">
+                            <path d="M16 6C14 6 12 7 12 9v7c0 2-2 3-2 3h12s-2-1-2-3V9c0-2-2-3-4-3z" fill="#FFB800"></path>
+                            <circle cx="16" cy="24" r="2" fill="#FFB800"></circle>
+                        </svg>
+                    </div>
+                    <span>학습 알림</span>
+                </div>
+                <div class="toggle-switch active" onclick="toggleSwitch(this)"></div>
+            </div>
+            <div class="setting-card">
+                <div class="setting-label">
+                    <div class="setting-icon">
+                        <svg width="32" height="32" viewBox="0 0 32 32">
+                            <path d="M16 4L6 10v8c0 6 4 10 10 12 6-2 10-6 10-12v-8L16 4z" fill="#4FC3F7"></path>
+                        </svg>
+                    </div>
+                    <span>성과 알림</span>
+                </div>
+                <div class="toggle-switch active" onclick="toggleSwitch(this)"></div>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <h2 class="section-title">학습 관리</h2>
+            <div class="setting-card">
+                <div class="setting-label">
+                    <div class="setting-icon">
+                        <svg width="32" height="32" viewBox="0 0 32 32">
+                            <circle cx="16" cy="16" r="10" fill="none" stroke="#6B4FB8" stroke-width="3"></circle>
+                            <path d="M16 11v5l3 3" stroke="#6B4FB8" stroke-width="3" stroke-linecap="round"></path>
+                        </svg>
+                    </div>
+                    <span>시간 제한</span>
+                </div>
+                <div class="toggle-switch" onclick="toggleSwitch(this)"></div>
+            </div>
+            <div class="input-card">
+                <label class="input-label">일일 학습 목표 (분)</label>
+                <input type="number" class="input-field" value="30" min="5" max="120" step="5">
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <h2 class="section-title">계정</h2>
+            <button class="logout-button">로그아웃</button>
+        </div>
+    </div>
+
+    <div class="exit-container">
+        <button class="hold-exit-button" id="holdExitBtn">
+            <div class="hold-progress" id="holdProgress"></div>
+            <span class="hold-text">길게 눌러서 부모 설정 나가기</span>
+        </button>
+    </div>
+
+    <script>
+        function goBack() {
+            console.log('뒤로 가기');
+        }
+
+        function toggleSwitch(element) {
+            element.classList.toggle('active');
+        }
+
+        const holdExitBtn = document.getElementById('holdExitBtn');
+        const holdProgress = document.getElementById('holdProgress');
+        let holdTimer = null;
+        let holdStartTime = null;
+
+        holdExitBtn.addEventListener('mousedown', startHold);
+        holdExitBtn.addEventListener('touchstart', startHold);
+        holdExitBtn.addEventListener('mouseup', endHold);
+        holdExitBtn.addEventListener('touchend', endHold);
+        holdExitBtn.addEventListener('mouseleave', endHold);
+
+        function startHold(e) {
+            e.preventDefault();
+            holdStartTime = Date.now();
+            holdProgress.style.transition = 'width 2s linear';
+            holdProgress.style.width = '100%';
+
+            holdTimer = setTimeout(() => {
+                console.log('부모 설정 나가기');
+                holdProgress.style.width = '0';
+                holdProgress.style.transition = 'none';
+            }, 2000);
+        }
+
+        function endHold(e) {
+            if (holdTimer) {
+                clearTimeout(holdTimer);
+                holdTimer = null;
+            }
+            holdProgress.style.transition = 'width 0.3s ease-out';
+            holdProgress.style.width = '0';
+        }
+    </script>
+
+</body></html>

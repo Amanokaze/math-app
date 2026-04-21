@@ -2,6 +2,262 @@ package com.mathapp.practice.ui
 
 import kotlin.random.Random
 
+// ─── Character System ─────────────────────────────────────────────────────────
+
+enum class CharacterType(val emoji: String, val nameKey: String) {
+    BEAR("🐻", "char_bear"),
+    RABBIT("🐰", "char_rabbit"),
+    FOX("🦊", "char_fox"),
+    OWL("🦉", "char_owl")
+}
+
+fun getSelectedCharacter(): CharacterType? {
+    val idx = AppSettings.getInt("selectedCharacter", -1)
+    return if (idx >= 0 && idx < CharacterType.entries.size) CharacterType.entries[idx] else null
+}
+
+fun setSelectedCharacter(char: CharacterType) {
+    AppSettings.setInt("selectedCharacter", CharacterType.entries.indexOf(char))
+}
+
+fun hasSeenOnboarding(): Boolean = AppSettings.getInt("hasSeenOnboarding", 0) == 1
+
+fun markOnboardingSeen() = AppSettings.setInt("hasSeenOnboarding", 1)
+
+// ─── Daily Quest ──────────────────────────────────────────────────────────────
+
+enum class QuestType { PROGRESS, REVIEW, NEW }
+
+data class DailyQuest(
+    val operation: MathOperation,
+    val stageNumber: Int,
+    val questType: QuestType,
+    val targetCount: Int,
+    val progress: Int
+) {
+    val isCompleted: Boolean get() = progress >= targetCount
+    val progressFraction: Float get() = (progress.toFloat() / targetCount).coerceIn(0f, 1f)
+}
+
+fun getTodayDateString(): String {
+    val epochDay = getCurrentEpochSeconds() / 86400L
+    return epochDay.toString()
+}
+
+/**
+ * Selects an appropriate operation + stage for today's quest based on learner progress.
+ *
+ * Distribution:
+ *  - 60 %: continue current progress (last played op, next uncompleted stage)
+ *  - 30 %: review the weakest (1-star) stage
+ *  - 10 %: introduce a not-yet-started operation at stage 1
+ */
+private fun chooseDailyQuestParams(): Triple<MathOperation, Int, QuestType> {
+    data class OpStat(val op: MathOperation, val highestCleared: Int, val weakestStage: Int?)
+
+    val stats = MathOperation.entries.map { op ->
+        val stages = stagesFor(op)
+        val highestCleared = stages.filter { it.stars > 0 }.maxOfOrNull { it.number } ?: 0
+        val weakestStage = stages.filter { it.stars == 1 }.minByOrNull { it.number }?.number
+        OpStat(op, highestCleared, weakestStage)
+    }
+
+    val started    = stats.filter { it.highestCleared > 0 }
+    val notStarted = stats.filter { it.highestCleared == 0 }
+    val withWeakness = stats.filter { it.weakestStage != null }
+
+    val rand = Random.nextFloat()
+
+    // 10 %: introduce a new operation
+    if (notStarted.isNotEmpty() && rand < 0.10f) {
+        val pick = notStarted.random()
+        return Triple(pick.op, 1, QuestType.NEW)
+    }
+
+    // 30 %: review the weakest stage
+    if (withWeakness.isNotEmpty() && rand < 0.40f) {
+        val pick = withWeakness.random()
+        return Triple(pick.op, pick.weakestStage!!, QuestType.REVIEW)
+    }
+
+    // 60 %: continue progress on the last-played (or most-advanced) operation
+    if (started.isNotEmpty()) {
+        val lastOp = getLastPlayedStage()?.first
+        val stat = if (lastOp != null)
+            stats.find { it.op == lastOp } ?: started.maxByOrNull { it.highestCleared }!!
+        else
+            started.maxByOrNull { it.highestCleared }!!
+        val nextStage = (stat.highestCleared + 1).coerceAtMost(20)
+        return Triple(stat.op, nextStage, QuestType.PROGRESS)
+    }
+
+    // Fallback: no progress at all — start with addition stage 1
+    return Triple(MathOperation.ADDITION, 1, QuestType.NEW)
+}
+
+fun getOrCreateDailyQuest(): DailyQuest {
+    val today = getTodayDateString()
+    val savedDate = AppSettings.getString("questDate", "")
+    if (savedDate != today) {
+        // New day — choose quest based on learner progress
+        val (op, stage, type) = chooseDailyQuestParams()
+        AppSettings.setString("questDate", today)
+        AppSettings.setString("questOp", op.key)
+        AppSettings.setInt("questStage", stage)
+        AppSettings.setString("questType", type.name)
+        AppSettings.setInt("questTarget", 10)
+        AppSettings.setInt("questProgress", 0)
+    }
+    val opKey = AppSettings.getString("questOp", MathOperation.ADDITION.key)
+    val op = MathOperation.entries.find { it.key == opKey } ?: MathOperation.ADDITION
+    val stage = AppSettings.getInt("questStage", 1)
+    val typeStr = AppSettings.getString("questType", QuestType.PROGRESS.name)
+    val type = QuestType.entries.find { it.name == typeStr } ?: QuestType.PROGRESS
+    return DailyQuest(
+        operation = op,
+        stageNumber = stage,
+        questType = type,
+        targetCount = AppSettings.getInt("questTarget", 10),
+        progress = AppSettings.getInt("questProgress", 0)
+    )
+}
+
+fun addQuestProgress(amount: Int) {
+    val quest = getOrCreateDailyQuest()
+    if (!quest.isCompleted) {
+        val newProgress = (quest.progress + amount).coerceAtMost(quest.targetCount)
+        AppSettings.setInt("questProgress", newProgress)
+    }
+}
+
+// ─── Badge System ─────────────────────────────────────────────────────────────
+
+data class Badge(
+    val id: String,
+    val emoji: String,
+    val nameKey: String,
+    val descKey: String
+)
+
+val ALL_BADGES = listOf(
+    Badge("first_step",  "🌟", "badge_first_step",  "badge_first_step_desc"),
+    Badge("speed_demon", "⚡", "badge_speed_demon",  "badge_speed_demon_desc"),
+    Badge("perfectionist","💎","badge_perfectionist","badge_perfectionist_desc"),
+    Badge("math_master", "🏆", "badge_math_master",  "badge_math_master_desc"),
+    Badge("consistent",  "🔥", "badge_consistent",   "badge_consistent_desc"),
+    Badge("explorer",    "🗺️", "badge_explorer",     "badge_explorer_desc")
+)
+
+fun isBadgeEarned(badgeId: String): Boolean =
+    AppSettings.getInt("badge_$badgeId", 0) == 1
+
+fun earnBadge(badgeId: String) = AppSettings.setInt("badge_$badgeId", 1)
+
+fun checkAndAwardBadges() {
+    // First step — complete any stage
+    if (ALL_STAGES.any { it.stars > 0 }) earnBadge("first_step")
+    // Perfectionist — 3 stars on 10+ stages
+    if (ALL_STAGES.count { it.stars == 3 } >= 10) earnBadge("perfectionist")
+    // Math master — all 40 stages cleared
+    if (ALL_STAGES.all { it.stars > 0 }) earnBadge("math_master")
+    // Explorer — at least 1 stage cleared in all 4 operations
+    if (MathOperation.entries.all { op -> stagesFor(op).any { it.stars > 0 } }) earnBadge("explorer")
+    // Speed demon — any stage with 3 stars
+    if (ALL_STAGES.any { it.stars == 3 }) earnBadge("speed_demon")
+}
+
+// ─── Streak Tracking ──────────────────────────────────────────────────────────
+
+fun recordPlayToday() {
+    val today = getTodayDateString()
+    val lastPlay = AppSettings.getString("lastPlayDate", "")
+    if (lastPlay == today) return
+    val yesterday = (getTodayDateString().toLongOrNull()?.minus(1))?.toString() ?: ""
+    val streak = if (lastPlay == yesterday) AppSettings.getInt("streakDays", 0) + 1 else 1
+    AppSettings.setString("lastPlayDate", today)
+    AppSettings.setInt("streakDays", streak)
+    if (streak >= 7) earnBadge("consistent")
+}
+
+fun getStreakDays(): Int = AppSettings.getInt("streakDays", 0)
+
+// ─── Daily Stats (for Report) ─────────────────────────────────────────────────
+
+fun recordDailyStats(solvedCount: Int, correctCount: Int) {
+    val today = getTodayDateString()
+    if (AppSettings.getString("todayDate", "") != today) {
+        AppSettings.setString("todayDate", today)
+        AppSettings.setInt("todaySolved", 0)
+        AppSettings.setInt("todayCorrect", 0)
+    }
+    AppSettings.setInt("todaySolved", AppSettings.getInt("todaySolved", 0) + solvedCount)
+    AppSettings.setInt("todayCorrect", AppSettings.getInt("todayCorrect", 0) + correctCount)
+
+    // Weekly chart: dayOfWeek 0=Mon … 6=Sun
+    val day = (getTodayDateString().toLongOrNull() ?: 0L) % 7
+    val key = "weekSolved_$day"
+    AppSettings.setInt(key, AppSettings.getInt(key, 0) + solvedCount)
+}
+
+fun getTodayStats(): Pair<Int, Int> {
+    val today = getTodayDateString()
+    if (AppSettings.getString("todayDate", "") != today) return Pair(0, 0)
+    return Pair(AppSettings.getInt("todaySolved", 0), AppSettings.getInt("todayCorrect", 0))
+}
+
+/** Returns list of solved counts for the last 7 days (Mon-Sun slot), today's slot last */
+fun getWeeklyStats(): List<Int> = (0..6).map { AppSettings.getInt("weekSolved_$it", 0) }
+
+// ─── Treasure Chest ───────────────────────────────────────────────────────────
+
+data class TreasureItem(val id: Int, val emoji: String, val requiredPoints: Int)
+
+val ALL_TREASURES = listOf(
+    TreasureItem(0, "🗝️",   100),
+    TreasureItem(1, "💍",   300),
+    TreasureItem(2, "📜",   600),
+    TreasureItem(3, "🏺",  1000),
+    TreasureItem(4, "🗡️", 1500),
+    TreasureItem(5, "🛡️", 2200),
+    TreasureItem(6, "💎",  3000),
+    TreasureItem(7, "👑",  4200),
+    TreasureItem(8, "🌟",  6000)
+)
+
+fun getTreasureLevel(): Int {
+    val pts = getTotalPoints()
+    return when {
+        pts >= 6000 -> 10
+        pts >= 4200 -> 9
+        pts >= 3000 -> 8
+        pts >= 2200 -> 7
+        pts >= 1500 -> 6
+        pts >= 1000 -> 5
+        pts >= 600  -> 4
+        pts >= 300  -> 3
+        pts >= 100  -> 2
+        else        -> 1
+    }
+}
+
+fun getNextLevelPoints(): Int {
+    val pts = getTotalPoints()
+    return when {
+        pts < 100  -> 100
+        pts < 300  -> 300
+        pts < 600  -> 600
+        pts < 1000 -> 1000
+        pts < 1500 -> 1500
+        pts < 2200 -> 2200
+        pts < 3000 -> 3000
+        pts < 4200 -> 4200
+        pts < 6000 -> 6000
+        else       -> 6000
+    }
+}
+
+fun isTreasureUnlocked(item: TreasureItem): Boolean = getTotalPoints() >= item.requiredPoints
+
 // ─── Operations ───────────────────────────────────────────────────────────────
 
 enum class MathOperation(val symbol: String, val key: String) {
@@ -41,10 +297,10 @@ data class StageInfo(val operation: MathOperation, val number: Int) {
 }
 
 val ALL_STAGES: List<StageInfo> = MathOperation.entries.flatMap { op ->
-    (1..10).map { n -> StageInfo(op, n) }
+    (1..20).map { n -> StageInfo(op, n) }
 }
 
-fun stagesFor(op: MathOperation): List<StageInfo> = (1..10).map { StageInfo(op, it) }
+fun stagesFor(op: MathOperation): List<StageInfo> = (1..20).map { StageInfo(op, it) }
 
 // ─── Progress persistence ─────────────────────────────────────────────────────
 
@@ -56,7 +312,7 @@ fun saveStageResult(op: MathOperation, number: Int, stars: Int) {
     // Unlock next stage on any clear (≥1 star)
     if (stars >= 1) {
         val nextNum = number + 1
-        if (nextNum <= 10) {
+        if (nextNum <= 20) {
             AppSettings.setInt("stage_${op.key}_${nextNum}_unlocked", 1)
         } else {
             val ops = MathOperation.entries
@@ -84,7 +340,7 @@ fun saveLastPlayedStage(op: MathOperation, number: Int) {
 
 fun resetAllProgress() {
     MathOperation.entries.forEach { op ->
-        (1..10).forEach { n ->
+        (1..20).forEach { n ->
             AppSettings.setInt("stage_${op.key}_${n}_unlocked", 0)
             AppSettings.setInt("stage_${op.key}_${n}_stars", 0)
         }
@@ -92,6 +348,13 @@ fun resetAllProgress() {
     AppSettings.setString("last_op", "")
     AppSettings.setInt("last_stage_num", 0)
     AppSettings.setInt("total_points", 0)
+    // Reset daily quest
+    AppSettings.setString("questDate", "")
+    AppSettings.setString("questOp", "")
+    AppSettings.setInt("questStage", 1)
+    AppSettings.setString("questType", "")
+    AppSettings.setInt("questTarget", 10)
+    AppSettings.setInt("questProgress", 0)
 }
 
 // ─── Star calculation ─────────────────────────────────────────────────────────
@@ -113,9 +376,9 @@ fun calcStars(correctCount: Int, totalSeconds: Float): Int {
  *  stageNumber 1~3 = easy tier, 4~6 = normal tier, 7~10 = hard tier. */
 fun calcPoints(stageNumber: Int, stars: Int): Int {
     return when {
-        stageNumber <= 3 -> when (stars) { 1 -> 100; 2 -> 110; else -> 120 }
-        stageNumber <= 6 -> when (stars) { 1 -> 150; 2 -> 165; else -> 180 }
-        else             -> when (stars) { 1 -> 200; 2 -> 220; else -> 240 }
+        stageNumber <= 6  -> when (stars) { 1 -> 100; 2 -> 110; else -> 120 }
+        stageNumber <= 14 -> when (stars) { 1 -> 150; 2 -> 165; else -> 180 }
+        else              -> when (stars) { 1 -> 200; 2 -> 220; else -> 240 }
     }
 }
 
@@ -187,8 +450,10 @@ fun operationProgress(op: MathOperation): Float {
 
 // ─── Problem generation ───────────────────────────────────────────────────────
 
-fun generateProblems(op: MathOperation, stageNumber: Int): List<MathProblem> =
-    List(10) { generateOneProblem(op, stageNumber) }
+fun generateProblems(op: MathOperation, stageNumber: Int): List<MathProblem> {
+    val difficulty = (stageNumber + 1) / 2   // 1,2→1; 3,4→2; ...; 19,20→10
+    return List(10) { generateOneProblem(op, difficulty) }
+}
 
 private fun generateOneProblem(op: MathOperation, stage: Int): MathProblem = when (op) {
     MathOperation.ADDITION       -> generateAddition(stage)
@@ -280,6 +545,7 @@ private fun generateDivision(stage: Int): MathProblem {
 // ─── Stage descriptions (per language) ───────────────────────────────────────
 
 fun stageDesc(op: MathOperation, stage: Int, lang: AppLanguage): String {
+    val level = (stage + 1) / 2  // 1,2→1; 3,4→2; ...; 19,20→10
     val list = when (op) {
         MathOperation.ADDITION -> when (lang) {
             AppLanguage.KOREAN             -> listOf("합이 5 이하", "합이 9 이하", "10 만들기", "합이 20 이하", "두 자리 덧셈", "받아올림 덧셈", "두 자리끼리 덧셈", "세 자리+한 자리", "세 자리+두 자리", "혼합 덧셈")
@@ -310,7 +576,7 @@ fun stageDesc(op: MathOperation, stage: Int, lang: AppLanguage): String {
             else                           -> listOf("÷2, ÷3", "÷4, ÷5", "÷6, ÷7", "÷8, ÷9", "÷2~÷5 mixed", "÷6~÷9 mixed", "÷2~÷9 mixed", "Large ÷2~÷5", "Large ÷6~÷9", "Mixed ÷2~÷9")
         }
     }
-    return list.getOrElse(stage - 1) { "Stage $stage" }
+    return list.getOrElse(level - 1) { "Stage $stage" }
 }
 
 fun opName(op: MathOperation, lang: AppLanguage): String = when (op) {
