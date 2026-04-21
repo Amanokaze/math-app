@@ -35,6 +35,7 @@ fun ResultScreen(
     onToHome: () -> Unit
 ) {
     val character = remember { getSelectedCharacter() }
+    val equippedEffect = remember { getEquippedItem(ShopCategory.RESULT_EFFECT) }
     val titleKey = when (stars) {
         3 -> "result_title_3star"
         2 -> "result_title_2star"
@@ -79,6 +80,17 @@ fun ResultScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+                // Equipped result effect row
+                if (equippedEffect != null) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        repeat(6) { Text(equippedEffect.emoji, fontSize = 26.sp) }
+                    }
+                    Spacer(modifier = Modifier.height(4.dp))
+                }
+
                 // Character + Title message (combined)
                 val charEmoji = character?.emoji ?: "🐻"
                 Row(

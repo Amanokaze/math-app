@@ -25,7 +25,7 @@ import kotlinx.coroutines.delay
 
 // ─── Home Tab ─────────────────────────────────────────────────────────────────
 
-enum class HomeTab { HOME, REPORT, TREASURE }
+enum class HomeTab { HOME, REPORT, TREASURE, SHOP }
 
 // ─── Home Screen ──────────────────────────────────────────────────────────────
 
@@ -71,6 +71,7 @@ fun HomeScreen(
                     appLanguage = appLanguage,
                     onBack = { activeTab = HomeTab.HOME }
                 )
+                HomeTab.SHOP -> ShopScreen(appLanguage = appLanguage)
             }
         }
     }
@@ -104,6 +105,12 @@ private fun HomeBottomBar(
             icon = { Text("🎁", fontSize = 22.sp) },
             label = { Text(L10n.string("nav_treasure", appLanguage), fontSize = 11.sp) }
         )
+        NavigationBarItem(
+            selected = activeTab == HomeTab.SHOP,
+            onClick = { onTabSelected(HomeTab.SHOP) },
+            icon = { Text("🛒", fontSize = 22.sp) },
+            label = { Text(L10n.string("shop_title", appLanguage), fontSize = 11.sp) }
+        )
     }
 }
 
@@ -120,8 +127,11 @@ private fun HomeContent(
 ) {
     val hearts = rememberLiveHearts(heartsVersion)
     val totalPoints = remember(progressVersion) { getTotalPoints() }
+    val coinBalance = remember(progressVersion) { getCoinBalance() }
     val character = remember { getSelectedCharacter() }
     val dailyQuest = remember(progressVersion) { getOrCreateDailyQuest() }
+    val equippedAccessory = remember(progressVersion) { getEquippedItem(ShopCategory.ACCESSORY) }
+    val equippedDeco = remember(progressVersion) { getEquippedItem(ShopCategory.HOME_DECO) }
 
     LaunchedEffect(Unit) {
         if (appLanguageRaw.isEmpty()) onAppLanguageChange(getDeviceLanguageCode())
@@ -148,12 +158,12 @@ private fun HomeContent(
                         tint = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
 
-                // Hearts + Points (right side)
+                // Hearts + Points + Coins (right side)
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // Coin badge
+                    // Points badge
                     if (totalPoints > 0) {
                         Box(
                             modifier = Modifier
@@ -164,7 +174,25 @@ private fun HomeContent(
                                 .padding(horizontal = 10.dp, vertical = 5.dp)
                         ) {
                             Text(
-                                text = "🪙 $totalPoints",
+                                text = "⭐ $totalPoints",
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                        }
+                    }
+                    // Coin balance badge
+                    if (coinBalance > 0) {
+                        Box(
+                            modifier = Modifier
+                                .background(
+                                    Brush.linearGradient(AppColors.GradientTeal),
+                                    RoundedCornerShape(20.dp)
+                                )
+                                .padding(horizontal = 10.dp, vertical = 5.dp)
+                        ) {
+                            Text(
+                                text = "🪙 $coinBalance",
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White
@@ -224,12 +252,31 @@ private fun HomeContent(
         // ── Character overlay (top-right, non-scrolling): only when quest is not completed ──
         if (!dailyQuest.isCompleted) {
             val charEmoji = character?.emoji ?: "🐻"
-            Text(
-                text = charEmoji,
-                fontSize = 72.sp,
+            Box(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(top = 52.dp, end = 8.dp)
+            ) {
+                Text(text = charEmoji, fontSize = 72.sp)
+                if (equippedAccessory != null) {
+                    Text(
+                        text = equippedAccessory.emoji,
+                        fontSize = 30.sp,
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .offset(y = (-8).dp)
+                    )
+                }
+            }
+        }
+        // ── Home decoration (bottom-end, non-scrolling) ──
+        if (equippedDeco != null) {
+            Text(
+                text = equippedDeco.emoji,
+                fontSize = 40.sp,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(bottom = 80.dp, end = 16.dp)
             )
         }
     }

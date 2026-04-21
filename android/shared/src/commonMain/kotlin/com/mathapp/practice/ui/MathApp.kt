@@ -146,6 +146,7 @@ fun MathApp() {
                         saveStageResult(s.operation, s.stageNumber, stars)
                         val points = calcPoints(s.stageNumber, stars)
                         addPoints(points)
+                        addCoins(calcCoins(s.stageNumber, stars))
                         // Record stats for report
                         recordDailyStats(solvedCount = 10, correctCount = correctCount)
                         // Check badges
