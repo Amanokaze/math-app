@@ -348,6 +348,13 @@ fun resetAllProgress() {
     AppSettings.setString("last_op", "")
     AppSettings.setInt("last_stage_num", 0)
     AppSettings.setInt("total_points", 0)
+    // Reset weekly / daily stats
+    (0..6).forEach { AppSettings.setInt("weekSolved_$it", 0) }
+    AppSettings.setString("todayDate", "")
+    AppSettings.setInt("todaySolved", 0)
+    AppSettings.setInt("todayCorrect", 0)
+    // Reset shop & coins
+    resetShopProgress()
     // Reset daily quest
     AppSettings.setString("questDate", "")
     AppSettings.setString("questOp", "")
@@ -388,6 +395,39 @@ fun addPoints(points: Int) {
 }
 
 fun getTotalPoints(): Int = AppSettings.getInt("total_points", 0)
+
+// ─── Coin System ──────────────────────────────────────────────────────────────
+
+/** Regular stage: repeatable, so coins are modest. */
+fun calcCoins(stageNumber: Int, stars: Int): Int = when {
+    stageNumber <= 6  -> stars * 5
+    stageNumber <= 14 -> stars * 8
+    else              -> stars * 12
+}
+
+/** Quest per-session reward: ~1.5× regular (once-a-day limited). */
+fun calcQuestCoins(stageNumber: Int, stars: Int): Int = when {
+    stageNumber <= 6  -> stars * 8
+    stageNumber <= 14 -> stars * 12
+    else              -> stars * 18
+}
+
+/** Bonus awarded once when the daily quest target is fully reached. */
+const val QUEST_COMPLETION_BONUS = 25
+
+fun addCoins(amount: Int) {
+    val current = AppSettings.getInt("coin_balance", 0)
+    AppSettings.setInt("coin_balance", current + amount)
+}
+
+fun spendCoins(amount: Int): Boolean {
+    val current = AppSettings.getInt("coin_balance", 0)
+    if (current < amount) return false
+    AppSettings.setInt("coin_balance", current - amount)
+    return true
+}
+
+fun getCoinBalance(): Int = AppSettings.getInt("coin_balance", 0)
 
 // ─── Heart (Energy) System ────────────────────────────────────────────────────
 

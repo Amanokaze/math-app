@@ -55,8 +55,10 @@ fun StageMapScreen(
     val stages     = remember(progressVersion) { stagesFor(operation) }
     val currentIdx = stages.indexOfFirst { it.isUnlocked && it.stars == 0 }
         .let { if (it == -1) stages.size - 1 else it }
-    val hearts    = rememberLiveHearts(heartsVersion)
-    val character = remember { getSelectedCharacter() }
+    val hearts       = rememberLiveHearts(heartsVersion)
+    val character    = remember { getSelectedCharacter() }
+    val equippedHead = remember { getEquippedItem(ShopCategory.HEAD) }
+    val equippedBg   = remember { getEquippedItem(ShopCategory.BACKGROUND) }
 
     var pendingStage by remember { mutableStateOf(autoSelectStage) }
 
@@ -310,13 +312,15 @@ fun StageMapScreen(
                             val charX = fromCx + (toCx - fromCx) * p
                             val charY = fromCy + (toCy - fromCy) * p
                             val activeBounce = if (p >= 1f) foxBounce else 0f
-                            val charEmoji = character?.emoji ?: "🦊"
-                            Text(
-                                text = charEmoji,
-                                fontSize = 36.sp,
+                            val portraitSize = 44.dp
+                            CharacterPortrait(
+                                character = character,
+                                size = portraitSize,
+                                headItem = equippedHead,
+                                bgItem = equippedBg,
                                 modifier = Modifier.absoluteOffset(
-                                    x = charX - 18.dp,
-                                    y = charY - NODE_CURRENT / 2 - 6.dp + activeBounce.dp
+                                    x = charX - portraitSize / 2,
+                                    y = charY - NODE_CURRENT / 2 - portraitSize / 2 + activeBounce.dp
                                 )
                             )
                         }

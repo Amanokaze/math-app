@@ -27,6 +27,7 @@ fun ResultScreen(
     stars: Int,
     avgSeconds: Float,
     points: Int,
+    coinsEarned: Int,
     hearts: Int,
     appLanguage: AppLanguage,
     hasNextStage: Boolean,
@@ -34,7 +35,11 @@ fun ResultScreen(
     onNextStage: () -> Unit,
     onToHome: () -> Unit
 ) {
-    val character = remember { getSelectedCharacter() }
+    val character      = remember { getSelectedCharacter() }
+    val equippedEffect = remember { getEquippedItem(ShopCategory.RESULT_EFFECT) }
+    val equippedHead   = remember { getEquippedItem(ShopCategory.HEAD) }
+    val equippedBadge  = remember { getEquippedItem(ShopCategory.BADGE) }
+    val equippedBg     = remember { getEquippedItem(ShopCategory.BACKGROUND) }
     val titleKey = when (stars) {
         3 -> "result_title_3star"
         2 -> "result_title_2star"
@@ -79,14 +84,30 @@ fun ResultScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+                // Equipped result effect row
+                if (equippedEffect != null) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        repeat(6) { Text(equippedEffect.emoji, fontSize = 26.sp) }
+                    }
+                    Spacer(modifier = Modifier.height(4.dp))
+                }
+
                 // Character + Title message (combined)
-                val charEmoji = character?.emoji ?: "🐻"
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    Text(text = charEmoji, fontSize = 64.sp)
+                    CharacterPortrait(
+                        character = character,
+                        size = 70.dp,
+                        headItem = equippedHead,
+                        badgeItem = equippedBadge,
+                        bgItem = equippedBg
+                    )
                     Spacer(modifier = Modifier.width(16.dp))
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
@@ -101,8 +122,8 @@ fun ResultScreen(
                     }
                 }
 
-                // Points + Avg time (one row)
-                ResultStatsRow(points = points, avgSeconds = avgSeconds, appLanguage = appLanguage)
+                // Points + Avg time + Coins (one row)
+                ResultStatsRow(points = points, coinsEarned = coinsEarned, avgSeconds = avgSeconds, appLanguage = appLanguage)
             }
 
             // ── Bottom: action buttons ──
@@ -183,8 +204,9 @@ fun ResultScreen(
 // ─── Result stats row (points + avg time) ────────────────────────────────────
 
 @Composable
-private fun ResultStatsRow(points: Int, avgSeconds: Float, appLanguage: AppLanguage) {
+private fun ResultStatsRow(points: Int, coinsEarned: Int, avgSeconds: Float, appLanguage: AppLanguage) {
     var displayedPoints by remember { mutableIntStateOf(0) }
+    var displayedCoins  by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(points) {
         kotlinx.coroutines.delay(400)
@@ -192,9 +214,11 @@ private fun ResultStatsRow(points: Int, avgSeconds: Float, appLanguage: AppLangu
         val stepDelay = 500L / steps
         for (i in 1..steps) {
             displayedPoints = points * i / steps
+            displayedCoins  = coinsEarned * i / steps
             kotlinx.coroutines.delay(stepDelay)
         }
         displayedPoints = points
+        displayedCoins  = coinsEarned
     }
 
     Surface(
@@ -208,14 +232,32 @@ private fun ResultStatsRow(points: Int, avgSeconds: Float, appLanguage: AppLangu
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Points
+            // Learning points (XP)
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text("⭐", fontSize = 24.sp)
+                Text(
+                    text = "+${displayedPoints}P",
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = AppColors.WarnGold
+                )
+            }
+
+            Spacer(
+                modifier = Modifier
+                    .width(1.dp)
+                    .height(44.dp)
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+            )
+
+            // Coins earned
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text("🪙", fontSize = 24.sp)
                 Text(
-                    text = "+${displayedPoints}P",
-                    fontSize = 26.sp,
+                    text = "+${displayedCoins}",
+                    fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
-                    color = AppColors.WarnGold
+                    color = Color(0xFF4CAF50)
                 )
             }
 
@@ -231,7 +273,7 @@ private fun ResultStatsRow(points: Int, avgSeconds: Float, appLanguage: AppLangu
                 Text("⏱️", fontSize = 24.sp)
                 Text(
                     text = L10n.string("avg_time_format", appLanguage, avgSeconds),
-                    fontSize = 26.sp,
+                    fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
                     color = AppColors.SecondaryPurple
                 )

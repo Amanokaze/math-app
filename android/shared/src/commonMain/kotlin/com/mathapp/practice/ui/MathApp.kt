@@ -23,7 +23,8 @@ sealed class Screen {
         val stageNumber: Int,
         val stars: Int,
         val avgSeconds: Float,
-        val points: Int
+        val points: Int,
+        val coinsEarned: Int
     ) : Screen()
 }
 
@@ -145,13 +146,15 @@ fun MathApp() {
                     onComplete = { stars, correctCount, avgSec ->
                         saveStageResult(s.operation, s.stageNumber, stars)
                         val points = calcPoints(s.stageNumber, stars)
+                        val coins  = calcCoins(s.stageNumber, stars)
                         addPoints(points)
+                        addCoins(coins)
                         // Record stats for report
                         recordDailyStats(solvedCount = 10, correctCount = correctCount)
                         // Check badges
                         checkAndAwardBadges()
                         progressVersion++
-                        screen = Screen.Result(s.operation, s.stageNumber, stars, avgSec, points)
+                        screen = Screen.Result(s.operation, s.stageNumber, stars, avgSec, points, coins)
                     },
                     onBack = { screen = Screen.StageMap(s.operation) }
                 )
@@ -161,8 +164,14 @@ fun MathApp() {
                     stageNumber = s.stageNumber,
                     appLanguage = appLanguage,
                     isQuestMode = true,
-                    onComplete = { _, correctCount, _ ->
+                    onComplete = { stars, correctCount, _ ->
+                        val wasCompleted = getOrCreateDailyQuest().isCompleted
                         addQuestProgress(correctCount)
+                        val justCompleted = !wasCompleted && getOrCreateDailyQuest().isCompleted
+                        val coins = calcQuestCoins(s.stageNumber, stars) +
+                                    if (justCompleted) QUEST_COMPLETION_BONUS else 0
+                        addCoins(coins)
+                        recordDailyStats(solvedCount = 10, correctCount = correctCount)
                         progressVersion++
                         screen = Screen.Home
                     },
@@ -179,6 +188,7 @@ fun MathApp() {
                         stars = s.stars,
                         avgSeconds = s.avgSeconds,
                         points = s.points,
+                        coinsEarned = s.coinsEarned,
                         hearts = hearts,
                         appLanguage = appLanguage,
                         hasNextStage = hasNextStage,

@@ -217,35 +217,46 @@ private fun WeeklyBarChart(
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.Bottom
     ) {
-        data.zip(labels).forEachIndexed { idx, (count, label) ->
+        data.zip(labels).forEach { (count, label) ->
             val fraction = count / maxVal
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Bottom,
-                modifier = Modifier.weight(1f).fillMaxHeight()
+                modifier = Modifier.weight(1f)
             ) {
-                if (count > 0) {
-                    Text(
-                        text = count.toString(),
-                        fontSize = 10.sp,
-                        color = AppColors.SecondaryPurple,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(2.dp))
+                // Count label — always reserves the same height to keep bars aligned
+                Box(modifier = Modifier.height(16.dp)) {
+                    if (count > 0) {
+                        Text(
+                            text = count.toString(),
+                            fontSize = 10.sp,
+                            color = AppColors.SecondaryPurple,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                    }
                 }
+                Spacer(modifier = Modifier.height(2.dp))
+                // Bar area — fills remaining flexible space; bar grows within it
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth(0.6f)
-                        .fillMaxHeight(fraction.coerceAtLeast(0.04f))
-                        .background(
-                            Brush.linearGradient(
-                                colors = AppColors.GradientTealBlue,
-                                start = Offset(0f, Float.POSITIVE_INFINITY),
-                                end = Offset(0f, 0f)
-                            ),
-                            shape = RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp)
-                        )
-                )
+                        .weight(1f)
+                        .fillMaxWidth(),
+                    contentAlignment = Alignment.BottomCenter
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(0.6f)
+                            .fillMaxHeight(fraction.coerceAtLeast(0.04f))
+                            .background(
+                                Brush.linearGradient(
+                                    colors = AppColors.GradientTealBlue,
+                                    start = Offset(0f, Float.POSITIVE_INFINITY),
+                                    end = Offset(0f, 0f)
+                                ),
+                                shape = RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp)
+                            )
+                    )
+                }
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = label,
