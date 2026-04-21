@@ -65,6 +65,10 @@ fun getEquippedItem(category: ShopCategory): ShopItem? {
     return if (id.isEmpty()) null else ALL_SHOP_ITEMS.find { it.id == id }
 }
 
+fun equipItem(item: ShopItem) {
+    AppSettings.setString("equipped_${item.category.name}", item.id)
+}
+
 fun toggleEquip(item: ShopItem) {
     val key = "equipped_${item.category.name}"
     AppSettings.setString(key,
