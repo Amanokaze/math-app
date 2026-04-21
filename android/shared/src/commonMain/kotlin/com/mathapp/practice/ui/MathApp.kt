@@ -17,7 +17,7 @@ sealed class Screen {
     object ParentSettings : Screen()
     data class StageMap(val operation: MathOperation, val autoSelectStage: Int? = null) : Screen()
     data class Game(val operation: MathOperation, val stageNumber: Int) : Screen()
-    data class Quest(val operation: MathOperation) : Screen()
+    data class Quest(val operation: MathOperation, val stageNumber: Int) : Screen()
     data class Result(
         val operation: MathOperation,
         val stageNumber: Int,
@@ -93,7 +93,10 @@ fun MathApp() {
                         AppSettings.setString("appLanguage", it)
                     },
                     onOperationSelected = { op -> screen = Screen.StageMap(op) },
-                    onQuestStart = { op -> screen = Screen.Quest(op) },
+                    onQuestStart = { _ ->
+                        val q = getOrCreateDailyQuest()
+                        screen = Screen.Quest(q.operation, q.stageNumber)
+                    },
                     onOpenParentSettings = { screen = Screen.ParentSettings },
                     progressVersion = progressVersion,
                     heartsVersion = heartsVersion
@@ -155,7 +158,7 @@ fun MathApp() {
 
                 is Screen.Quest -> GameScreen(
                     operation = s.operation,
-                    stageNumber = QUEST_STAGE_NUMBER,
+                    stageNumber = s.stageNumber,
                     appLanguage = appLanguage,
                     isQuestMode = true,
                     onComplete = { _, correctCount, _ ->

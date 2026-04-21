@@ -301,14 +301,14 @@ fun DailyQuestCard(
                         fontSize = 14.sp,
                         color = Color.White.copy(alpha = 0.85f)
                     )
+                    val descKey = when (quest.questType) {
+                        QuestType.PROGRESS -> "quest_desc_progress"
+                        QuestType.REVIEW   -> "quest_desc_review"
+                        QuestType.NEW      -> "quest_desc_new"
+                    }
                     Text(
-                        text = "${opName(quest.operation, appLanguage)} ${quest.targetCount}${
-                            when (appLanguage) {
-                                AppLanguage.KOREAN -> "문제 풀기"
-                                AppLanguage.JAPANESE -> "問題を解く"
-                                else -> " problems"
-                            }
-                        }",
+                        text = "${L10n.string(descKey, appLanguage, opName(quest.operation, appLanguage), quest.stageNumber)}  " +
+                            L10n.string("quest_problems", appLanguage, quest.targetCount),
                         fontSize = 17.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White

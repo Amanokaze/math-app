@@ -26,11 +26,12 @@ fun markOnboardingSeen() = AppSettings.setInt("hasSeenOnboarding", 1)
 
 // ─── Daily Quest ──────────────────────────────────────────────────────────────
 
-/** Stage difficulty used for quest games (mid-range). */
-const val QUEST_STAGE_NUMBER = 5
+enum class QuestType { PROGRESS, REVIEW, NEW }
 
 data class DailyQuest(
     val operation: MathOperation,
+    val stageNumber: Int,
+    val questType: QuestType,
     val targetCount: Int,
     val progress: Int
 ) {
@@ -43,21 +44,79 @@ fun getTodayDateString(): String {
     return epochDay.toString()
 }
 
+/**
+ * Selects an appropriate operation + stage for today's quest based on learner progress.
+ *
+ * Distribution:
+ *  - 60 %: continue current progress (last played op, next uncompleted stage)
+ *  - 30 %: review the weakest (1-star) stage
+ *  - 10 %: introduce a not-yet-started operation at stage 1
+ */
+private fun chooseDailyQuestParams(): Triple<MathOperation, Int, QuestType> {
+    data class OpStat(val op: MathOperation, val highestCleared: Int, val weakestStage: Int?)
+
+    val stats = MathOperation.entries.map { op ->
+        val stages = stagesFor(op)
+        val highestCleared = stages.filter { it.stars > 0 }.maxOfOrNull { it.number } ?: 0
+        val weakestStage = stages.filter { it.stars == 1 }.minByOrNull { it.number }?.number
+        OpStat(op, highestCleared, weakestStage)
+    }
+
+    val started    = stats.filter { it.highestCleared > 0 }
+    val notStarted = stats.filter { it.highestCleared == 0 }
+    val withWeakness = stats.filter { it.weakestStage != null }
+
+    val rand = Random.nextFloat()
+
+    // 10 %: introduce a new operation
+    if (notStarted.isNotEmpty() && rand < 0.10f) {
+        val pick = notStarted.random()
+        return Triple(pick.op, 1, QuestType.NEW)
+    }
+
+    // 30 %: review the weakest stage
+    if (withWeakness.isNotEmpty() && rand < 0.40f) {
+        val pick = withWeakness.random()
+        return Triple(pick.op, pick.weakestStage!!, QuestType.REVIEW)
+    }
+
+    // 60 %: continue progress on the last-played (or most-advanced) operation
+    if (started.isNotEmpty()) {
+        val lastOp = getLastPlayedStage()?.first
+        val stat = if (lastOp != null)
+            stats.find { it.op == lastOp } ?: started.maxByOrNull { it.highestCleared }!!
+        else
+            started.maxByOrNull { it.highestCleared }!!
+        val nextStage = (stat.highestCleared + 1).coerceAtMost(20)
+        return Triple(stat.op, nextStage, QuestType.PROGRESS)
+    }
+
+    // Fallback: no progress at all — start with addition stage 1
+    return Triple(MathOperation.ADDITION, 1, QuestType.NEW)
+}
+
 fun getOrCreateDailyQuest(): DailyQuest {
     val today = getTodayDateString()
     val savedDate = AppSettings.getString("questDate", "")
     if (savedDate != today) {
-        // New day — reset quest
-        val op = MathOperation.entries.random()
+        // New day — choose quest based on learner progress
+        val (op, stage, type) = chooseDailyQuestParams()
         AppSettings.setString("questDate", today)
         AppSettings.setString("questOp", op.key)
+        AppSettings.setInt("questStage", stage)
+        AppSettings.setString("questType", type.name)
         AppSettings.setInt("questTarget", 10)
         AppSettings.setInt("questProgress", 0)
     }
     val opKey = AppSettings.getString("questOp", MathOperation.ADDITION.key)
     val op = MathOperation.entries.find { it.key == opKey } ?: MathOperation.ADDITION
+    val stage = AppSettings.getInt("questStage", 1)
+    val typeStr = AppSettings.getString("questType", QuestType.PROGRESS.name)
+    val type = QuestType.entries.find { it.name == typeStr } ?: QuestType.PROGRESS
     return DailyQuest(
         operation = op,
+        stageNumber = stage,
+        questType = type,
         targetCount = AppSettings.getInt("questTarget", 10),
         progress = AppSettings.getInt("questProgress", 0)
     )
@@ -292,6 +351,8 @@ fun resetAllProgress() {
     // Reset daily quest
     AppSettings.setString("questDate", "")
     AppSettings.setString("questOp", "")
+    AppSettings.setInt("questStage", 1)
+    AppSettings.setString("questType", "")
     AppSettings.setInt("questTarget", 10)
     AppSettings.setInt("questProgress", 0)
 }
