@@ -143,6 +143,7 @@ private fun HomeContent(
     val equippedHead  = remember(progressVersion) { getEquippedItem(ShopCategory.HEAD) }
     val equippedBadge = remember(progressVersion) { getEquippedItem(ShopCategory.BADGE) }
     val equippedBg    = remember(progressVersion) { getEquippedItem(ShopCategory.BACKGROUND) }
+    val featuredTreasure = remember(progressVersion) { getFeaturedTreasure() }
 
     LaunchedEffect(Unit) {
         if (appLanguageRaw.isEmpty()) onAppLanguageChange(getDeviceLanguageCode())
@@ -224,6 +225,15 @@ private fun HomeContent(
                         )
                     }
                 }
+            }
+
+            // ── Featured treasure (only shown when set) ──
+            if (featuredTreasure != null) {
+                HomeFeaturedTreasure(
+                    treasure = featuredTreasure,
+                    appLanguage = appLanguage,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                )
             }
 
             // Space before quest card: reduced when quest is completed (character moves into card)
@@ -667,4 +677,52 @@ fun LanguagePickerSheet(
             }
         }
     )
+}
+
+// ─── Home Featured Treasure ───────────────────────────────────────────────────
+
+@Composable
+fun HomeFeaturedTreasure(
+    treasure: TreasureItem,
+    appLanguage: AppLanguage,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surface,
+        shadowElevation = 2.dp
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .background(
+                        Brush.linearGradient(AppColors.GradientGold),
+                        shape = androidx.compose.foundation.shape.CircleShape
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = treasure.emoji, fontSize = 20.sp)
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = L10n.string("treasure_featured_section", appLanguage),
+                    fontSize = 11.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = L10n.string(treasure.nameKey, appLanguage),
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = AppColors.WarnGold
+                )
+            }
+            Text(text = "✨", fontSize = 18.sp)
+        }
+    }
 }

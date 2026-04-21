@@ -214,12 +214,12 @@ private fun ShopItemCard(
     onEquip: (ShopItem) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val owned    = remember(shopVersion) { isItemOwned(item.id) }
-    val equipped = remember(shopVersion) { getEquippedItemId(item.category) == item.id }
+    val owned    = remember(shopVersion, item.id) { isItemOwned(item.id) }
+    val equipped = remember(shopVersion, item.id) { getEquippedItemId(item.category) == item.id }
 
-    val headItem  = remember(shopVersion) { getEquippedItem(ShopCategory.HEAD) }
-    val badgeItem = remember(shopVersion) { getEquippedItem(ShopCategory.BADGE) }
-    val bgItem    = remember(shopVersion) { getEquippedItem(ShopCategory.BACKGROUND) }
+    val headItem  = remember(shopVersion, item.id) { getEquippedItem(ShopCategory.HEAD) }
+    val badgeItem = remember(shopVersion, item.id) { getEquippedItem(ShopCategory.BADGE) }
+    val bgItem    = remember(shopVersion, item.id) { getEquippedItem(ShopCategory.BACKGROUND) }
 
     val cardModifier = if (equipped)
         modifier.border(2.dp, AppColors.SecondaryPurple, RoundedCornerShape(16.dp))

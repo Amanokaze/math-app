@@ -1,8 +1,10 @@
 package com.mathapp.practice.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -17,6 +19,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 
 @Composable
 fun TreasureChestScreen(
@@ -28,6 +32,9 @@ fun TreasureChestScreen(
     val nextLevelPoints = remember { getNextLevelPoints() }
     val levelProgress = if (nextLevelPoints > 0) (totalPoints.toFloat() / nextLevelPoints).coerceIn(0f, 1f) else 1f
     val treasures = ALL_TREASURES
+
+    var selectedTreasure by remember { mutableStateOf<TreasureItem?>(null) }
+    var featuredId by remember { mutableStateOf(getFeaturedTreasureId()) }
 
     Column(
         modifier = Modifier
@@ -88,7 +95,6 @@ fun TreasureChestScreen(
                             )
                         }
                     }
-                    // Points display
                     Box(
                         modifier = Modifier
                             .background(
@@ -108,7 +114,6 @@ fun TreasureChestScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Progress bar
                 LinearProgressIndicator(
                     progress = { levelProgress },
                     modifier = Modifier.fillMaxWidth().height(8.dp),
@@ -117,6 +122,15 @@ fun TreasureChestScreen(
                 )
             }
         }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        // ── Featured treasure section ──
+        FeaturedTreasureSection(
+            featuredId = featuredId,
+            appLanguage = appLanguage,
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
 
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -150,8 +164,10 @@ fun TreasureChestScreen(
                             TreasureItemBox(
                                 item = item,
                                 isUnlocked = isTreasureUnlocked(item),
+                                isFeatured = item.id == featuredId,
                                 appLanguage = appLanguage,
-                                modifier = Modifier.weight(1f)
+                                modifier = Modifier.weight(1f),
+                                onClick = { selectedTreasure = item }
                             )
                         }
                         repeat(3 - row.size) {
@@ -165,14 +181,100 @@ fun TreasureChestScreen(
 
         Spacer(modifier = Modifier.height(32.dp))
     }
+
+    // ── Detail dialog ──
+    selectedTreasure?.let { item ->
+        TreasureDetailDialog(
+            item = item,
+            isUnlocked = isTreasureUnlocked(item),
+            isFeatured = item.id == featuredId,
+            totalPoints = totalPoints,
+            appLanguage = appLanguage,
+            onSetFeatured = {
+                setFeaturedTreasureId(item.id)
+                featuredId = item.id
+                selectedTreasure = null
+            },
+            onDismiss = { selectedTreasure = null }
+        )
+    }
+}
+
+@Composable
+private fun FeaturedTreasureSection(
+    featuredId: Int,
+    appLanguage: AppLanguage,
+    modifier: Modifier = Modifier
+) {
+    val featured = ALL_TREASURES.find { it.id == featuredId && isTreasureUnlocked(it) }
+
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        color = if (featured != null)
+            MaterialTheme.colorScheme.primaryContainer
+        else
+            MaterialTheme.colorScheme.surface,
+        shadowElevation = 2.dp
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(60.dp)
+                    .background(
+                        if (featured != null) Brush.linearGradient(AppColors.GradientGold)
+                        else Brush.linearGradient(listOf(Color(0xFFEEEEEE), Color(0xFFDDDDDD))),
+                        shape = CircleShape
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = featured?.emoji ?: "🎁",
+                    fontSize = 28.sp
+                )
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+            Column {
+                Text(
+                    text = L10n.string("treasure_featured_section", appLanguage),
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = if (featured != null)
+                        L10n.string(featured.nameKey, appLanguage)
+                    else
+                        "—",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = if (featured != null)
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                    else
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                if (featured != null) {
+                    Text(
+                        text = L10n.string(featured.praiseKey, appLanguage),
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+    }
 }
 
 @Composable
 private fun TreasureItemBox(
     item: TreasureItem,
     isUnlocked: Boolean,
+    isFeatured: Boolean,
     appLanguage: AppLanguage,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
 ) {
     val bgBrush = if (isUnlocked)
         Brush.linearGradient(AppColors.GradientGold)
@@ -182,24 +284,231 @@ private fun TreasureItemBox(
     Box(
         modifier = modifier
             .aspectRatio(1f)
-            .background(bgBrush, shape = RoundedCornerShape(16.dp)),
+            .background(bgBrush, shape = RoundedCornerShape(16.dp))
+            .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 text = if (isUnlocked) item.emoji else "🔒",
-                fontSize = 36.sp,
+                fontSize = 32.sp,
                 color = if (isUnlocked) Color.Unspecified else Color.White.copy(alpha = 0.6f)
             )
-            if (!isUnlocked) {
-                Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = if (isUnlocked)
+                    L10n.string(item.nameKey, appLanguage)
+                else
+                    "${item.requiredPoints}P",
+                fontSize = 9.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = if (isUnlocked) Color.White.copy(alpha = 0.9f) else Color.Gray,
+                textAlign = TextAlign.Center,
+                maxLines = 2,
+                modifier = Modifier.padding(horizontal = 4.dp)
+            )
+        }
+        if (isFeatured) {
+            Text(
+                text = "✨",
+                fontSize = 12.sp,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(4.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun TreasureDetailDialog(
+    item: TreasureItem,
+    isUnlocked: Boolean,
+    isFeatured: Boolean,
+    totalPoints: Int,
+    appLanguage: AppLanguage,
+    onSetFeatured: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth(0.9f)
+                .wrapContentHeight(),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(28.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Emoji circle
+                Box(
+                    modifier = Modifier
+                        .size(80.dp)
+                        .background(
+                            if (isUnlocked) Brush.linearGradient(AppColors.GradientGold)
+                            else Brush.linearGradient(listOf(Color(0xFFEEEEEE), Color(0xFFDDDDDD))),
+                            shape = CircleShape
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = if (isUnlocked) item.emoji else "🔒",
+                        fontSize = 40.sp
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Name
                 Text(
-                    text = "${item.requiredPoints}P",
-                    fontSize = 11.sp,
+                    text = if (isUnlocked)
+                        L10n.string(item.nameKey, appLanguage)
+                    else
+                        L10n.string("treasure_locked", appLanguage),
+                    fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.Gray,
+                    color = if (isUnlocked) AppColors.WarnGold else MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center
                 )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Status badge
+                Box(
+                    modifier = Modifier
+                        .background(
+                            if (isUnlocked) Color(0xFF4CAF50) else Color(0xFF9E9E9E),
+                            shape = RoundedCornerShape(20.dp)
+                        )
+                        .padding(horizontal = 12.dp, vertical = 4.dp)
+                ) {
+                    Text(
+                        text = if (isUnlocked)
+                            L10n.string("treasure_achieved", appLanguage)
+                        else
+                            L10n.string("treasure_not_yet", appLanguage),
+                        fontSize = 12.sp,
+                        color = Color.White,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                if (isUnlocked) {
+                    // Description
+                    Text(
+                        text = L10n.string(item.descKey, appLanguage),
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                        lineHeight = 20.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Praise
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = MaterialTheme.colorScheme.primaryContainer
+                    ) {
+                        Text(
+                            text = "\"${L10n.string(item.praiseKey, appLanguage)}\"",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                            lineHeight = 18.sp
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    // Featured button
+                    if (isFeatured) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(
+                                    Brush.linearGradient(AppColors.GradientGold),
+                                    shape = RoundedCornerShape(12.dp)
+                                )
+                                .padding(vertical = 12.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = L10n.string("treasure_is_featured", appLanguage),
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                        }
+                    } else {
+                        Button(
+                            onClick = onSetFeatured,
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = AppColors.WarnGold
+                            )
+                        ) {
+                            Text(
+                                text = L10n.string("treasure_set_featured", appLanguage),
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                } else {
+                    // Locked hint
+                    val pointsNeeded = item.requiredPoints - totalPoints
+                    Text(
+                        text = kmpFormat(L10n.string("treasure_hint_points", appLanguage), pointsNeeded),
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                        lineHeight = 20.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Progress toward this treasure
+                    val progress = (totalPoints.toFloat() / item.requiredPoints).coerceIn(0f, 1f)
+                    LinearProgressIndicator(
+                        progress = { progress },
+                        modifier = Modifier.fillMaxWidth().height(8.dp),
+                        color = AppColors.WarnGold,
+                        trackColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    Text(
+                        text = "$totalPoints / ${item.requiredPoints} P",
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                TextButton(onClick = onDismiss, modifier = Modifier.fillMaxWidth()) {
+                    Text(L10n.string("cancel", appLanguage))
+                }
             }
         }
     }

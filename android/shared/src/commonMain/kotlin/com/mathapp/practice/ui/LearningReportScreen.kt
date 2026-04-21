@@ -223,22 +223,7 @@ private fun WeeklyBarChart(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.weight(1f)
             ) {
-                // Count label — always reserves the same height to keep bars aligned
-                Box(modifier = Modifier.height(18.dp).fillMaxWidth()) {
-                    if (count > 0) {
-                        Text(
-                            text = count.toString(),
-                            fontSize = 9.sp,
-                            color = AppColors.SecondaryPurple,
-                            fontWeight = FontWeight.Bold,
-                            maxLines = 1,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.align(Alignment.Center).fillMaxWidth()
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.height(2.dp))
-                // Bar area — fills remaining flexible space; bar grows within it
+                // Bar area — fills the flexible space; label floats inside the bar at the top
                 Box(
                     modifier = Modifier
                         .weight(1f)
@@ -256,8 +241,21 @@ private fun WeeklyBarChart(
                                     end = Offset(0f, 0f)
                                 ),
                                 shape = RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp)
+                            ),
+                        contentAlignment = Alignment.TopCenter
+                    ) {
+                        if (count > 0) {
+                            Text(
+                                text = count.toString(),
+                                fontSize = 9.sp,
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                maxLines = 1,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.padding(top = 3.dp)
                             )
-                    )
+                        }
+                    }
                 }
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
