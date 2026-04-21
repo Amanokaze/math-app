@@ -25,7 +25,7 @@ import kotlinx.coroutines.delay
 
 // ─── Home Tab ─────────────────────────────────────────────────────────────────
 
-enum class HomeTab { HOME, REPORT, TREASURE, SHOP }
+enum class HomeTab { HOME, REPORT, TREASURE, CHARACTER, SHOP }
 
 // ─── Home Screen ──────────────────────────────────────────────────────────────
 
@@ -71,6 +71,10 @@ fun HomeScreen(
                     appLanguage = appLanguage,
                     onBack = { activeTab = HomeTab.HOME }
                 )
+                HomeTab.CHARACTER -> CharacterPortraitScreen(
+                    appLanguage = appLanguage,
+                    onShopClick = { activeTab = HomeTab.SHOP }
+                )
                 HomeTab.SHOP -> ShopScreen(appLanguage = appLanguage)
             }
         }
@@ -106,6 +110,12 @@ private fun HomeBottomBar(
             label = { Text(L10n.string("nav_treasure", appLanguage), fontSize = 11.sp) }
         )
         NavigationBarItem(
+            selected = activeTab == HomeTab.CHARACTER,
+            onClick = { onTabSelected(HomeTab.CHARACTER) },
+            icon = { Text("✨", fontSize = 22.sp) },
+            label = { Text(L10n.string("nav_character", appLanguage), fontSize = 11.sp) }
+        )
+        NavigationBarItem(
             selected = activeTab == HomeTab.SHOP,
             onClick = { onTabSelected(HomeTab.SHOP) },
             icon = { Text("🛒", fontSize = 22.sp) },
@@ -130,8 +140,9 @@ private fun HomeContent(
     val coinBalance = remember(progressVersion) { getCoinBalance() }
     val character = remember { getSelectedCharacter() }
     val dailyQuest = remember(progressVersion) { getOrCreateDailyQuest() }
-    val equippedAccessory = remember(progressVersion) { getEquippedItem(ShopCategory.ACCESSORY) }
-    val equippedDeco = remember(progressVersion) { getEquippedItem(ShopCategory.HOME_DECO) }
+    val equippedHead  = remember(progressVersion) { getEquippedItem(ShopCategory.HEAD) }
+    val equippedBadge = remember(progressVersion) { getEquippedItem(ShopCategory.BADGE) }
+    val equippedBg    = remember(progressVersion) { getEquippedItem(ShopCategory.BACKGROUND) }
 
     LaunchedEffect(Unit) {
         if (appLanguageRaw.isEmpty()) onAppLanguageChange(getDeviceLanguageCode())
@@ -224,6 +235,7 @@ private fun HomeContent(
                 appLanguage = appLanguage,
                 onContinue = { onQuestStart(dailyQuest.operation) },
                 characterEmoji = character?.emoji ?: "🐻",
+                character = character,
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
 
@@ -249,34 +261,17 @@ private fun HomeContent(
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        // ── Character overlay (top-right, non-scrolling): only when quest is not completed ──
+        // ── Character portrait overlay (top-right, non-scrolling): only when quest is not completed ──
         if (!dailyQuest.isCompleted) {
-            val charEmoji = character?.emoji ?: "🐻"
-            Box(
+            CharacterPortrait(
+                character = character,
+                size = 88.dp,
+                headItem = equippedHead,
+                badgeItem = equippedBadge,
+                bgItem = equippedBg,
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .padding(top = 52.dp, end = 8.dp)
-            ) {
-                Text(text = charEmoji, fontSize = 72.sp)
-                if (equippedAccessory != null) {
-                    Text(
-                        text = equippedAccessory.emoji,
-                        fontSize = 30.sp,
-                        modifier = Modifier
-                            .align(Alignment.TopCenter)
-                            .offset(y = (-8).dp)
-                    )
-                }
-            }
-        }
-        // ── Home decoration (bottom-end, non-scrolling) ──
-        if (equippedDeco != null) {
-            Text(
-                text = equippedDeco.emoji,
-                fontSize = 40.sp,
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(bottom = 80.dp, end = 16.dp)
+                    .padding(top = 52.dp, end = 12.dp)
             )
         }
     }
@@ -290,6 +285,7 @@ fun DailyQuestCard(
     appLanguage: AppLanguage,
     onContinue: () -> Unit,
     characterEmoji: String = "🐻",
+    character: CharacterType? = null,
     modifier: Modifier = Modifier
 ) {
     val questGradient = if (quest.isCompleted)
@@ -312,16 +308,17 @@ fun DailyQuestCard(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Character in white circle
-                Surface(
-                    shape = RoundedCornerShape(50),
-                    color = Color.White.copy(alpha = 0.25f),
-                    modifier = Modifier.size(72.dp)
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Text(characterEmoji, fontSize = 44.sp)
-                    }
-                }
+                // Character portrait in card
+                val headItem  = remember { getEquippedItem(ShopCategory.HEAD) }
+                val badgeItem = remember { getEquippedItem(ShopCategory.BADGE) }
+                val bgItem    = remember { getEquippedItem(ShopCategory.BACKGROUND) }
+                CharacterPortrait(
+                    character = character,
+                    size = 72.dp,
+                    headItem = headItem,
+                    badgeItem = badgeItem,
+                    bgItem = bgItem
+                )
                 Column {
                     Text(
                         text = L10n.string("quest_completed_title", appLanguage),

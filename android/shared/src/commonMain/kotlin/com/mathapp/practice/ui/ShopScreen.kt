@@ -19,9 +19,10 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun ShopScreen(appLanguage: AppLanguage) {
-    var selectedCategory by remember { mutableStateOf(ShopCategory.ACCESSORY) }
+    var selectedCategory by remember { mutableStateOf(ShopCategory.HEAD) }
     var shopVersion by remember { mutableIntStateOf(0) }
     val coinBalance = remember(shopVersion) { getCoinBalance() }
+    val character   = remember { getSelectedCharacter() }
 
     Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         // ── Header ────────────────────────────────────────────────────────────
@@ -58,13 +59,14 @@ fun ShopScreen(appLanguage: AppLanguage) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 10.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             ShopCategory.entries.forEach { cat ->
                 val tabKey = when (cat) {
-                    ShopCategory.ACCESSORY    -> "shop_tab_accessory"
+                    ShopCategory.HEAD          -> "shop_tab_head"
+                    ShopCategory.BADGE         -> "shop_tab_badge"
+                    ShopCategory.BACKGROUND    -> "shop_tab_bg"
                     ShopCategory.RESULT_EFFECT -> "shop_tab_effect"
-                    ShopCategory.HOME_DECO    -> "shop_tab_deco"
                 }
                 val isSelected = cat == selectedCategory
                 Surface(
@@ -79,7 +81,7 @@ fun ShopScreen(appLanguage: AppLanguage) {
                         text = L10n.string(tabKey, appLanguage),
                         modifier = Modifier.padding(vertical = 10.dp),
                         textAlign = TextAlign.Center,
-                        fontSize = 13.sp,
+                        fontSize = 12.sp,
                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                         color = if (isSelected) Color.White
                                 else MaterialTheme.colorScheme.onSurface
@@ -105,6 +107,7 @@ fun ShopScreen(appLanguage: AppLanguage) {
                     rowItems.forEach { item ->
                         ShopItemCard(
                             item = item,
+                            character = character,
                             appLanguage = appLanguage,
                             shopVersion = shopVersion,
                             coinBalance = coinBalance,
@@ -125,6 +128,7 @@ fun ShopScreen(appLanguage: AppLanguage) {
 @Composable
 private fun ShopItemCard(
     item: ShopItem,
+    character: CharacterType?,
     appLanguage: AppLanguage,
     shopVersion: Int,
     coinBalance: Int,
@@ -133,6 +137,10 @@ private fun ShopItemCard(
 ) {
     val owned    = remember(shopVersion) { isItemOwned(item.id) }
     val equipped = remember(shopVersion) { getEquippedItemId(item.category) == item.id }
+
+    val headItem  = remember(shopVersion) { getEquippedItem(ShopCategory.HEAD) }
+    val badgeItem = remember(shopVersion) { getEquippedItem(ShopCategory.BADGE) }
+    val bgItem    = remember(shopVersion) { getEquippedItem(ShopCategory.BACKGROUND) }
 
     val cardModifier = if (equipped)
         modifier.border(2.dp, AppColors.SecondaryPurple, RoundedCornerShape(16.dp))
@@ -152,7 +160,31 @@ private fun ShopItemCard(
                 .padding(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(text = item.emoji, fontSize = 44.sp)
+            // Portrait preview for cosmetic categories; plain emoji for effects
+            when (item.category) {
+                ShopCategory.HEAD -> CharacterPortrait(
+                    character = character,
+                    size = 64.dp,
+                    headItem = item,
+                    badgeItem = badgeItem,
+                    bgItem = bgItem
+                )
+                ShopCategory.BADGE -> CharacterPortrait(
+                    character = character,
+                    size = 64.dp,
+                    headItem = headItem,
+                    badgeItem = item,
+                    bgItem = bgItem
+                )
+                ShopCategory.BACKGROUND -> CharacterPortrait(
+                    character = character,
+                    size = 64.dp,
+                    headItem = headItem,
+                    badgeItem = badgeItem,
+                    bgItem = item
+                )
+                ShopCategory.RESULT_EFFECT -> Text(text = item.emoji, fontSize = 44.sp)
+            }
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = L10n.string(item.nameKey, appLanguage),

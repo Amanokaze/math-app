@@ -398,11 +398,22 @@ fun getTotalPoints(): Int = AppSettings.getInt("total_points", 0)
 
 // ─── Coin System ──────────────────────────────────────────────────────────────
 
+/** Regular stage: repeatable, so coins are modest. */
 fun calcCoins(stageNumber: Int, stars: Int): Int = when {
     stageNumber <= 6  -> stars * 5
     stageNumber <= 14 -> stars * 8
     else              -> stars * 12
 }
+
+/** Quest per-session reward: ~1.5× regular (once-a-day limited). */
+fun calcQuestCoins(stageNumber: Int, stars: Int): Int = when {
+    stageNumber <= 6  -> stars * 8
+    stageNumber <= 14 -> stars * 12
+    else              -> stars * 18
+}
+
+/** Bonus awarded once when the daily quest target is fully reached. */
+const val QUEST_COMPLETION_BONUS = 25
 
 fun addCoins(amount: Int) {
     val current = AppSettings.getInt("coin_balance", 0)
