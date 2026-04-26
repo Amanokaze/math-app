@@ -8,7 +8,9 @@ enum class CharacterType(val emoji: String, val nameKey: String) {
     BEAR("🐻", "char_bear"),
     RABBIT("🐰", "char_rabbit"),
     FOX("🦊", "char_fox"),
-    OWL("🦉", "char_owl")
+    OWL("🦉", "char_owl"),
+    CAT("🐱", "char_cat"),
+    DOG("🐶", "char_dog")
 }
 
 fun getSelectedCharacter(): CharacterType? {

@@ -140,9 +140,6 @@ private fun HomeContent(
     val coinBalance = remember(progressVersion) { getCoinBalance() }
     val character = remember { getSelectedCharacter() }
     val dailyQuest = remember(progressVersion) { getOrCreateDailyQuest() }
-    val equippedHead  = remember(progressVersion) { getEquippedItem(ShopCategory.HEAD) }
-    val equippedBadge = remember(progressVersion) { getEquippedItem(ShopCategory.BADGE) }
-    val equippedBg    = remember(progressVersion) { getEquippedItem(ShopCategory.BACKGROUND) }
     val featuredTreasure = remember(progressVersion) { getFeaturedTreasure() }
 
     LaunchedEffect(Unit) {
@@ -236,15 +233,13 @@ private fun HomeContent(
                 )
             }
 
-            // Space before quest card: reduced when quest is completed (character moves into card)
-            Spacer(modifier = Modifier.height(if (dailyQuest.isCompleted) 8.dp else 72.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             // ── Daily Quest Card ──
             DailyQuestCard(
                 quest = dailyQuest,
                 appLanguage = appLanguage,
                 onContinue = { onQuestStart(dailyQuest.operation) },
-                characterEmoji = character?.emoji ?: "🐻",
                 character = character,
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
@@ -271,19 +266,6 @@ private fun HomeContent(
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        // ── Character portrait overlay (top-right, non-scrolling): only when quest is not completed ──
-        if (!dailyQuest.isCompleted) {
-            CharacterPortrait(
-                character = character,
-                size = 88.dp,
-                headItem = equippedHead,
-                badgeItem = equippedBadge,
-                bgItem = equippedBg,
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(top = 52.dp, end = 12.dp)
-            )
-        }
     }
 }
 
@@ -294,10 +276,13 @@ fun DailyQuestCard(
     quest: DailyQuest,
     appLanguage: AppLanguage,
     onContinue: () -> Unit,
-    characterEmoji: String = "🐻",
     character: CharacterType? = null,
     modifier: Modifier = Modifier
 ) {
+    val headItem  = remember { getEquippedItem(ShopCategory.HEAD) }
+    val badgeItem = remember { getEquippedItem(ShopCategory.BADGE) }
+    val bgItem    = remember { getEquippedItem(ShopCategory.BACKGROUND) }
+
     val questGradient = if (quest.isCompleted)
         listOf(Color(0xFF43A047), Color(0xFF66BB6A))
     else
@@ -318,10 +303,6 @@ fun DailyQuestCard(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Character portrait in card
-                val headItem  = remember { getEquippedItem(ShopCategory.HEAD) }
-                val badgeItem = remember { getEquippedItem(ShopCategory.BADGE) }
-                val bgItem    = remember { getEquippedItem(ShopCategory.BACKGROUND) }
                 CharacterPortrait(
                     character = character,
                     size = 72.dp,
@@ -345,14 +326,44 @@ fun DailyQuestCard(
                 }
             }
         } else {
-            // ── In progress state ──
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("🎯", fontSize = 36.sp)
-                Spacer(modifier = Modifier.width(12.dp))
+            // ── In progress state: character + speech bubble integrated into card ──
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                // ── 모험 친구 + 말풍선 ──
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Box(
+                        modifier = Modifier
+                            .background(
+                                Color.White.copy(alpha = 0.22f),
+                                RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp, bottomEnd = 8.dp, bottomStart = 2.dp)
+                            )
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = L10n.string("quest_buddy_hint", appLanguage),
+                            fontSize = 11.sp,
+                            color = Color.White,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(3.dp))
+                    CharacterPortrait(
+                        character = character,
+                        size = 60.dp,
+                        headItem = headItem,
+                        badgeItem = badgeItem,
+                        bgItem = bgItem
+                    )
+                }
+
+                // ── 퀘스트 안내 내용 ──
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = L10n.string("quest_title", appLanguage),
-                        fontSize = 14.sp,
+                        text = "🎯 ${L10n.string("quest_title", appLanguage)}",
+                        fontSize = 12.sp,
                         color = Color.White.copy(alpha = 0.85f)
                     )
                     val descKey = when (quest.questType) {
@@ -363,12 +374,11 @@ fun DailyQuestCard(
                     Text(
                         text = "${L10n.string(descKey, appLanguage, opName(quest.operation, appLanguage), quest.stageNumber)}  " +
                             L10n.string("quest_problems", appLanguage, quest.targetCount),
-                        fontSize = 17.sp,
+                        fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    // Progress bar
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -382,35 +392,39 @@ fun DailyQuestCard(
                                 .background(Color.White, RoundedCornerShape(3.dp))
                         )
                     }
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = when {
-                            quest.progress == 0 ->
-                                L10n.string("quest_progress_start", appLanguage)
-                            else ->
-                                L10n.string("quest_progress_remaining", appLanguage, quest.targetCount - quest.progress)
-                        },
-                        fontSize = 12.sp,
-                        color = Color.White.copy(alpha = 0.9f)
-                    )
-                }
-                Spacer(modifier = Modifier.width(12.dp))
-                // Continue button
-                Button(
-                    onClick = onContinue,
-                    modifier = Modifier.height(68.dp),
-                    shape = RoundedCornerShape(14.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.White.copy(alpha = 0.25f)
-                    ),
-                    contentPadding = PaddingValues(horizontal = 12.dp)
-                ) {
-                    Text(
-                        text = L10n.string("quest_continue", appLanguage),
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = when {
+                                quest.progress == 0 ->
+                                    L10n.string("quest_progress_start", appLanguage)
+                                else ->
+                                    L10n.string("quest_progress_remaining", appLanguage, quest.targetCount - quest.progress)
+                            },
+                            fontSize = 11.sp,
+                            color = Color.White.copy(alpha = 0.9f)
+                        )
+                        Button(
+                            onClick = onContinue,
+                            modifier = Modifier.height(36.dp),
+                            shape = RoundedCornerShape(10.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.White.copy(alpha = 0.25f)
+                            ),
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp)
+                        ) {
+                            Text(
+                                text = L10n.string("quest_continue", appLanguage),
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                        }
+                    }
                 }
             }
         }

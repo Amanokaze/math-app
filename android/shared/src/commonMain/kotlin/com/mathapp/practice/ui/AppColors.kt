@@ -24,6 +24,8 @@ object AppColors {
     val RabbitColor      = Color(0xFFEC407A)   // pink
     val FoxColor         = Color(0xFFFF7043)   // deep orange
     val OwlColor         = Color(0xFF7E57C2)   // purple
+    val CatColor         = Color(0xFFAB8ED6)   // lavender
+    val DogColor         = Color(0xFF64B5F6)   // sky blue
 
     // UI utility
     val CardWhite        = Color(0xFFFFFFFF)

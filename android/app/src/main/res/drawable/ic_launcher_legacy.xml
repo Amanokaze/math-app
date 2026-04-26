@@ -2,7 +2,8 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item>
         <shape android:shape="rectangle">
-            <solid android:color="#000000"/>
+            <solid android:color="#58C7F3"/>
         </shape>
     </item>
+    <item android:drawable="@mipmap/ic_launcher_foreground"/>
 </layer-list>

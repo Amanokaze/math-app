@@ -1,5 +1,6 @@
 package com.mathapp.practice.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -9,21 +10,36 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import math.shared.generated.resources.*
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.jetbrains.compose.resources.painterResource
 
-/**
- * Reusable character portrait composable.
- *
- * Renders a circular portrait with:
- *  - background gradient (character default colour or equipped BG item)
- *  - character emoji centred inside
- *  - optional head accessory floating above
- *  - optional badge in the bottom-end corner
- *
- * Call sites control which decorations are shown by passing null for unused slots.
- */
+@OptIn(ExperimentalResourceApi::class)
+fun characterDrawable(character: CharacterType): DrawableResource = when (character) {
+    CharacterType.BEAR   -> Res.drawable.char_bear
+    CharacterType.RABBIT -> Res.drawable.char_rabbit
+    CharacterType.FOX    -> Res.drawable.char_fox
+    CharacterType.OWL    -> Res.drawable.char_owl
+    CharacterType.CAT    -> Res.drawable.char_cat
+    CharacterType.DOG    -> Res.drawable.char_dog
+}
+
+fun characterBgColors(character: CharacterType?): List<Color> = when (character) {
+    CharacterType.BEAR   -> listOf(AppColors.BearColor.copy(alpha = 0.85f),   AppColors.BearColor.copy(alpha = 0.35f))
+    CharacterType.RABBIT -> listOf(AppColors.RabbitColor.copy(alpha = 0.85f), AppColors.RabbitColor.copy(alpha = 0.35f))
+    CharacterType.FOX    -> listOf(AppColors.FoxColor.copy(alpha = 0.85f),    AppColors.FoxColor.copy(alpha = 0.35f))
+    CharacterType.OWL    -> listOf(AppColors.OwlColor.copy(alpha = 0.85f),    AppColors.OwlColor.copy(alpha = 0.35f))
+    CharacterType.CAT    -> listOf(AppColors.CatColor.copy(alpha = 0.85f),    AppColors.CatColor.copy(alpha = 0.35f))
+    CharacterType.DOG    -> listOf(AppColors.DogColor.copy(alpha = 0.85f),    AppColors.DogColor.copy(alpha = 0.35f))
+    null                 -> listOf(Color(0xFFE0E0E0), Color(0xFFF5F5F5))
+}
+
+@OptIn(ExperimentalResourceApi::class)
 @Composable
 fun CharacterPortrait(
     character: CharacterType?,
@@ -33,16 +49,7 @@ fun CharacterPortrait(
     bgItem: ShopItem?    = null,
     modifier: Modifier   = Modifier
 ) {
-    val charEmoji = character?.emoji ?: "🐻"
-
-    val defaultBgColors: List<Color> = when (character) {
-        CharacterType.BEAR   -> listOf(AppColors.BearColor.copy(alpha = 0.85f),   AppColors.BearColor.copy(alpha = 0.35f))
-        CharacterType.RABBIT -> listOf(AppColors.RabbitColor.copy(alpha = 0.85f), AppColors.RabbitColor.copy(alpha = 0.35f))
-        CharacterType.FOX    -> listOf(AppColors.FoxColor.copy(alpha = 0.85f),    AppColors.FoxColor.copy(alpha = 0.35f))
-        CharacterType.OWL    -> listOf(AppColors.OwlColor.copy(alpha = 0.85f),    AppColors.OwlColor.copy(alpha = 0.35f))
-        null                 -> listOf(Color(0xFFE0E0E0), Color(0xFFF5F5F5))
-    }
-    val bgColors = bgItemColors(bgItem) ?: defaultBgColors
+    val bgColors = bgItemColors(bgItem) ?: characterBgColors(character)
 
     Box(
         modifier = modifier.size(size),
@@ -55,10 +62,12 @@ fun CharacterPortrait(
                 .background(Brush.radialGradient(bgColors), CircleShape)
         )
 
-        // ── Character emoji ──
-        Text(
-            text  = charEmoji,
-            fontSize = (size.value * 0.54f).sp
+        // ── Character image ──
+        Image(
+            painter = painterResource(characterDrawable(character ?: CharacterType.BEAR)),
+            contentDescription = null,
+            modifier = Modifier.size(size * 0.72f),
+            contentScale = ContentScale.Fit
         )
 
         // ── Head accessory: center sits on the circle's top rim ──
