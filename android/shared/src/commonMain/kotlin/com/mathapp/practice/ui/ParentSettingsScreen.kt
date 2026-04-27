@@ -27,12 +27,6 @@ fun ParentSettingsScreen(
     onResetProgress: () -> Unit,
     onBack: () -> Unit
 ) {
-    var studyNotification by remember {
-        mutableStateOf(AppSettings.getInt("parentStudyNotify", 1) == 1)
-    }
-    var achievementNotification by remember {
-        mutableStateOf(AppSettings.getInt("parentAchieveNotify", 1) == 1)
-    }
     var timeLimit by remember {
         mutableStateOf(AppSettings.getInt("parentTimeLimit", 0) == 1)
     }
@@ -100,31 +94,6 @@ fun ParentSettingsScreen(
                 )
             }
         }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // ── Notifications section ──
-        SettingsSectionHeader(L10n.string("parent_notifications", appLanguage))
-
-        SettingsToggleRow(
-            label = L10n.string("parent_study_notification", appLanguage),
-            icon = "📚",
-            checked = studyNotification,
-            onCheckedChange = {
-                studyNotification = it
-                AppSettings.setInt("parentStudyNotify", if (it) 1 else 0)
-            }
-        )
-
-        SettingsToggleRow(
-            label = L10n.string("parent_achievement_notification", appLanguage),
-            icon = "🏆",
-            checked = achievementNotification,
-            onCheckedChange = {
-                achievementNotification = it
-                AppSettings.setInt("parentAchieveNotify", if (it) 1 else 0)
-            }
-        )
 
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -213,34 +182,6 @@ fun ParentSettingsScreen(
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
                     text = L10n.string("reset_progress", appLanguage),
-                    fontSize = 16.sp,
-                    color = MaterialTheme.colorScheme.error,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // ── Account section ──
-        SettingsSectionHeader(L10n.string("parent_account", appLanguage))
-
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 4.dp),
-            shape = RoundedCornerShape(16.dp),
-            color = MaterialTheme.colorScheme.surface,
-            shadowElevation = 1.dp
-        ) {
-            Row(
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("👋", fontSize = 22.sp)
-                Spacer(modifier = Modifier.width(12.dp))
-                Text(
-                    text = L10n.string("parent_logout", appLanguage),
                     fontSize = 16.sp,
                     color = MaterialTheme.colorScheme.error,
                     fontWeight = FontWeight.SemiBold

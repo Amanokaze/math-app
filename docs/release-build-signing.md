@@ -23,7 +23,7 @@ iOS:
 - `CURRENT_PROJECT_VERSION = 1`
 - `IPHONEOS_DEPLOYMENT_TARGET = 17.0`
 - `CFBundleDisplayName = Math`
-- `PrivacyInfo.xcprivacy` 없음
+- `PrivacyInfo.xcprivacy` 추가 완료 (2026-04-27, NSUserDefaults CA92.1)
 
 ## 출시 전 식별자 결정
 
@@ -160,7 +160,7 @@ cd android
 2. `CFBundleDisplayName`을 `셈토끼`로 변경한다.
 3. `MARKETING_VERSION`을 `1.0.0`으로 맞춘다.
 4. `CURRENT_PROJECT_VERSION`은 첫 출시 `1`로 유지하고 업데이트마다 1씩 증가한다.
-5. `PrivacyInfo.xcprivacy`를 추가하고 앱 타깃 리소스로 포함한다.
+5. `PrivacyInfo.xcprivacy`를 추가하고 앱 타깃 리소스로 포함한다. ✓ 완료 (2026-04-27)
 6. AppIcon을 최종 1024x1024 PNG로 교체한다.
 7. Xcode에서 Signing & Capabilities가 실제 Apple Developer Team과 맞는지 확인한다.
 8. Archive를 생성한다.

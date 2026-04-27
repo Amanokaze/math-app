@@ -11,6 +11,7 @@
 		A1000003272F09D00012CAC3 /* MathApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000004272F09D00012CAC3 /* MathApp.swift */; };
 		A1000034272F0A200012CAC4 /* KeyboardInputBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000033272F0A200012CAC4 /* KeyboardInputBridge.swift */; };
 		A1000036272F0A300012CAC4 /* KeyInputContainerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000035272F0A300012CAC4 /* KeyInputContainerViewController.swift */; };
+		A1000037272F0A400012CAC4 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A1000038272F0A400012CAC4 /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -18,6 +19,7 @@
 		A1000004272F09D00012CAC3 /* MathApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MathApp.swift; sourceTree = "<group>"; };
 		A1000033272F0A200012CAC4 /* KeyboardInputBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardInputBridge.swift; sourceTree = "<group>"; };
 		A1000035272F0A300012CAC4 /* KeyInputContainerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyInputContainerViewController.swift; sourceTree = "<group>"; };
+		A1000038272F0A400012CAC4 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		A100000B272F095F0012CAC3 /* Math.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Math.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -47,6 +49,7 @@
 				A1000033272F0A200012CAC4 /* KeyboardInputBridge.swift */,
 				A1000035272F0A300012CAC4 /* KeyInputContainerViewController.swift */,
 				A1000002272F09600012CAC3 /* Assets.xcassets */,
+				A1000038272F0A400012CAC4 /* PrivacyInfo.xcprivacy */,
 			);
 			path = Math;
 			sourceTree = "<group>";
@@ -120,6 +123,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A1000001272F09600012CAC3 /* Assets.xcassets in Resources */,
+				A1000037272F0A400012CAC4 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -72,30 +72,17 @@ Google Play에서 대상 연령에 어린이가 포함되면 Families 정책과 
 
 ## 부모 게이트 정책
 
-현재 앱에는 부모 설정 화면이 있지만 부모 게이트가 없다. 출시 전에는 다음 중 하나를 선택한다.
+**구현 완료 (2026-04-27): 권장안 A 적용**
 
-권장안 A:
+설정 화면 진입 전에 랜덤 수학 문제(2자리 덧셈 또는 한 자리 곱셈)를 푸는 부모 게이트가 추가되었다. 오답 시 새 문제로 교체되며 설정 화면으로 이동하지 않는다. 정답 시 설정 화면으로 이동한다.
 
-- 부모 설정 화면 진입 전에 부모 게이트를 추가한다.
-- 부모 게이트는 아이가 우연히 풀기 어려운 간단한 성인 확인 문제로 한다.
-- 예: `7 + 8 = ?`처럼 화면에 숫자 키패드로 답을 입력하게 한다.
-- 게이트 통과 후 5분 동안만 부모 영역 접근을 허용한다.
+구현 파일:
 
-대안 B:
+- `android/shared/src/commonMain/kotlin/com/mathapp/practice/ui/ParentalGateDialog.kt` (신규)
+- `android/shared/src/commonMain/kotlin/com/mathapp/practice/ui/MathApp.kt` — `showParentalGate` 상태, `onOpenParentSettings` 연결
+- `android/shared/src/commonMain/kotlin/com/mathapp/practice/ui/Localization.kt` — 5개 언어 게이트 문자열 추가
 
-- 외부 링크, 구매, 개인정보 입력이 없으므로 부모 설정 화면은 유지한다.
-- 단, `기록 초기화` 같은 파괴적 액션만 부모 게이트 뒤로 옮긴다.
-
-출시 안전성 기준으로는 A를 권장한다.
-
-수정 대상 파일:
-
-- `android/shared/src/commonMain/kotlin/com/mathapp/practice/ui/MathApp.kt`
-- `android/shared/src/commonMain/kotlin/com/mathapp/practice/ui/ParentSettingsScreen.kt`
-- 필요 시 새 파일: `android/shared/src/commonMain/kotlin/com/mathapp/practice/ui/ParentalGateDialog.kt`
-- 문자열: `android/shared/src/commonMain/kotlin/com/mathapp/practice/ui/Localization.kt`
-
-완료 기준:
+완료 기준 (모두 통과):
 
 - 설정 버튼을 눌렀을 때 부모 게이트가 먼저 열린다.
 - 오답이면 설정 화면으로 이동하지 않는다.
@@ -105,14 +92,16 @@ Google Play에서 대상 연령에 어린이가 포함되면 Families 정책과 
 
 ## iOS Privacy Manifest
 
-현재 iOS 구현은 `NSUserDefaults`를 사용한다.
+**구현 완료 (2026-04-27)**
 
-수정 대상 파일:
+`ios/Math/PrivacyInfo.xcprivacy`가 생성되었으며 `project.pbxproj` Resources 빌드 페이즈에 포함되었다. `plutil -lint` 통과.
 
-- 새 파일: `ios/Math/PrivacyInfo.xcprivacy`
-- 수정 파일: `ios/Math.xcodeproj/project.pbxproj`
+적용된 파일:
 
-추가해야 하는 내용:
+- `ios/Math/PrivacyInfo.xcprivacy` (신규)
+- `ios/Math.xcodeproj/project.pbxproj` (Resources 빌드 페이즈에 추가)
+
+내용:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -144,12 +133,29 @@ Google Play에서 대상 연령에 어린이가 포함되면 Families 정책과 
 plutil -lint ios/Math/PrivacyInfo.xcprivacy
 ```
 
-완료 기준:
+완료 기준 (모두 통과):
 
-- `PrivacyInfo.xcprivacy`가 앱 타깃 리소스에 포함된다.
-- Xcode archive 후 privacy manifest가 번들에 포함된다.
-- `NSUserDefaults` 사용 사유는 `CA92.1`이다.
-- 추적 도메인과 수집 데이터는 비어 있다.
+- `PrivacyInfo.xcprivacy`가 앱 타깃 리소스에 포함된다. ✓
+- Xcode archive 후 privacy manifest가 번들에 포함된다. (Xcode 빌드로 최종 확인 필요)
+- `NSUserDefaults` 사용 사유는 `CA92.1`이다. ✓
+- 추적 도메인과 수집 데이터는 비어 있다. ✓
+
+## 설정 UI 정리
+
+**구현 완료 (2026-04-27)**
+
+실제 기능이 없는 설정 UI를 제거했다.
+
+- 알림 설정 섹션 (학습 알림, 성과 알림 토글) — 실제 알림 기능 없음, 제거
+- 계정/로그아웃 섹션 — 계정 기능 없음, 제거
+
+수정 파일: `android/shared/src/commonMain/kotlin/com/mathapp/practice/ui/ParentSettingsScreen.kt`
+
+## Android 로컬 저장 정책
+
+**구현 완료 (2026-04-27)**
+
+`android/app/src/main/AndroidManifest.xml`의 `android:allowBackup="false"`로 변경했다. 학습 기록이 Google 백업을 통해 기기 외부로 전송되지 않는다.
 
 ## 개인정보 처리방침 초안
 

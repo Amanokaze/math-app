@@ -139,6 +139,11 @@ object L10n {
             "parent_data" to "데이터",
             "parent_account" to "계정",
             "parent_logout" to "로그아웃",
+            // ── Parental Gate ──
+            "parent_gate_title" to "부모 확인",
+            "parent_gate_desc" to "설정에 접근하려면 아래 문제를 풀어주세요.",
+            "parent_gate_wrong" to "오답입니다. 다시 시도해 주세요.",
+            "parent_gate_confirm" to "확인",
             // ── Treasure Chest ──
             "treasure_title" to "별보물함",
             "treasure_level" to "레벨",
@@ -352,6 +357,11 @@ object L10n {
             "parent_data" to "Data",
             "parent_account" to "Account",
             "parent_logout" to "Log Out",
+            // ── Parental Gate ──
+            "parent_gate_title" to "Parent Check",
+            "parent_gate_desc" to "Please solve the problem below to access settings.",
+            "parent_gate_wrong" to "Incorrect answer. Please try again.",
+            "parent_gate_confirm" to "Confirm",
             // ── Treasure Chest ──
             "treasure_title" to "Star Chest",
             "treasure_level" to "Level",
@@ -571,6 +581,11 @@ object L10n {
             "parent_data" to "資料",
             "parent_account" to "帳號",
             "parent_logout" to "登出",
+            // ── Parental Gate ──
+            "parent_gate_title" to "家長確認",
+            "parent_gate_desc" to "請解以下問題以進入設定頁面。",
+            "parent_gate_wrong" to "答案錯誤，請重試。",
+            "parent_gate_confirm" to "確認",
             // ── Treasure Chest ──
             "treasure_title" to "星寶箱",
             "treasure_level" to "等級",
@@ -784,6 +799,11 @@ object L10n {
             "parent_data" to "数据",
             "parent_account" to "账号",
             "parent_logout" to "登出",
+            // ── Parental Gate ──
+            "parent_gate_title" to "家长确认",
+            "parent_gate_desc" to "请解以下问题以进入设置页面。",
+            "parent_gate_wrong" to "答案错误，请重试。",
+            "parent_gate_confirm" to "确认",
             // ── Treasure Chest ──
             "treasure_title" to "星宝箱",
             "treasure_level" to "等级",
@@ -997,6 +1017,11 @@ object L10n {
             "parent_data" to "データ",
             "parent_account" to "アカウント",
             "parent_logout" to "ログアウト",
+            // ── Parental Gate ──
+            "parent_gate_title" to "保護者確認",
+            "parent_gate_desc" to "設定にアクセスするには、以下の問題を解いてください。",
+            "parent_gate_wrong" to "不正解です。もう一度お試しください。",
+            "parent_gate_confirm" to "確認",
             // ── Treasure Chest ──
             "treasure_title" to "星宝箱",
             "treasure_level" to "レベル",

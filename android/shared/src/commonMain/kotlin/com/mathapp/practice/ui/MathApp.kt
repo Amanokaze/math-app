@@ -36,6 +36,7 @@ fun MathApp() {
     var appLanguageRaw by remember { mutableStateOf(AppSettings.getString("appLanguage", "")) }
     var progressVersion by remember { mutableIntStateOf(0) }
     var heartsVersion by remember { mutableIntStateOf(0) }
+    var showParentalGate by remember { mutableStateOf(false) }
 
     // Determine initial screen based on onboarding / character selection state
     val initialScreen: Screen = remember {
@@ -98,7 +99,7 @@ fun MathApp() {
                         val q = getOrCreateDailyQuest()
                         screen = Screen.Quest(q.operation, q.stageNumber)
                     },
-                    onOpenParentSettings = { screen = Screen.ParentSettings },
+                    onOpenParentSettings = { showParentalGate = true },
                     progressVersion = progressVersion,
                     heartsVersion = heartsVersion
                 )
@@ -199,6 +200,17 @@ fun MathApp() {
                         onToHome = { screen = Screen.Home }
                     )
                 }
+            }
+
+            if (showParentalGate) {
+                ParentalGateDialog(
+                    appLanguage = appLanguage,
+                    onPassed = {
+                        showParentalGate = false
+                        screen = Screen.ParentSettings
+                    },
+                    onDismiss = { showParentalGate = false }
+                )
             }
         }
     }
