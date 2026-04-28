@@ -270,7 +270,10 @@ object L10n {
             "item_night" to "밤하늘",
             "item_ocean" to "바다",
             "item_spring" to "봄 배경",
-            "item_flower" to "꽃 장식"
+            "item_flower" to "꽃 장식",
+            // ── Sound ──
+            "parent_sound" to "소리",
+            "parent_sound_effects" to "효과음"
         ),
         AppLanguage.ENGLISH to mapOf(
             "reset_records" to "Reset Records",
@@ -528,7 +531,10 @@ object L10n {
             "item_night" to "Night Sky",
             "item_ocean" to "Ocean",
             "item_spring" to "Spring",
-            "item_flower" to "Flower"
+            "item_flower" to "Flower",
+            // ── Sound ──
+            "parent_sound" to "Sound",
+            "parent_sound_effects" to "Sound effects"
         ),
         AppLanguage.CHINESE_TRADITIONAL to mapOf(
             "reset_records" to "重置紀錄",
@@ -786,7 +792,10 @@ object L10n {
             "item_night" to "夜空",
             "item_ocean" to "海洋",
             "item_spring" to "春天",
-            "item_flower" to "花朵"
+            "item_flower" to "花朵",
+            // ── Sound ──
+            "parent_sound" to "聲音",
+            "parent_sound_effects" to "音效"
         ),
         AppLanguage.CHINESE_SIMPLIFIED to mapOf(
             "reset_records" to "重置记录",
@@ -1044,7 +1053,10 @@ object L10n {
             "item_night" to "夜空",
             "item_ocean" to "海洋",
             "item_spring" to "春天",
-            "item_flower" to "花朵"
+            "item_flower" to "花朵",
+            // ── Sound ──
+            "parent_sound" to "声音",
+            "parent_sound_effects" to "音效"
         ),
         AppLanguage.JAPANESE to mapOf(
             "reset_records" to "記録をリセット",
@@ -1302,7 +1314,10 @@ object L10n {
             "item_night" to "夜空",
             "item_ocean" to "海",
             "item_spring" to "春",
-            "item_flower" to "お花"
+            "item_flower" to "お花",
+            // ── Sound ──
+            "parent_sound" to "サウンド",
+            "parent_sound_effects" to "効果音"
         )
     )
 

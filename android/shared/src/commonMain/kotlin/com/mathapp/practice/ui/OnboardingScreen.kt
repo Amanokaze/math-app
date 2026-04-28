@@ -104,7 +104,7 @@ fun OnboardingScreen(
 
             // Start button
             Button(
-                onClick = onFinish,
+                onClick = { SoundPlayer.play(SoundEffect.Tap); onFinish() },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(90.dp),
@@ -194,7 +194,7 @@ fun CharacterSelectionScreen(
                                     appLanguage = appLanguage,
                                     cardSize = landscapeCardSize,
                                     modifier = Modifier.weight(1f)
-                                ) { selected = char }
+                                ) { SoundPlayer.play(SoundEffect.Tap); selected = char }
                             }
                             // 마지막 행이 3개 미만이면 빈 weight로 채움
                             repeat(3 - row.size) { Spacer(Modifier.weight(1f)) }
@@ -215,7 +215,7 @@ fun CharacterSelectionScreen(
                                     isSelected = selected == char,
                                     appLanguage = appLanguage,
                                     modifier = Modifier.weight(1f)
-                                ) { selected = char }
+                                ) { SoundPlayer.play(SoundEffect.Tap); selected = char }
                             }
                             repeat(2 - row.size) { Spacer(Modifier.weight(1f)) }
                         }
@@ -227,7 +227,7 @@ fun CharacterSelectionScreen(
 
             // Confirm button
             Button(
-                onClick = { selected?.let { onCharacterSelected(it) } },
+                onClick = { SoundPlayer.play(SoundEffect.Tap); selected?.let { onCharacterSelected(it) } },
                 enabled = selected != null,
                 modifier = Modifier.fillMaxWidth().height(confirmHeight),
                 shape = RoundedCornerShape(20.dp),

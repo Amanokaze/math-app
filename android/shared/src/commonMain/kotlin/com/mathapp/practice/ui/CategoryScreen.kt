@@ -35,7 +35,7 @@ fun CategoryScreen(
                 .background(Brush.linearGradient(AppColors.GradientTealBlue))
                 .padding(top = 44.dp, bottom = 16.dp, start = 16.dp, end = 16.dp)
         ) {
-            IconButton(onClick = onBack, modifier = Modifier.align(Alignment.CenterStart)) {
+            IconButton(onClick = { SoundPlayer.play(SoundEffect.Back); onBack() }, modifier = Modifier.align(Alignment.CenterStart)) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, tint = Color.White)
             }
             Text(
@@ -67,7 +67,7 @@ fun CategoryScreen(
                             progress = progressList[globalIdx],
                             appLanguage = appLanguage,
                             modifier = Modifier.weight(1f).fillMaxHeight(),
-                            onClick = { onOperationSelected(op) }
+                            onClick = { SoundPlayer.play(SoundEffect.Tap); onOperationSelected(op) }
                         )
                     }
                     if (rowOps.size < 2) Spacer(modifier = Modifier.weight(1f))

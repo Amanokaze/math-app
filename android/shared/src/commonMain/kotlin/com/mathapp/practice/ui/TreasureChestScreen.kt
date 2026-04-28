@@ -49,7 +49,7 @@ fun TreasureChestScreen(
                 .background(Brush.linearGradient(AppColors.GradientGold))
                 .padding(horizontal = 16.dp, vertical = 10.dp)
         ) {
-            IconButton(onClick = onBack, modifier = Modifier.align(Alignment.CenterStart)) {
+            IconButton(onClick = { SoundPlayer.play(SoundEffect.Back); onBack() }, modifier = Modifier.align(Alignment.CenterStart)) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, tint = Color.White)
             }
             Text(
@@ -167,7 +167,10 @@ fun TreasureChestScreen(
                                 isFeatured = item.id == featuredId,
                                 appLanguage = appLanguage,
                                 modifier = Modifier.weight(1f),
-                                onClick = { selectedTreasure = item }
+                                onClick = {
+                                    if (isTreasureUnlocked(item)) SoundPlayer.play(SoundEffect.Reward)
+                                    selectedTreasure = item
+                                }
                             )
                         }
                         repeat(3 - row.size) {

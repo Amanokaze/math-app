@@ -89,6 +89,7 @@ fun ParentalGateDialog(
         },
         confirmButton = {
             Button(onClick = {
+                SoundPlayer.play(SoundEffect.Tap)
                 val ans = input.toIntOrNull()
                 if (ans != null && ans == problem.answer) {
                     onPassed()
@@ -102,7 +103,7 @@ fun ParentalGateDialog(
             }
         },
         dismissButton = {
-            OutlinedButton(onClick = onDismiss) {
+            OutlinedButton(onClick = { SoundPlayer.play(SoundEffect.Tap); onDismiss() }) {
                 Text(L10n.string("cancel", appLanguage))
             }
         }

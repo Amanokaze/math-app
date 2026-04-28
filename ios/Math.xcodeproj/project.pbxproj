@@ -12,6 +12,14 @@
 		A1000034272F0A200012CAC4 /* KeyboardInputBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000033272F0A200012CAC4 /* KeyboardInputBridge.swift */; };
 		A1000036272F0A300012CAC4 /* KeyInputContainerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000035272F0A300012CAC4 /* KeyInputContainerViewController.swift */; };
 		A1000037272F0A400012CAC4 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A1000038272F0A400012CAC4 /* PrivacyInfo.xcprivacy */; };
+		A2AA0011272F09600012CA11 /* sfx_tap.wav in Resources */ = {isa = PBXBuildFile; fileRef = A2AA0001272F09600012CA01 /* sfx_tap.wav */; };
+		A2AA0012272F09600012CA12 /* sfx_correct.wav in Resources */ = {isa = PBXBuildFile; fileRef = A2AA0002272F09600012CA02 /* sfx_correct.wav */; };
+		A2AA0013272F09600012CA13 /* sfx_incorrect.wav in Resources */ = {isa = PBXBuildFile; fileRef = A2AA0003272F09600012CA03 /* sfx_incorrect.wav */; };
+		A2AA0014272F09600012CA14 /* sfx_reward.wav in Resources */ = {isa = PBXBuildFile; fileRef = A2AA0004272F09600012CA04 /* sfx_reward.wav */; };
+		A2AA0015272F09600012CA15 /* sfx_complete.wav in Resources */ = {isa = PBXBuildFile; fileRef = A2AA0005272F09600012CA05 /* sfx_complete.wav */; };
+		A2AA0016272F09600012CA16 /* sfx_back.wav in Resources */ = {isa = PBXBuildFile; fileRef = A2AA0006272F09600012CA06 /* sfx_back.wav */; };
+		A2AA0017272F09600012CA17 /* sfx_countdown_tick.wav in Resources */ = {isa = PBXBuildFile; fileRef = A2AA0007272F09600012CA07 /* sfx_countdown_tick.wav */; };
+		A2AA0018272F09600012CA18 /* sfx_countdown_go.wav in Resources */ = {isa = PBXBuildFile; fileRef = A2AA0008272F09600012CA08 /* sfx_countdown_go.wav */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -21,6 +29,14 @@
 		A1000035272F0A300012CAC4 /* KeyInputContainerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyInputContainerViewController.swift; sourceTree = "<group>"; };
 		A1000038272F0A400012CAC4 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		A100000B272F095F0012CAC3 /* Math.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Math.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A2AA0001272F09600012CA01 /* sfx_tap.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = sfx_tap.wav; sourceTree = "<group>"; };
+		A2AA0002272F09600012CA02 /* sfx_correct.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = sfx_correct.wav; sourceTree = "<group>"; };
+		A2AA0003272F09600012CA03 /* sfx_incorrect.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = sfx_incorrect.wav; sourceTree = "<group>"; };
+		A2AA0004272F09600012CA04 /* sfx_reward.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = sfx_reward.wav; sourceTree = "<group>"; };
+		A2AA0005272F09600012CA05 /* sfx_complete.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = sfx_complete.wav; sourceTree = "<group>"; };
+		A2AA0006272F09600012CA06 /* sfx_back.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = sfx_back.wav; sourceTree = "<group>"; };
+		A2AA0007272F09600012CA07 /* sfx_countdown_tick.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = sfx_countdown_tick.wav; sourceTree = "<group>"; };
+		A2AA0008272F09600012CA08 /* sfx_countdown_go.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = sfx_countdown_go.wav; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -50,8 +66,24 @@
 				A1000035272F0A300012CAC4 /* KeyInputContainerViewController.swift */,
 				A1000002272F09600012CAC3 /* Assets.xcassets */,
 				A1000038272F0A400012CAC4 /* PrivacyInfo.xcprivacy */,
+				A2AA0000272F09600012CA00 /* Resources */,
 			);
 			path = Math;
+			sourceTree = "<group>";
+		};
+		A2AA0000272F09600012CA00 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				A2AA0001272F09600012CA01 /* sfx_tap.wav */,
+				A2AA0002272F09600012CA02 /* sfx_correct.wav */,
+				A2AA0003272F09600012CA03 /* sfx_incorrect.wav */,
+				A2AA0004272F09600012CA04 /* sfx_reward.wav */,
+				A2AA0005272F09600012CA05 /* sfx_complete.wav */,
+				A2AA0006272F09600012CA06 /* sfx_back.wav */,
+				A2AA0007272F09600012CA07 /* sfx_countdown_tick.wav */,
+				A2AA0008272F09600012CA08 /* sfx_countdown_go.wav */,
+			);
+			path = Resources;
 			sourceTree = "<group>";
 		};
 		A100000F272F08EF0012CAC3 /* Products */ = {
@@ -124,6 +156,14 @@
 			files = (
 				A1000001272F09600012CAC3 /* Assets.xcassets in Resources */,
 				A1000037272F0A400012CAC4 /* PrivacyInfo.xcprivacy in Resources */,
+				A2AA0011272F09600012CA11 /* sfx_tap.wav in Resources */,
+				A2AA0012272F09600012CA12 /* sfx_correct.wav in Resources */,
+				A2AA0013272F09600012CA13 /* sfx_incorrect.wav in Resources */,
+				A2AA0014272F09600012CA14 /* sfx_reward.wav in Resources */,
+				A2AA0015272F09600012CA15 /* sfx_complete.wav in Resources */,
+				A2AA0016272F09600012CA16 /* sfx_back.wav in Resources */,
+				A2AA0017272F09600012CA17 /* sfx_countdown_tick.wav in Resources */,
+				A2AA0018272F09600012CA18 /* sfx_countdown_go.wav in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

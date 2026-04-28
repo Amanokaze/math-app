@@ -59,7 +59,7 @@ fun LearningReportScreen(
                 .background(Brush.linearGradient(AppColors.GradientPurple))
                 .padding(horizontal = 16.dp, vertical = 10.dp)
         ) {
-            IconButton(onClick = onBack, modifier = Modifier.align(Alignment.CenterStart)) {
+            IconButton(onClick = { SoundPlayer.play(SoundEffect.Back); onBack() }, modifier = Modifier.align(Alignment.CenterStart)) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, tint = Color.White)
             }
             Text(

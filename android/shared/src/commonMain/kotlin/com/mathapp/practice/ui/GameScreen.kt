@@ -118,6 +118,7 @@ fun GameScreen(
                 firstAttemptDone[currentIndex] = true
                 if (isCorrect) correctOnFirstAttempt[currentIndex] = true
             }
+            SoundPlayer.play(if (isCorrect) SoundEffect.Correct else SoundEffect.Incorrect)
             showResult = isCorrect
             lastInputMutationAt = currentTimeMillis()
         }
@@ -257,6 +258,7 @@ fun GameScreen(
                         appLanguage = appLanguage,
                         onChoiceSelected = { choice ->
                             if (showResult == null) {
+                                SoundPlayer.play(SoundEffect.Tap)
                                 onSubmitAnswer(choice.toString())
                             }
                         }
@@ -336,7 +338,7 @@ fun GameScreen(
             QuitConfirmDialog(
                 appLanguage = appLanguage,
                 onDismiss = { showQuitDialog = false; isPaused = false; if (!isMultiChoice) focusRequester.requestFocus() },
-                onConfirm = { onBack() }
+                onConfirm = { SoundPlayer.play(SoundEffect.Back); onBack() }
             )
         }
     }
