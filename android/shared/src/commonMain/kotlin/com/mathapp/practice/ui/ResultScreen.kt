@@ -40,6 +40,8 @@ fun ResultScreen(
     val equippedHead   = remember { getEquippedItem(ShopCategory.HEAD) }
     val equippedBadge  = remember { getEquippedItem(ShopCategory.BADGE) }
     val equippedBg     = remember { getEquippedItem(ShopCategory.BACKGROUND) }
+
+    LaunchedEffect(Unit) { SoundPlayer.play(SoundEffect.Complete) }
     val titleKey = when (stars) {
         3 -> "result_title_3star"
         2 -> "result_title_2star"

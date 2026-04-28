@@ -14,11 +14,13 @@ import com.mathapp.practice.ui.dispatchHardwareKeyboardEvent
 import com.mathapp.practice.ui.MathApp
 import com.mathapp.practice.ui.OAuthCallbackState
 import com.mathapp.practice.ui.initAppSettings
+import com.mathapp.practice.ui.initSoundPlayer
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initAppSettings(applicationContext)
+        initSoundPlayer(applicationContext)
         
         // 폰(sw<600dp): 세로만, 태블릿: 세로/가로 모두 허용
         val swDp = resources.configuration.smallestScreenWidthDp

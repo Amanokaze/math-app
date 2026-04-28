@@ -93,31 +93,31 @@ private fun HomeBottomBar(
     ) {
         NavigationBarItem(
             selected = activeTab == HomeTab.HOME,
-            onClick = { onTabSelected(HomeTab.HOME) },
+            onClick = { SoundPlayer.play(SoundEffect.Tap); onTabSelected(HomeTab.HOME) },
             icon = { Text("🏠", fontSize = 22.sp) },
             label = { Text(L10n.string("nav_home", appLanguage), fontSize = 11.sp) }
         )
         NavigationBarItem(
             selected = activeTab == HomeTab.REPORT,
-            onClick = { onTabSelected(HomeTab.REPORT) },
+            onClick = { SoundPlayer.play(SoundEffect.Tap); onTabSelected(HomeTab.REPORT) },
             icon = { Text("📊", fontSize = 22.sp) },
             label = { Text(L10n.string("nav_report", appLanguage), fontSize = 11.sp) }
         )
         NavigationBarItem(
             selected = activeTab == HomeTab.TREASURE,
-            onClick = { onTabSelected(HomeTab.TREASURE) },
+            onClick = { SoundPlayer.play(SoundEffect.Tap); onTabSelected(HomeTab.TREASURE) },
             icon = { Text("🎁", fontSize = 22.sp) },
             label = { Text(L10n.string("nav_treasure", appLanguage), fontSize = 11.sp) }
         )
         NavigationBarItem(
             selected = activeTab == HomeTab.CHARACTER,
-            onClick = { onTabSelected(HomeTab.CHARACTER) },
+            onClick = { SoundPlayer.play(SoundEffect.Tap); onTabSelected(HomeTab.CHARACTER) },
             icon = { Text("✨", fontSize = 22.sp) },
             label = { Text(L10n.string("nav_character", appLanguage), fontSize = 11.sp) }
         )
         NavigationBarItem(
             selected = activeTab == HomeTab.SHOP,
-            onClick = { onTabSelected(HomeTab.SHOP) },
+            onClick = { SoundPlayer.play(SoundEffect.Tap); onTabSelected(HomeTab.SHOP) },
             icon = { Text("🛒", fontSize = 22.sp) },
             label = { Text(L10n.string("shop_title", appLanguage), fontSize = 11.sp) }
         )
@@ -162,7 +162,7 @@ private fun HomeContent(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Settings button → Settings
-                IconButton(onClick = onOpenParentSettings) {
+                IconButton(onClick = { SoundPlayer.play(SoundEffect.Tap); onOpenParentSettings() }) {
                     Icon(Icons.Default.Settings, contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
@@ -409,7 +409,7 @@ fun DailyQuestCard(
                             color = Color.White.copy(alpha = 0.9f)
                         )
                         Button(
-                            onClick = onContinue,
+                            onClick = { SoundPlayer.play(SoundEffect.Tap); onContinue() },
                             modifier = Modifier.height(36.dp),
                             shape = RoundedCornerShape(10.dp),
                             colors = ButtonDefaults.buttonColors(
@@ -533,7 +533,7 @@ private fun OperationGrid(
                         totalStars = totalStars,
                         progress = progress,
                         gradient = gradient,
-                        onClick = { onOperationSelected(op) },
+                        onClick = { SoundPlayer.play(SoundEffect.Tap); onOperationSelected(op) },
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -626,6 +626,8 @@ fun CountdownOverlay(appLanguage: AppLanguage, onComplete: () -> Unit) {
             kotlinx.coroutines.delay(50)
             scale = 1.2f
             alpha = 1f
+            if (i > 0) SoundPlayer.play(SoundEffect.CountdownTick)
+            else        SoundPlayer.play(SoundEffect.CountdownGo)
             kotlinx.coroutines.delay(400)
             scale = 1f
             kotlinx.coroutines.delay(550)
@@ -669,7 +671,7 @@ fun LanguagePickerSheet(
             Column {
                 AppLanguage.entries.forEach { lang ->
                     TextButton(
-                        onClick = { onLanguageSelected(lang) },
+                        onClick = { SoundPlayer.play(SoundEffect.Tap); onLanguageSelected(lang) },
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Row(
@@ -686,7 +688,7 @@ fun LanguagePickerSheet(
             }
         },
         confirmButton = {
-            OutlinedButton(onClick = onDismiss) {
+            OutlinedButton(onClick = { SoundPlayer.play(SoundEffect.Tap); onDismiss() }) {
                 Text(L10n.string("cancel", appLanguage))
             }
         }

@@ -85,7 +85,7 @@ fun KeypadButton(
 ) {
     Surface(
         modifier = modifier.height(50.dp),
-        onClick = onClick,
+        onClick = { SoundPlayer.play(SoundEffect.Tap); onClick() },
         enabled = enabled,
         shape = RoundedCornerShape(10.dp),
         color = when {

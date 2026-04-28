@@ -53,12 +53,13 @@ fun ShopScreen(appLanguage: AppLanguage) {
                         }
                     },
                     dismissButton = {
-                        TextButton(onClick = { activeDialog = null }) {
+                        TextButton(onClick = { SoundPlayer.play(SoundEffect.Tap); activeDialog = null }) {
                             Text(L10n.string("shop_cancel", appLanguage))
                         }
                     },
                     confirmButton = {
                         Button(onClick = {
+                            SoundPlayer.play(SoundEffect.Tap)
                             if (buyItem(item)) {
                                 shopVersion++
                                 activeDialog = ShopDialog.PostBuyEquip(item)
@@ -83,12 +84,13 @@ fun ShopScreen(appLanguage: AppLanguage) {
                     },
                     text = { Text(L10n.string("shop_equip_now_question", appLanguage)) },
                     dismissButton = {
-                        TextButton(onClick = { activeDialog = null }) {
+                        TextButton(onClick = { SoundPlayer.play(SoundEffect.Tap); activeDialog = null }) {
                             Text(L10n.string("shop_later", appLanguage))
                         }
                     },
                     confirmButton = {
                         Button(onClick = {
+                            SoundPlayer.play(SoundEffect.Tap)
                             equipItem(item)
                             shopVersion++
                             activeDialog = null
@@ -147,7 +149,7 @@ fun ShopScreen(appLanguage: AppLanguage) {
                 }
                 val isSelected = cat == selectedCategory
                 Surface(
-                    onClick = { selectedCategory = cat },
+                    onClick = { SoundPlayer.play(SoundEffect.Tap); selectedCategory = cat },
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(12.dp),
                     color = if (isSelected) AppColors.SecondaryPurple
@@ -290,7 +292,7 @@ private fun ShopItemCard(
 
             when {
                 !owned -> Button(
-                    onClick = { onBuyRequest(item) },
+                    onClick = { SoundPlayer.play(SoundEffect.Tap); onBuyRequest(item) },
                     enabled = coinBalance >= item.price,
                     modifier = Modifier.fillMaxWidth().height(36.dp),
                     shape = RoundedCornerShape(10.dp),
@@ -303,7 +305,7 @@ private fun ShopItemCard(
                     )
                 }
                 equipped -> OutlinedButton(
-                    onClick = { onEquip(item) },
+                    onClick = { SoundPlayer.play(SoundEffect.Tap); onEquip(item) },
                     modifier = Modifier.fillMaxWidth().height(36.dp),
                     shape = RoundedCornerShape(10.dp),
                     contentPadding = PaddingValues(horizontal = 8.dp)
@@ -316,7 +318,7 @@ private fun ShopItemCard(
                     )
                 }
                 else -> Button(
-                    onClick = { onEquip(item) },
+                    onClick = { SoundPlayer.play(SoundEffect.Tap); onEquip(item) },
                     modifier = Modifier.fillMaxWidth().height(36.dp),
                     shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = AppColors.SuccessGreen),

@@ -86,7 +86,7 @@ fun CharacterPortraitScreen(
                 }
                 val isSelected = slot == selectedSlot
                 Surface(
-                    onClick = { selectedSlot = slot },
+                    onClick = { SoundPlayer.play(SoundEffect.Tap); selectedSlot = slot },
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(12.dp),
                     color = if (isSelected) AppColors.SecondaryPurple
@@ -129,7 +129,7 @@ fun CharacterPortraitScreen(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(
-                    onClick = onShopClick,
+                    onClick = { SoundPlayer.play(SoundEffect.Tap); onShopClick() },
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = AppColors.SecondaryPurple)
                 ) {
@@ -192,7 +192,7 @@ private fun PortraitItemChip(
         Modifier
 
     Surface(
-        onClick = onToggle,
+        onClick = { SoundPlayer.play(SoundEffect.Tap); onToggle() },
         modifier = borderMod.width(96.dp),
         shape = RoundedCornerShape(16.dp),
         color = if (isEquipped) AppColors.SecondaryPurple.copy(alpha = 0.08f)

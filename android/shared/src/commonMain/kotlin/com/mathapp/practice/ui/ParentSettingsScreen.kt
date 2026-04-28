@@ -36,6 +36,9 @@ fun ParentSettingsScreen(
     var dailyGoalText by remember {
         mutableStateOf(AppSettings.getInt("parentDailyGoal", 30).toString())
     }
+    var soundEffectsEnabled by remember {
+        mutableStateOf(AppSettings.getInt("soundEffectsEnabled", 1) == 1)
+    }
     var showLanguageSheet by remember { mutableStateOf(false) }
     var showResetConfirm by remember { mutableStateOf(false) }
 
@@ -52,7 +55,7 @@ fun ParentSettingsScreen(
                 .background(Brush.linearGradient(AppColors.GradientPurple))
                 .padding(horizontal = 16.dp, vertical = 10.dp)
         ) {
-            IconButton(onClick = onBack, modifier = Modifier.align(Alignment.CenterStart)) {
+            IconButton(onClick = { SoundPlayer.play(SoundEffect.Back); onBack() }, modifier = Modifier.align(Alignment.CenterStart)) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, tint = Color.White)
             }
             Text(
@@ -161,6 +164,21 @@ fun ParentSettingsScreen(
             icon = "🌙",
             checked = colorSchemeMode == 2,
             onCheckedChange = { onColorSchemeChange(if (it) 2 else 1) }
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // ── Sound section ──
+        SettingsSectionHeader(L10n.string("parent_sound", appLanguage))
+
+        SettingsToggleRow(
+            label = L10n.string("parent_sound_effects", appLanguage),
+            icon = "🔊",
+            checked = soundEffectsEnabled,
+            onCheckedChange = {
+                soundEffectsEnabled = it
+                AppSettings.setInt("soundEffectsEnabled", if (it) 1 else 0)
+            }
         )
 
         Spacer(modifier = Modifier.height(12.dp))

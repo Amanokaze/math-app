@@ -132,7 +132,7 @@ fun StageMapScreen(
             ) {
                 // White rounded back button
                 Surface(
-                    onClick = onBack,
+                    onClick = { SoundPlayer.play(SoundEffect.Back); onBack() },
                     shape = RoundedCornerShape(16.dp),
                     color = Color.White,
                     shadowElevation = 4.dp,
@@ -295,7 +295,7 @@ fun StageMapScreen(
                                 nodeSize = nodeSize,
                                 appLanguage = appLanguage,
                                 onClick = if (isLocked || hearts <= 0) null
-                                          else { { pendingStage = stage.number } },
+                                          else { { SoundPlayer.play(SoundEffect.Tap); pendingStage = stage.number } },
                                 modifier = Modifier.absoluteOffset(
                                     x = cx - nodeSize / 2,
                                     y = cy - nodeSize / 2
