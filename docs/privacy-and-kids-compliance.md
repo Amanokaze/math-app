@@ -2,42 +2,61 @@
 
 이 문서는 출시 전 개인정보, 어린이 대상 앱, 부모 게이트, 스토어 선언을 정리한다. 코드 구현자는 이 문서를 먼저 읽고 정책을 깨는 SDK나 기능을 추가하지 않는다.
 
-- 기준일: 2026-04-25
+- 기준일: 2026-04-27 (계정 연동 기능 추가로 업데이트)
 - 출시 기본 전략: 어린이 대상 교육 앱
-- 데이터 전략: 기기 내 로컬 저장만 사용
+- 데이터 전략: 로컬 저장 기본 + 선택적 계정 연동 시 Supabase 원격 저장
 - 수익화 전략: 광고 없음, 인앱 결제 없음
 - 소셜 전략: 채팅, 사용자 생성 콘텐츠, 랭킹, 친구 초대 없음
 
 ## 현재 데이터 인벤토리
 
-현재 코드 기준으로 확인된 저장/처리 항목:
+계정 연동 기능 추가 후 저장/처리 항목 (브랜치 `15-account-linking`):
 
 | 항목 | 저장 위치 | 오프디바이스 전송 | 개인정보 여부 | 스토어 선언 방향 |
 |---|---|---:|---:|---|
-| 선택 캐릭터 | SharedPreferences/NSUserDefaults | 없음 | 아니오 | 수집 아님 |
-| 언어/테마 설정 | SharedPreferences/NSUserDefaults | 없음 | 아니오 | 수집 아님 |
-| 스테이지 별 기록 | SharedPreferences/NSUserDefaults | 없음 | 아니오 | 수집 아님 |
-| 오늘 푼 문제 수/정답 수 | SharedPreferences/NSUserDefaults | 없음 | 아니오 | 수집 아님 |
-| 연속 학습일 | SharedPreferences/NSUserDefaults | 없음 | 아니오 | 수집 아님 |
-| 별코인/별점수/보물/아이템 | SharedPreferences/NSUserDefaults | 없음 | 아니오 | 수집 아님 |
+| 선택 캐릭터 | SharedPreferences/NSUserDefaults + Supabase(계정 연동 시) | 계정 연동 시 전송 | 아니오 | 수집 아님(게스트) / 앱 기능 목적(계정) |
+| 언어/테마 설정 | SharedPreferences/NSUserDefaults + Supabase(계정 연동 시) | 계정 연동 시 전송 | 아니오 | 수집 아님(게스트) / 앱 기능 목적(계정) |
+| 스테이지 별 기록 | SharedPreferences/NSUserDefaults + Supabase(계정 연동 시) | 계정 연동 시 전송 | 아니오 | 수집 아님(게스트) / 앱 기능 목적(계정) |
+| 오늘 푼 문제 수/정답 수 | SharedPreferences/NSUserDefaults + Supabase(계정 연동 시) | 계정 연동 시 전송 | 아니오 | 수집 아님(게스트) / 앱 기능 목적(계정) |
+| 연속 학습일 | SharedPreferences/NSUserDefaults + Supabase(계정 연동 시) | 계정 연동 시 전송 | 아니오 | 수집 아님(게스트) / 앱 기능 목적(계정) |
+| 별코인/별점수/보물/아이템 | SharedPreferences/NSUserDefaults + Supabase(계정 연동 시) | 계정 연동 시 전송 | 아니오 | 수집 아님(게스트) / 앱 기능 목적(계정) |
+| 이메일 주소 | Supabase Auth (계정 연동 시만) | 계정 연동 시 전송 | **예** | Contact Info > Email Address |
+| 로그인 제공자 정보 | Supabase Auth (계정 연동 시만) | 계정 연동 시 전송 | **예** | Identifiers |
 | 기기 언어 조회 | OS locale | 없음 | 아니오 | 수집 아님 |
 
-현재 Android Manifest에는 `INTERNET`, `AD_ID`, 위치, 카메라, 마이크, 연락처 권한이 없다. 현재 의존성에는 광고, 분석, 결제, Firebase, 네트워크 SDK가 없다.
+Android Manifest에 `INTERNET` 권한이 추가되었다 (계정 연동 기능). `AD_ID`, 위치, 카메라, 마이크, 연락처 권한은 없다. 광고, 분석, Firebase Analytics SDK는 없다. Supabase Ktor 클라이언트만 네트워크를 사용한다.
 
 ## 출시 정책 원칙
 
-출시 1차에서는 아래 원칙을 깨지 않는다.
+계정 연동 기능이 추가되어 아래 원칙 중 일부가 변경되었다.
 
-- 서버 계정 생성 없음
-- 이메일/이름/생년월일 입력 없음
+**유지되는 원칙:**
 - 광고 SDK 없음
-- 분석 SDK 없음
+- 분석 SDK 없음 (Firebase Analytics 등 제3자 분석 사용하지 않음)
 - 결제/Billing/StoreKit 상품 없음
 - 랭킹/친구/채팅/UGC 없음
-- 외부 웹 링크는 앱 내부에 노출하지 않음
-- 학습 기록은 기기 내에만 저장
+- 아이가 직접 이메일/개인정보를 입력하는 흐름 없음 (부모 게이트 뒤에 배치)
+
+**변경된 원칙:**
+- ~~서버 계정 생성 없음~~ → 선택적 계정 연동 지원 (Supabase Auth)
+- ~~이메일 입력 없음~~ → 부모/보호자가 부모 게이트 통과 후 이메일 입력 가능
+- ~~학습 기록은 기기 내에만 저장~~ → 계정 연동 시 Supabase에 선택적 동기화
+- 외부 인증 화면(Google OAuth) 이동: **부모 게이트 통과 후 열리며, 이동 전 안내 다이얼로그 제공**
 
 이 원칙을 깨는 기능을 추가해야 한다면, 스토어 메타데이터와 개인정보 처리방침, Data safety, App Privacy를 다시 작성한다.
+
+## 계정 연동 정책 세부
+
+### 부모 게이트 연동
+계정 생성, Google 로그인, 로그아웃, 계정 삭제는 모두 기존 부모 게이트(랜덤 수학 문제) 통과 후에만 접근 가능한 설정 화면 내에 배치된다.
+
+### 데이터 삭제 요청 대응
+- 앱 내 "계정 삭제" 버튼으로 삭제 요청 제출
+- 영업일 3일 내 Supabase에서 수동 삭제 처리
+- 이메일 문의 대응: `docs/launch-operations.md` 참조
+
+### 하트 상태 동기화
+하트는 시간 기반 재생 로직이 있어 서버 시간 의존성이 생기므로 로컬 전용으로 유지한다.
 
 ## 어린이 앱 리스크
 
@@ -72,30 +91,17 @@ Google Play에서 대상 연령에 어린이가 포함되면 Families 정책과 
 
 ## 부모 게이트 정책
 
-현재 앱에는 부모 설정 화면이 있지만 부모 게이트가 없다. 출시 전에는 다음 중 하나를 선택한다.
+**구현 완료 (2026-04-27): 권장안 A 적용**
 
-권장안 A:
+설정 화면 진입 전에 랜덤 수학 문제(2자리 덧셈 또는 한 자리 곱셈)를 푸는 부모 게이트가 추가되었다. 오답 시 새 문제로 교체되며 설정 화면으로 이동하지 않는다. 정답 시 설정 화면으로 이동한다.
 
-- 부모 설정 화면 진입 전에 부모 게이트를 추가한다.
-- 부모 게이트는 아이가 우연히 풀기 어려운 간단한 성인 확인 문제로 한다.
-- 예: `7 + 8 = ?`처럼 화면에 숫자 키패드로 답을 입력하게 한다.
-- 게이트 통과 후 5분 동안만 부모 영역 접근을 허용한다.
+구현 파일:
 
-대안 B:
+- `android/shared/src/commonMain/kotlin/com/mathapp/practice/ui/ParentalGateDialog.kt` (신규)
+- `android/shared/src/commonMain/kotlin/com/mathapp/practice/ui/MathApp.kt` — `showParentalGate` 상태, `onOpenParentSettings` 연결
+- `android/shared/src/commonMain/kotlin/com/mathapp/practice/ui/Localization.kt` — 5개 언어 게이트 문자열 추가
 
-- 외부 링크, 구매, 개인정보 입력이 없으므로 부모 설정 화면은 유지한다.
-- 단, `기록 초기화` 같은 파괴적 액션만 부모 게이트 뒤로 옮긴다.
-
-출시 안전성 기준으로는 A를 권장한다.
-
-수정 대상 파일:
-
-- `android/shared/src/commonMain/kotlin/com/mathapp/practice/ui/MathApp.kt`
-- `android/shared/src/commonMain/kotlin/com/mathapp/practice/ui/ParentSettingsScreen.kt`
-- 필요 시 새 파일: `android/shared/src/commonMain/kotlin/com/mathapp/practice/ui/ParentalGateDialog.kt`
-- 문자열: `android/shared/src/commonMain/kotlin/com/mathapp/practice/ui/Localization.kt`
-
-완료 기준:
+완료 기준 (모두 통과):
 
 - 설정 버튼을 눌렀을 때 부모 게이트가 먼저 열린다.
 - 오답이면 설정 화면으로 이동하지 않는다.
@@ -105,14 +111,16 @@ Google Play에서 대상 연령에 어린이가 포함되면 Families 정책과 
 
 ## iOS Privacy Manifest
 
-현재 iOS 구현은 `NSUserDefaults`를 사용한다.
+**구현 완료 (2026-04-27)**
 
-수정 대상 파일:
+`ios/Math/PrivacyInfo.xcprivacy`가 생성되었으며 `project.pbxproj` Resources 빌드 페이즈에 포함되었다. `plutil -lint` 통과.
 
-- 새 파일: `ios/Math/PrivacyInfo.xcprivacy`
-- 수정 파일: `ios/Math.xcodeproj/project.pbxproj`
+적용된 파일:
 
-추가해야 하는 내용:
+- `ios/Math/PrivacyInfo.xcprivacy` (신규)
+- `ios/Math.xcodeproj/project.pbxproj` (Resources 빌드 페이즈에 추가)
+
+내용:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -144,12 +152,29 @@ Google Play에서 대상 연령에 어린이가 포함되면 Families 정책과 
 plutil -lint ios/Math/PrivacyInfo.xcprivacy
 ```
 
-완료 기준:
+완료 기준 (모두 통과):
 
-- `PrivacyInfo.xcprivacy`가 앱 타깃 리소스에 포함된다.
-- Xcode archive 후 privacy manifest가 번들에 포함된다.
-- `NSUserDefaults` 사용 사유는 `CA92.1`이다.
-- 추적 도메인과 수집 데이터는 비어 있다.
+- `PrivacyInfo.xcprivacy`가 앱 타깃 리소스에 포함된다. ✓
+- Xcode archive 후 privacy manifest가 번들에 포함된다. (Xcode 빌드로 최종 확인 필요)
+- `NSUserDefaults` 사용 사유는 `CA92.1`이다. ✓
+- 추적 도메인과 수집 데이터는 비어 있다. ✓
+
+## 설정 UI 정리
+
+**구현 완료 (2026-04-27)**
+
+실제 기능이 없는 설정 UI를 제거했다.
+
+- 알림 설정 섹션 (학습 알림, 성과 알림 토글) — 실제 알림 기능 없음, 제거
+- 계정/로그아웃 섹션 — 계정 기능 없음, 제거
+
+수정 파일: `android/shared/src/commonMain/kotlin/com/mathapp/practice/ui/ParentSettingsScreen.kt`
+
+## Android 로컬 저장 정책
+
+**구현 완료 (2026-04-27)**
+
+`android/app/src/main/AndroidManifest.xml`의 `android:allowBackup="false"`로 변경했다. 학습 기록이 Google 백업을 통해 기기 외부로 전송되지 않는다.
 
 ## 개인정보 처리방침 초안
 

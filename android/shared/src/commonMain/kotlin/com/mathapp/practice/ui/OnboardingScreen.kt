@@ -1,6 +1,7 @@
 package com.mathapp.practice.ui
 
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -14,10 +15,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.jetbrains.compose.resources.painterResource
 
 // ─── Onboarding Screen ────────────────────────────────────────────────────────
 
@@ -138,23 +143,31 @@ fun CharacterSelectionScreen(
     onCharacterSelected: (CharacterType) -> Unit
 ) {
     var selected by remember { mutableStateOf<CharacterType?>(null) }
-
     val characters = CharacterType.entries
 
-    Box(
+    BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
             .background(Brush.linearGradient(listOf(Color(0xFFFFE5F0), Color(0xFFE5F0FF))))
     ) {
+        val isLandscape = maxWidth > maxHeight
+        val topSpacing = if (isLandscape) 20.dp else 56.dp
+        val titleFontSize = if (isLandscape) 22.sp else 28.sp
+        val confirmHeight = if (isLandscape) 60.dp else 80.dp
+        val bottomSpacing = if (isLandscape) 16.dp else 48.dp
+        val landscapeCardSize = if (isLandscape)
+            minOf(maxHeight - topSpacing - confirmHeight - bottomSpacing - 80.dp, 180.dp)
+        else null
+
         Column(
             modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(56.dp))
+            Spacer(modifier = Modifier.height(topSpacing))
 
             Text(
                 text = L10n.string("select_character", appLanguage),
-                fontSize = 28.sp,
+                fontSize = titleFontSize,
                 fontWeight = FontWeight.Bold,
                 color = AppColors.SecondaryPurple,
                 textAlign = TextAlign.Center
@@ -162,27 +175,49 @@ fun CharacterSelectionScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Text(
-                text = "✨✨✨",
-                fontSize = 20.sp
-            )
+            Text(text = "✨✨✨", fontSize = 20.sp)
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(if (isLandscape) 12.dp else 32.dp))
 
-            // 2x2 character grid
-            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                characters.chunked(2).forEach { row ->
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        row.forEach { char ->
-                            CharacterCard(
-                                character = char,
-                                isSelected = selected == char,
-                                appLanguage = appLanguage,
-                                modifier = Modifier.weight(1f)
-                            ) { selected = char }
+            if (isLandscape) {
+                // 태블릿 가로 모드: 2행 × 3열
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    characters.chunked(3).forEach { row ->
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            row.forEach { char ->
+                                CharacterCard(
+                                    character = char,
+                                    isSelected = selected == char,
+                                    appLanguage = appLanguage,
+                                    cardSize = landscapeCardSize,
+                                    modifier = Modifier.weight(1f)
+                                ) { selected = char }
+                            }
+                            // 마지막 행이 3개 미만이면 빈 weight로 채움
+                            repeat(3 - row.size) { Spacer(Modifier.weight(1f)) }
+                        }
+                    }
+                }
+            } else {
+                // 모바일 세로 모드: 3행 × 2열
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    characters.chunked(2).forEach { row ->
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            row.forEach { char ->
+                                CharacterCard(
+                                    character = char,
+                                    isSelected = selected == char,
+                                    appLanguage = appLanguage,
+                                    modifier = Modifier.weight(1f)
+                                ) { selected = char }
+                            }
+                            repeat(2 - row.size) { Spacer(Modifier.weight(1f)) }
                         }
                     }
                 }
@@ -194,7 +229,7 @@ fun CharacterSelectionScreen(
             Button(
                 onClick = { selected?.let { onCharacterSelected(it) } },
                 enabled = selected != null,
-                modifier = Modifier.fillMaxWidth().height(80.dp),
+                modifier = Modifier.fillMaxWidth().height(confirmHeight),
                 shape = RoundedCornerShape(20.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
                 contentPadding = PaddingValues(0.dp)
@@ -220,17 +255,19 @@ fun CharacterSelectionScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(48.dp))
+            Spacer(modifier = Modifier.height(bottomSpacing))
         }
     }
 }
 
+@OptIn(ExperimentalResourceApi::class)
 @Composable
 private fun CharacterCard(
     character: CharacterType,
     isSelected: Boolean,
     appLanguage: AppLanguage,
     modifier: Modifier = Modifier,
+    cardSize: Dp? = null,
     onClick: () -> Unit
 ) {
     val scale by animateFloatAsState(
@@ -246,17 +283,20 @@ private fun CharacterCard(
         CharacterType.RABBIT -> Brush.linearGradient(listOf(Color(0xFFFCE4EC), Color(0xFFFFCDD2)))
         CharacterType.FOX    -> Brush.linearGradient(listOf(Color(0xFFFFF8E1), Color(0xFFFFECB3)))
         CharacterType.OWL    -> Brush.linearGradient(listOf(Color(0xFFEDE7F6), Color(0xFFD1C4E9)))
+        CharacterType.CAT    -> Brush.linearGradient(listOf(Color(0xFFF3E5F5), Color(0xFFE1BEE7)))
+        CharacterType.DOG    -> Brush.linearGradient(listOf(Color(0xFFE3F2FD), Color(0xFFBBDEFB)))
     }
 
+    val sizeModifier = if (cardSize != null)
+        modifier.scale(scale).height(cardSize)
+    else
+        modifier.scale(scale).aspectRatio(1f)
+
+    val imageSize = if (cardSize != null) cardSize * 0.58f else 72.dp
+
     Box(
-        modifier = modifier
-            .scale(scale)
-            .aspectRatio(1f)
-            .border(
-                width = 3.dp,
-                color = borderColor,
-                shape = RoundedCornerShape(20.dp)
-            )
+        modifier = sizeModifier
+            .border(width = 3.dp, color = borderColor, shape = RoundedCornerShape(20.dp))
             .background(cardBrush, RoundedCornerShape(20.dp))
             .clickable { onClick() },
         contentAlignment = Alignment.Center
@@ -265,11 +305,16 @@ private fun CharacterCard(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text(text = character.emoji, fontSize = 64.sp)
-            Spacer(modifier = Modifier.height(8.dp))
+            Image(
+                painter = painterResource(characterDrawable(character)),
+                contentDescription = null,
+                modifier = Modifier.size(imageSize),
+                contentScale = ContentScale.Fit
+            )
+            Spacer(modifier = Modifier.height(6.dp))
             Text(
                 text = L10n.string(character.nameKey, appLanguage),
-                fontSize = 16.sp,
+                fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = if (isSelected) AppColors.PrimaryPink else Color(0xFF333333)
             )

@@ -34,3 +34,6 @@ android/.gradle/
 android/.idea/
 android/local.properties
 android/*.iml
+
+# Supabase
+supabase/.temp/
