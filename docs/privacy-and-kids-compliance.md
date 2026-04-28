@@ -2,42 +2,61 @@
 
 이 문서는 출시 전 개인정보, 어린이 대상 앱, 부모 게이트, 스토어 선언을 정리한다. 코드 구현자는 이 문서를 먼저 읽고 정책을 깨는 SDK나 기능을 추가하지 않는다.
 
-- 기준일: 2026-04-25
+- 기준일: 2026-04-27 (계정 연동 기능 추가로 업데이트)
 - 출시 기본 전략: 어린이 대상 교육 앱
-- 데이터 전략: 기기 내 로컬 저장만 사용
+- 데이터 전략: 로컬 저장 기본 + 선택적 계정 연동 시 Supabase 원격 저장
 - 수익화 전략: 광고 없음, 인앱 결제 없음
 - 소셜 전략: 채팅, 사용자 생성 콘텐츠, 랭킹, 친구 초대 없음
 
 ## 현재 데이터 인벤토리
 
-현재 코드 기준으로 확인된 저장/처리 항목:
+계정 연동 기능 추가 후 저장/처리 항목 (브랜치 `15-account-linking`):
 
 | 항목 | 저장 위치 | 오프디바이스 전송 | 개인정보 여부 | 스토어 선언 방향 |
 |---|---|---:|---:|---|
-| 선택 캐릭터 | SharedPreferences/NSUserDefaults | 없음 | 아니오 | 수집 아님 |
-| 언어/테마 설정 | SharedPreferences/NSUserDefaults | 없음 | 아니오 | 수집 아님 |
-| 스테이지 별 기록 | SharedPreferences/NSUserDefaults | 없음 | 아니오 | 수집 아님 |
-| 오늘 푼 문제 수/정답 수 | SharedPreferences/NSUserDefaults | 없음 | 아니오 | 수집 아님 |
-| 연속 학습일 | SharedPreferences/NSUserDefaults | 없음 | 아니오 | 수집 아님 |
-| 별코인/별점수/보물/아이템 | SharedPreferences/NSUserDefaults | 없음 | 아니오 | 수집 아님 |
+| 선택 캐릭터 | SharedPreferences/NSUserDefaults + Supabase(계정 연동 시) | 계정 연동 시 전송 | 아니오 | 수집 아님(게스트) / 앱 기능 목적(계정) |
+| 언어/테마 설정 | SharedPreferences/NSUserDefaults + Supabase(계정 연동 시) | 계정 연동 시 전송 | 아니오 | 수집 아님(게스트) / 앱 기능 목적(계정) |
+| 스테이지 별 기록 | SharedPreferences/NSUserDefaults + Supabase(계정 연동 시) | 계정 연동 시 전송 | 아니오 | 수집 아님(게스트) / 앱 기능 목적(계정) |
+| 오늘 푼 문제 수/정답 수 | SharedPreferences/NSUserDefaults + Supabase(계정 연동 시) | 계정 연동 시 전송 | 아니오 | 수집 아님(게스트) / 앱 기능 목적(계정) |
+| 연속 학습일 | SharedPreferences/NSUserDefaults + Supabase(계정 연동 시) | 계정 연동 시 전송 | 아니오 | 수집 아님(게스트) / 앱 기능 목적(계정) |
+| 별코인/별점수/보물/아이템 | SharedPreferences/NSUserDefaults + Supabase(계정 연동 시) | 계정 연동 시 전송 | 아니오 | 수집 아님(게스트) / 앱 기능 목적(계정) |
+| 이메일 주소 | Supabase Auth (계정 연동 시만) | 계정 연동 시 전송 | **예** | Contact Info > Email Address |
+| 로그인 제공자 정보 | Supabase Auth (계정 연동 시만) | 계정 연동 시 전송 | **예** | Identifiers |
 | 기기 언어 조회 | OS locale | 없음 | 아니오 | 수집 아님 |
 
-현재 Android Manifest에는 `INTERNET`, `AD_ID`, 위치, 카메라, 마이크, 연락처 권한이 없다. 현재 의존성에는 광고, 분석, 결제, Firebase, 네트워크 SDK가 없다.
+Android Manifest에 `INTERNET` 권한이 추가되었다 (계정 연동 기능). `AD_ID`, 위치, 카메라, 마이크, 연락처 권한은 없다. 광고, 분석, Firebase Analytics SDK는 없다. Supabase Ktor 클라이언트만 네트워크를 사용한다.
 
 ## 출시 정책 원칙
 
-출시 1차에서는 아래 원칙을 깨지 않는다.
+계정 연동 기능이 추가되어 아래 원칙 중 일부가 변경되었다.
 
-- 서버 계정 생성 없음
-- 이메일/이름/생년월일 입력 없음
+**유지되는 원칙:**
 - 광고 SDK 없음
-- 분석 SDK 없음
+- 분석 SDK 없음 (Firebase Analytics 등 제3자 분석 사용하지 않음)
 - 결제/Billing/StoreKit 상품 없음
 - 랭킹/친구/채팅/UGC 없음
-- 외부 웹 링크는 앱 내부에 노출하지 않음
-- 학습 기록은 기기 내에만 저장
+- 아이가 직접 이메일/개인정보를 입력하는 흐름 없음 (부모 게이트 뒤에 배치)
+
+**변경된 원칙:**
+- ~~서버 계정 생성 없음~~ → 선택적 계정 연동 지원 (Supabase Auth)
+- ~~이메일 입력 없음~~ → 부모/보호자가 부모 게이트 통과 후 이메일 입력 가능
+- ~~학습 기록은 기기 내에만 저장~~ → 계정 연동 시 Supabase에 선택적 동기화
+- 외부 인증 화면(Google OAuth) 이동: **부모 게이트 통과 후 열리며, 이동 전 안내 다이얼로그 제공**
 
 이 원칙을 깨는 기능을 추가해야 한다면, 스토어 메타데이터와 개인정보 처리방침, Data safety, App Privacy를 다시 작성한다.
+
+## 계정 연동 정책 세부
+
+### 부모 게이트 연동
+계정 생성, Google 로그인, 로그아웃, 계정 삭제는 모두 기존 부모 게이트(랜덤 수학 문제) 통과 후에만 접근 가능한 설정 화면 내에 배치된다.
+
+### 데이터 삭제 요청 대응
+- 앱 내 "계정 삭제" 버튼으로 삭제 요청 제출
+- 영업일 3일 내 Supabase에서 수동 삭제 처리
+- 이메일 문의 대응: `docs/launch-operations.md` 참조
+
+### 하트 상태 동기화
+하트는 시간 기반 재생 로직이 있어 서버 시간 의존성이 생기므로 로컬 전용으로 유지한다.
 
 ## 어린이 앱 리스크
 

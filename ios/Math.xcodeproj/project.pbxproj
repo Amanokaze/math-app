@@ -142,7 +142,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -e\ncd \"$SRCROOT/../android\"\n\nif [ \"$PLATFORM_NAME\" = \"iphonesimulator\" ]; then\n  if [ \"$CONFIGURATION\" = \"Release\" ]; then\n    ./gradlew :shared:linkReleaseFrameworkIosSimulatorArm64\n    FRAMEWORK_DIR=\"shared/build/bin/iosSimulatorArm64/releaseFramework\"\n  else\n    ./gradlew :shared:linkDebugFrameworkIosSimulatorArm64\n    FRAMEWORK_DIR=\"shared/build/bin/iosSimulatorArm64/debugFramework\"\n  fi\nelif [ \"$PLATFORM_NAME\" = \"iphoneos\" ]; then\n  if [ \"$CONFIGURATION\" = \"Release\" ]; then\n    ./gradlew :shared:linkReleaseFrameworkIosArm64\n    FRAMEWORK_DIR=\"shared/build/bin/iosArm64/releaseFramework\"\n  else\n    ./gradlew :shared:linkDebugFrameworkIosArm64\n    FRAMEWORK_DIR=\"shared/build/bin/iosArm64/debugFramework\"\n  fi\nfi\n\ncp -r \"$FRAMEWORK_DIR/shared.framework\" \"$BUILT_PRODUCTS_DIR/\"";
+			shellScript = "set -e\ncd \"$SRCROOT/../android\"\n\nif [ \"$PLATFORM_NAME\" = \"iphonesimulator\" ]; then\n  if [ \"$CONFIGURATION\" = \"Release\" ]; then\n    ./gradlew :shared:linkReleaseFrameworkIosSimulatorArm64 :shared:syncComposeResourcesForIos\n    FRAMEWORK_DIR=\"shared/build/bin/iosSimulatorArm64/releaseFramework\"\n  else\n    ./gradlew :shared:linkDebugFrameworkIosSimulatorArm64 :shared:syncComposeResourcesForIos\n    FRAMEWORK_DIR=\"shared/build/bin/iosSimulatorArm64/debugFramework\"\n  fi\nelif [ \"$PLATFORM_NAME\" = \"iphoneos\" ]; then\n  if [ \"$CONFIGURATION\" = \"Release\" ]; then\n    ./gradlew :shared:linkReleaseFrameworkIosArm64 :shared:syncComposeResourcesForIos\n    FRAMEWORK_DIR=\"shared/build/bin/iosArm64/releaseFramework\"\n  else\n    ./gradlew :shared:linkDebugFrameworkIosArm64 :shared:syncComposeResourcesForIos\n    FRAMEWORK_DIR=\"shared/build/bin/iosArm64/debugFramework\"\n  fi\nfi\n\nrm -rf \"$BUILT_PRODUCTS_DIR/shared.framework\"\ncp -R \"$FRAMEWORK_DIR/shared.framework\" \"$BUILT_PRODUCTS_DIR/\"";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -289,7 +289,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Math/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "셈토끼";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -318,7 +319,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Math/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "셈토끼";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;

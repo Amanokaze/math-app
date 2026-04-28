@@ -1,5 +1,6 @@
 package com.mathapp.practice
 
+import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.view.KeyEvent
@@ -11,6 +12,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.mathapp.practice.ui.dispatchHardwareKeyboardEvent
 import com.mathapp.practice.ui.MathApp
+import com.mathapp.practice.ui.OAuthCallbackState
 import com.mathapp.practice.ui.initAppSettings
 
 class MainActivity : ComponentActivity() {
@@ -27,7 +29,12 @@ class MainActivity : ComponentActivity() {
         }
 
         enableEdgeToEdge()
-        hideSystemBars() // 시스템 바 숨기기 호출
+        hideSystemBars()
+
+        // 앱이 종료된 상태에서 딥링크로 실행된 경우
+        intent.data?.toString()
+            ?.takeIf { it.startsWith("com.mathapp.practice://auth-callback") }
+            ?.let { OAuthCallbackState.pendingUrl = it }
 
         setContent {
             MathApp()
@@ -48,6 +55,14 @@ class MainActivity : ComponentActivity() {
         if (hasFocus) {
             hideSystemBars()
         }
+    }
+
+    // OAuth 딥링크 콜백 처리 (singleTop 모드에서 새 인텐트로 재진입)
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        intent.data?.toString()
+            ?.takeIf { it.startsWith("com.mathapp.practice://auth-callback") }
+            ?.let { OAuthCallbackState.pendingUrl = it }
     }
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {

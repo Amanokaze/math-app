@@ -9,7 +9,7 @@
 - 표현: `게임`보다 `연산 놀이`, `모험`, `학습`을 우선 사용
 - 대상: 초등 저학년 자녀와 부모
 - 금지 표현: `1위`, `최고`, `완벽 보장`, `성적 향상 보장`, `무료 이벤트`, `다운로드하세요`
-- 광고/결제/계정이 없다는 점은 설명에 명확히 쓴다.
+- 광고/결제가 없다는 점은 설명에 명확히 쓴다. 계정은 선택 사항(부모 게이트 후 연동 가능)으로 표현한다.
 - Play 짧은 설명에는 이모지와 특수 장식을 쓰지 않는다.
 
 ## App Store
@@ -53,9 +53,10 @@
 
 • 광고 없음
 • 인앱 결제 없음
-• 계정 생성 없음
+• 계정 연동은 선택 사항 (부모 인증 후 설정 가능)
 • 채팅과 친구 기능 없음
-• 학습 기록은 기기 안에만 저장
+• 게스트 모드에서는 학습 기록이 기기 안에만 저장
+• 계정 연동 시 기기 간 학습 데이터 백업 가능
 
 셈토끼는 매일 짧게 풀고, 조금씩 성취를 쌓아가는 첫 사칙연산 경험을 목표로 합니다.
 ```
@@ -83,7 +84,7 @@ https://YOUR_DOMAIN/privacy
 ### App Review Notes
 
 ```text
-셈토끼는 어린이가 사칙연산을 연습하는 오프라인 학습 앱입니다. 로그인, 계정 생성, 인앱 결제, 광고, 채팅, 사용자 생성 콘텐츠는 없습니다. 학습 진행 상황과 설정은 기기 내에만 저장되며 외부 서버로 전송되지 않습니다. iOS UserDefaults 사용 사유는 PrivacyInfo.xcprivacy에 NSPrivacyAccessedAPICategoryUserDefaults / CA92.1로 선언했습니다.
+셈토끼는 어린이가 사칙연산을 연습하는 교육 앱입니다. 인앱 결제, 광고, 채팅, 사용자 생성 콘텐츠는 없습니다. 기본 모드(게스트)에서는 학습 데이터가 기기 안에만 저장됩니다. 선택적 계정 연동 기능이 있으며, 부모 인증(수학 문제 풀기) 통과 후 설정 화면에서만 접근 가능합니다. 계정 연동 시 Supabase에 이메일과 학습 데이터가 저장됩니다. iOS UserDefaults 사용 사유는 PrivacyInfo.xcprivacy에 NSPrivacyAccessedAPICategoryUserDefaults / CA92.1로 선언했습니다.
 ```
 
 ## Google Play
@@ -123,9 +124,10 @@ https://YOUR_DOMAIN/privacy
 
 - 광고 없음
 - 인앱 결제 없음
-- 계정 생성 없음
+- 계정 연동은 선택 사항 (부모 인증 후 설정 가능)
 - 채팅과 사용자 생성 콘텐츠 없음
-- 학습 기록은 기기 안에만 저장
+- 게스트 모드에서는 학습 기록이 기기 안에만 저장
+- 계정 연동 시 기기 간 학습 데이터 백업 가능
 
 셈토끼는 매일 짧게 풀고, 조금씩 성취를 쌓아가는 첫 사칙연산 경험을 목표로 합니다.
 ```
@@ -173,9 +175,10 @@ Designed for a safer learning experience
 
 - No ads
 - No in-app purchases
-- No account creation
+- Optional account linking (set up by parents after parental gate)
 - No chat or user-generated content
-- Learning progress stays on the device
+- Guest mode: learning progress stays on the device
+- With account: sync learning data across devices
 ```
 
 ## 앱 내부 문구 변경 기준
@@ -209,7 +212,8 @@ Designed for a safer learning experience
 - 셈토끼는 안내자, 선택 캐릭터는 모험 친구로 보인다.
 - 스토어 설명과 앱 내부 용어가 충돌하지 않는다.
 - Play 짧은 설명에 이모지/특수 장식이 없다.
-- 광고 없음/인앱 결제 없음/계정 없음 설명이 실제 앱과 일치한다.
+- 광고 없음/인앱 결제 없음 설명이 실제 앱과 일치한다.
+- 계정 연동은 "선택 사항, 부모 인증 후 설정 가능"으로 일관되게 표현한다.
 
 ## 정책 출처
 

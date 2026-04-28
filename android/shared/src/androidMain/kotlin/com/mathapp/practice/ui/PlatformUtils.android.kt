@@ -1,5 +1,7 @@
 package com.mathapp.practice.ui
 
+import android.content.Intent
+import android.net.Uri
 import android.view.KeyEvent
 
 actual fun getDeviceLanguageCode(): String {
@@ -36,6 +38,17 @@ actual fun setHardwareKeyboardHandler(
 }
 
 actual fun requiresHiddenTextInputBridge(): Boolean = false
+
+actual fun openExternalUrl(url: String): Boolean {
+    val context = appContext ?: return false
+    return runCatching {
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        context.startActivity(intent)
+        true
+    }.getOrDefault(false)
+}
 
 fun dispatchHardwareKeyboardEvent(event: KeyEvent): Boolean {
     if (event.action != KeyEvent.ACTION_UP) return false

@@ -8,6 +8,9 @@ import kotlin.time.TimeSource
 
 private val originMark = TimeSource.Monotonic.markNow()
 private const val hardwareKeyNotificationName = "MathHardwareKeyInput"
+private const val hardwareCaptureEnabledKey = "MathHardwareKeyboardCaptureEnabled"
+private const val externalUrlNotificationName = "MathOpenExternalUrl"
+private const val pendingExternalUrlKey = "MathPendingExternalUrl"
 
 private var hardwareKeyObserver: Any? = null
 private var hardwareOnDigit: ((String) -> Unit)? = null
@@ -48,10 +51,13 @@ actual fun setHardwareKeyboardHandler(
     hardwareOnMinus = onMinus
 
     if (onDigit == null && onBackspace == null && onSubmit == null && onMinus == null) {
+        NSUserDefaults.standardUserDefaults.setInteger(0L, hardwareCaptureEnabledKey)
         hardwareKeyObserver?.let { NSNotificationCenter.defaultCenter.removeObserver(it) }
         hardwareKeyObserver = null
         return
     }
+
+    NSUserDefaults.standardUserDefaults.setInteger(1L, hardwareCaptureEnabledKey)
 
     if (hardwareKeyObserver == null) {
         hardwareKeyObserver = NSNotificationCenter.defaultCenter.addObserverForName(
@@ -71,3 +77,13 @@ actual fun setHardwareKeyboardHandler(
 }
 
 actual fun requiresHiddenTextInputBridge(): Boolean = true
+
+actual fun openExternalUrl(url: String): Boolean {
+    if (!url.startsWith("http://") && !url.startsWith("https://")) return false
+    NSUserDefaults.standardUserDefaults.setObject(url, pendingExternalUrlKey)
+    NSNotificationCenter.defaultCenter.postNotificationName(
+        aName = externalUrlNotificationName,
+        `object` = null
+    )
+    return true
+}

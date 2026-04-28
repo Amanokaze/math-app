@@ -15,3 +15,5 @@ expect fun setHardwareKeyboardHandler(
 )
 
 expect fun requiresHiddenTextInputBridge(): Boolean
+
+expect fun openExternalUrl(url: String): Boolean

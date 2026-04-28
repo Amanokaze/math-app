@@ -2,6 +2,7 @@ import UIKit
 import Foundation
 
 private let hardwareKeyNotificationName = Notification.Name("MathHardwareKeyInput")
+private let hardwareKeyCaptureEnabledKey = "MathHardwareKeyboardCaptureEnabled"
 
 /// Captures hardware keyboard keys at the container VC level so shared KMP input
 /// can continue even when Compose text focus is lost on iOS.
@@ -41,6 +42,8 @@ final class KeyInputContainerViewController: UIViewController {
     override var canBecomeFirstResponder: Bool { true }
 
     override var keyCommands: [UIKeyCommand]? {
+        guard isHardwareKeyCaptureEnabled else { return nil }
+
         var commands: [UIKeyCommand] = []
 
         for digit in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"] {
@@ -55,11 +58,17 @@ final class KeyInputContainerViewController: UIViewController {
     }
 
     @objc private func handleKeyCommand(_ sender: UIKeyCommand) {
+        guard isHardwareKeyCaptureEnabled else { return }
         guard let input = sender.input else { return }
         mapAndPost(input: input)
     }
 
     override func pressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
+        guard isHardwareKeyCaptureEnabled else {
+            super.pressesBegan(presses, with: event)
+            return
+        }
+
         var handled = false
 
         for press in presses {
@@ -82,6 +91,10 @@ final class KeyInputContainerViewController: UIViewController {
         }
 
         super.pressesBegan(presses, with: event)
+    }
+
+    private var isHardwareKeyCaptureEnabled: Bool {
+        UserDefaults.standard.bool(forKey: hardwareKeyCaptureEnabledKey)
     }
 
     @discardableResult

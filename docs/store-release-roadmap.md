@@ -28,9 +28,32 @@
 
 ## 출시 전략 결론
 
-1차 출시는 `교육 앱`, `무료`, `광고 없음`, `인앱 결제 없음`, `계정 없음`, `서버 없음`, `개인정보 수집 없음`으로 간다. 이 조합이 어린이 앱 심사 리스크를 가장 낮추고, 현재 코드 구조와도 가장 잘 맞는다.
+1차 출시는 `교육 앱`, `무료`, `광고 없음`, `인앱 결제 없음`, `선택적 계정 연동`, `Supabase 백엔드`, `개인정보 최소 수집(이메일, 부모 게이트 후 입력)`으로 간다.
 
-Google Play에서는 어린이 대상 앱으로 Families 정책을 충족한다. App Store에서는 `Made for Kids` 선택이 승인 후 되돌리기 어려우므로, 출시자가 장기적으로 어린이 전용 정책을 지킬 수 있을 때만 선택한다. 이 앱은 현재 구조상 선택 가능하지만, 선택 전에 [privacy-and-kids-compliance.md](./privacy-and-kids-compliance.md)의 금지 항목을 모두 통과해야 한다.
+계정 연동은 1차 출시 범위에 포함된다 (브랜치 `15-account-linking`, 2026-04-27 구현 완료). 게스트 모드는 유지되며, 계정 연동은 부모 선택 사항이다.
+
+**스토어 선언 변경 필요 항목 (계정 연동 추가로 인해):**
+- Google Play Data safety: 이메일 주소(수집됨, 앱 기능, 사용자 삭제 가능), 앱 활동(학습 기록, 계정 연동 시 전송) 추가
+- App Store App Privacy: Contact Info > Email Address 추가 (계정 연동 사용자)
+- App Store Privacy Manifest: 네트워크 도메인 추가 (Supabase 프로젝트 URL)
+
+Google Play에서는 어린이 대상 앱으로 Families 정책을 충족한다. App Store에서는 `Made for Kids` 선택이 승인 후 되돌리기 어려우므로, 출시자가 장기적으로 어린이 전용 정책을 지킬 수 있을 때만 선택한다. 계정 연동 기능이 있더라도 외부 인증 화면은 부모 게이트 뒤에 배치되어 있으며, 이동 전 안내 다이얼로그가 표시된다. 선택 전에 [privacy-and-kids-compliance.md](./privacy-and-kids-compliance.md)의 항목을 모두 점검해야 한다.
+
+**Supabase 프로젝트 설정 필요 (출시 전 완료):**
+1. supabase.com 에서 프로젝트 생성 → URL과 anon key를 `SupabaseConfig.kt`에 입력
+2. Auth > Providers > Email 활성화
+3. Auth > Providers > Google 활성화 → Google Cloud Console에서 Web OAuth 클라이언트 생성, Supabase Callback URL 등록
+4. SQL 편집기에서 `user_data` 테이블 생성:
+```sql
+create table user_data (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  data jsonb not null default '{}',
+  deletion_requested boolean default false,
+  updated_at timestamptz default now()
+);
+alter table user_data enable row level security;
+create policy "user_data_self" on user_data for all using (auth.uid() = user_id);
+```
 
 ## 실제 실행 순서
 

@@ -25,6 +25,9 @@ fun ParentSettingsScreen(
     colorSchemeMode: Int,
     onColorSchemeChange: (Int) -> Unit,
     onResetProgress: () -> Unit,
+    authState: AuthState,
+    onAuthStateChange: (AuthState) -> Unit,
+    onNavigateToLogin: () -> Unit,
     onBack: () -> Unit
 ) {
     var timeLimit by remember {
@@ -158,6 +161,16 @@ fun ParentSettingsScreen(
             icon = "🌙",
             checked = colorSchemeMode == 2,
             onCheckedChange = { onColorSchemeChange(if (it) 2 else 1) }
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // ── Account section ──
+        AccountSection(
+            appLanguage       = appLanguage,
+            authState         = authState,
+            onAuthStateChange = onAuthStateChange,
+            onNavigateToLogin = onNavigateToLogin
         )
 
         Spacer(modifier = Modifier.height(12.dp))
